@@ -225,9 +225,6 @@
                                         <th>
                                             <strong>Para Depositos y Transferencias:</strong>
                                         </th>
-                                        <th>
-                                            <strong>Para pagos Internacioles:</strong>
-                                        </th>
                                     </thead>
                                 <tbody>
                                     <td style="text-align:left; background-color: white;border-style: none;border-right-style: none;">
@@ -242,6 +239,16 @@
                                             CAPW SERVICIOS TECNICOS, SRL
                                         </span>
                                     </td>
+
+                                </tbody>
+                            </table>
+                         <table class="table" style="border-style: none;border-right-style: none;">
+                              <thead class="thead-light" style="border-style: none;border-right-style: none;">
+                                        <th>
+                                            <strong>Para pagos Internacioles:</strong>
+                                        </th>
+                                    </thead>
+                              <tbody>
                                     <td style="text-align:left;background-color: white; color: #766c66;border-style: none;border-right-style: none;">
                                         <li>Banco Popular Dominicano</li>
                                         <li>Swift "BPDODOSX"</li>
@@ -249,7 +256,7 @@
                                         <li>CAPW SERVICIOS TECNICOS SRL</li>
                                     </td>
                                 </tbody>
-                            </table>
+                         </table>
                      </div>
                             <div class="col-6">
                                 <table class="table table-sm" style="page-break-inside: avoid;">
@@ -317,6 +324,7 @@
                 </div>
             <br/>
         </xpath>
+         <xpath expr="//div[@class='clearfix']" position="before"></xpath>
 
         <!-- Total monto descuento en líneas -->
         <xpath expr="//th[@name='th_price_unit']" position="after">

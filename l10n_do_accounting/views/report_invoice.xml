@@ -90,7 +90,6 @@
                         <t t-else="">NCF:</t>
                     </strong>
                     <span t-field="o.l10n_latam_document_number"/>
-                    <br/>
                     <span
                         t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
                         <strong>NCF modificado:</strong>
@@ -220,6 +219,7 @@
              <div class="clearfix">
                  <div id="total" class="row">
                      <div class="col-6">
+                         <br/>
                             <table class="table" style="border-style: none;border-right-style: none;">
                                     <thead class="thead-light" style="border-style: none;border-right-style: none;">
                                         <th>

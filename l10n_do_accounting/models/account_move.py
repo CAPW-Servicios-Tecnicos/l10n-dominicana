@@ -117,6 +117,8 @@ class AccountMove(models.Model):
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
+    manual_currency_rate = fields.Float(string="Currency Rate")
+    is_currency_manual = fields.Boolean(string="is_currency_manual", )
 
     def init(self):
 
@@ -810,3 +812,13 @@ class AccountMove(models.Model):
                 _("You cannot delete fiscal invoice which have been posted before")
             )
         return super(AccountMove, self).unlink()
+
+    @api.onchange('currency_id')
+    def compute_manual_currency_rate(self):
+        currency_company = self.company_id.currency_id
+        currency_id = self.currency_id
+        manual_currency_active = self.company_id.manual_change_currency
+        if manual_currency_active and currency_company != currency_id:
+            self.is_currency_manual = False
+        else:
+            self.is_currency_manual = True

@@ -21,6 +21,10 @@ class ResCompany(models.Model):
         "to have sales through offline mobile devices such as "
         "sales with Handheld, enter others.",
     )
+    financial_currency = fields.Boolean(
+        string='Financial Currency',)
+    manual_change_currency = fields.Boolean(
+        string='Manual Change Currency',)
 
     def _localization_use_documents(self):
         """ Dominican localization uses documents """

@@ -21,6 +21,7 @@
         "wizard/account_debit_note_views.xml",
         "views/res_config_settings_view.xml",
         "views/account_move_views.xml",
+        "views/account_payment.xml",
         "views/res_partner_views.xml",
         "views/res_company_views.xml",
         "views/account_dgii_menuitem.xml",

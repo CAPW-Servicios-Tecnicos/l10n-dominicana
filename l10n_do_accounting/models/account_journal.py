@@ -67,7 +67,7 @@ class AccountJournal(models.Model):
             "received": {
                 "taxpayer": ["fiscal"],
                 "non_payer": ["informal", "minor"],
-                "nonprofit": ["special", "governmental"],
+                "nonprofit": ["fiscal", "special", "governmental"],
                 "special": ["fiscal", "special", "governmental"],
                 "governmental": ["fiscal", "special", "governmental"],
                 "foreigner": ["import", "exterior"],

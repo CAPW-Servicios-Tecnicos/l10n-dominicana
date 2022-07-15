@@ -202,7 +202,7 @@ class AccountMove(models.Model):
                     and invoice.l10n_latam_document_type_id.l10n_do_ncf_type[:2] == "e-"
             )
 
-    @api.onchange('l10n_latam_document_number')
+    @api.depends('l10n_latam_document_number')
     def _block_duplicate_fiscal_number_supplier(self):
         invs = self.env['account.move'].search([("move_type", "=", "in_invoice"),
                                                 ("l10n_latam_use_documents", "=", True),

@@ -124,7 +124,7 @@ class AccountJournal(models.Model):
         else:
             raise ValidationError(
                 _("Partner %s is needed to issue a fiscal invoice")
-                % self._fields["l10n_do_dgii_tax_payer_type"].string
+                % counterpart_partner._fields["l10n_do_dgii_tax_payer_type"].string
             )
         if invoice and invoice.move_type in ["out_refund", "in_refund"]:
             ncf_types = ["credit_note"]
@@ -172,11 +172,15 @@ class AccountJournal(models.Model):
             lambda doc: doc.l10n_do_ncf_type
             not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
         ):
-            document_types |= self.env["l10n_do.account.journal.document_type"].create(
-                {
-                    "journal_id": self.id,
-                    "l10n_latam_document_type_id": document.id,
-                }
+            document_types |= (
+                self.env["l10n_do.account.journal.document_type"]
+                .sudo()
+                .create(
+                    {
+                        "journal_id": self.id,
+                        "l10n_latam_document_type_id": document.id,
+                    }
+                )
             )
 
     @api.model
@@ -208,4 +212,7 @@ class AccountJournalDocumentType(models.Model):
         string="Expiration date",
         required=True,
         default=fields.Date.end_of(fields.Date.today(), "year"),
+    )
+    company_id = fields.Many2one(
+        string="Company", related="journal_id.company_id", readonly=True
     )

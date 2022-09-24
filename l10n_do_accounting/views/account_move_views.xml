@@ -16,7 +16,8 @@
             <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
                 <div class="alert alert-warning"
                      role="alert" style="margin-bottom:0px;"
-                     attrs="{'invisible': ['|', '|',
+                     attrs="{'invisible': ['|', '|', '|',
+                     ('type', '=', 'entry'),
                      ('l10n_latam_country_code', '!=', 'DO'),
                      ('l10n_do_company_in_contingency', '=', False),
                      ('state', '!=', 'draft')]}">
@@ -48,7 +49,7 @@
                 <span attrs="{'invisible': ['|', ('type', '!=', 'in_refund'), '|', ('state', '!=', 'cancel'), ('l10n_latam_country_code', '!=', 'DO')]}">Cancelled Refund</span>
             </xpath>
             <xpath expr="//h1/span/.." position="after">
-                <h4 attrs="{'invisible':['|',('state','!=','cancel'),('l10n_latam_country_code', '!=', 'DO')]}">
+                <h4 name="l10n_do_cancellation_reason" attrs="{'invisible':['|',('state','!=','cancel'),('l10n_latam_country_code', '!=', 'DO')]}">
                     Cancellation Reason:
                     <br/>
                     <field name="l10n_do_cancellation_type" readonly="1"/>
@@ -70,8 +71,8 @@
                     'readonly': [('state','!=','draft')]
                 }"/>
                 <field name="l10n_do_ecf_modification_code" attrs="{
-                    'invisible':['|', '|', '|', '&amp;', ('type', 'not in', ('in_refund', 'out_refund')), ('is_debit_note', '=', False), '&amp;', ('type', 'in', ('in_refund', 'out_refund')), ('is_ecf_invoice', '=', False), '&amp;', ('is_debit_note', '=', True), ('is_ecf_invoice', '=', False), ('l10n_latam_country_code', '!=', 'DO')],
-                    'required': ['&amp;', ('is_ecf_invoice', '=', True), '|', ('type', 'in', ('in_refund', 'out_refund')), ('is_debit_note', '=', True)],
+                    'invisible':['|', '|', '|', '&amp;', ('type', '!=', 'out_refund'), ('is_debit_note', '=', False), '&amp;', ('type', '=', 'out_refund'), ('is_ecf_invoice', '=', False), '&amp;', ('is_debit_note', '=', True), ('is_ecf_invoice', '=', False), ('l10n_latam_country_code', '!=', 'DO')],
+                    'required': ['&amp;', ('is_ecf_invoice', '=', True), '|', ('type', '=', 'out_refund'), ('is_debit_note', '=', True)],
                 }"/>
             </xpath>
             <xpath expr="//field[@name='l10n_latam_document_number']" position="after">
@@ -92,8 +93,6 @@
             <field name="journal_id" position="after">
                 <field name="l10n_do_ecf_security_code" attrs="{
                 'invisible': ['|', '|', '|', ('partner_id', '=', False), ('l10n_latam_country_code', '!=', 'DO'), ('is_l10n_do_internal_sequence', '=', True), ('is_ecf_invoice', '=', False)]}"/>
-                <field name="l10n_do_ecf_sign_date" invisible="1"/>
-                <field name="l10n_do_electronic_stamp" invisible="1"/>
             </field>
 
             <!-- only computed when l10n_do ecf invoice -->

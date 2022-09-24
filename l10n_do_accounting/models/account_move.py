@@ -2904,6 +2904,7 @@ class AccountMoveLine(models.Model) :
         if not self.product_id :
             return 0.0
 
+<<<<<<< HEAD
         company = self.move_id.company_id
         currency = self.move_id.currency_id
         company_currency = company.currency_id
@@ -2911,6 +2912,116 @@ class AccountMoveLine(models.Model) :
         fiscal_position = self.move_id.fiscal_position_id
         is_refund_document = self.move_id.type in ('out_refund', 'in_refund')
         move_date = self.move_id.date or fields.Date.context_today(self)
+=======
+    l10n_do_expense_type = fields.Selection(
+        selection=lambda self: self.env["res.partner"]._get_l10n_do_expense_type(),
+        string="Cost & Expense Type",
+    )
+
+    l10n_do_cancellation_type = fields.Selection(
+        selection="_get_l10n_do_cancellation_type",
+        string="Cancellation Type",
+        copy=False,
+    )
+
+    l10n_do_income_type = fields.Selection(
+        selection="_get_l10n_do_income_type",
+        string="Income Type",
+        copy=False,
+        default=lambda self: self._context.get("l10n_do_income_type", "01"),
+    )
+
+    l10n_do_origin_ncf = fields.Char(
+        string="Modifies",
+    )
+
+    ncf_expiration_date = fields.Date(
+        string="Valid until",
+        store=True,
+    )  # TODO: forward-port this field using l10n_do prefix
+    is_debit_note = fields.Boolean()
+
+    # DO NOT FORWARD PORT
+    cancellation_type = fields.Selection(
+        selection="_get_l10n_do_cancellation_type",
+        string="Cancellation Type (deprecated)",
+        copy=False,
+    )
+    is_ecf_invoice = fields.Boolean(
+        compute="_compute_is_ecf_invoice",
+        store=True,
+    )
+    l10n_do_ecf_modification_code = fields.Selection(
+        selection="_get_l10n_do_ecf_modification_code",
+        string="e-CF Modification Code",
+        copy=False,
+        readonly=True,
+        states={"draft": [("readonly", False)]},
+    )
+    l10n_do_ecf_security_code = fields.Char(string="e-CF Security Code", copy=False)
+    l10n_do_ecf_sign_date = fields.Datetime(string="e-CF Sign Date", copy=False)
+    l10n_do_electronic_stamp = fields.Char(
+        string="Electronic Stamp",
+        compute="_compute_l10n_do_electronic_stamp",
+        store=True,
+    )
+    l10n_do_company_in_contingency = fields.Boolean(
+        string="Company in contingency",
+        compute="_compute_company_in_contingency",
+    )
+    is_l10n_do_internal_sequence = fields.Boolean(
+        string="Is internal sequence",
+        compute="_compute_l10n_latam_document_type",
+        store=True,
+    )
+    l10n_do_ecf_edi_file = fields.Binary("ECF XML File", copy=False, readonly=True)
+    l10n_do_ecf_edi_file_name = fields.Char(
+        "ECF XML File Name", copy=False, readonly=True
+    )
+
+    def _get_l10n_do_amounts(self, company_currency=False):
+        """
+        Method used to to prepare dominican fiscal invoices amounts data. Widely used
+        on reports and electronic invoicing.
+
+        Returned values:
+
+        itbis_amount: Total ITBIS
+        itbis_taxable_amount: Monto Gravado Total (con ITBIS)
+        itbis_exempt_amount: Monto Exento
+        """
+        self.ensure_one()
+        amount_field = company_currency and "balance" or "price_subtotal"
+        sign = -1 if (company_currency and self.is_inbound()) else 1
+
+        itbis_tax_group = self.env.ref("l10n_do.group_itbis", False)
+
+        taxed_move_lines = self.line_ids.filtered("tax_line_id")
+        itbis_taxed_move_lines = taxed_move_lines.filtered(
+            lambda l: itbis_tax_group in l.tax_line_id.mapped("tax_group_id")
+            and l.tax_line_id.amount > 0
+        )
+
+        itbis_taxed_product_lines = self.invoice_line_ids.filtered(
+            lambda l: itbis_tax_group in l.tax_ids.mapped("tax_group_id")
+        )
+
+        return {
+            "itbis_amount": sign * sum(itbis_taxed_move_lines.mapped(amount_field)),
+            "itbis_taxable_amount": sign
+            * sum(
+                line[amount_field]
+                for line in itbis_taxed_product_lines
+                if line.price_total != line.price_subtotal
+            ),
+            "itbis_exempt_amount": sign
+            * sum(
+                line[amount_field]
+                for line in itbis_taxed_product_lines
+                if any(True for tax in line.tax_ids if tax.amount == 0)
+            ),
+        }
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
         if self.move_id.is_sale_document(include_receipts=True) :
             product_price_unit = self.product_id.lst_price
@@ -2943,6 +3054,7 @@ class AccountMoveLine(models.Model) :
                     )
                     product_price_unit = company_currency.round(taxes_res['total_excluded'])
 
+<<<<<<< HEAD
                 flattened_taxes_after_fp = product_taxes_after_fp._origin.flatten_taxes_hierarchy()
                 if any(tax.price_include for tax in flattened_taxes_after_fp) :
                     taxes_res = flattened_taxes_after_fp.compute_all(
@@ -2968,10 +3080,68 @@ class AccountMoveLine(models.Model) :
     def _get_computed_account(self) :
         self.ensure_one()
         self = self.with_context(force_company=self.move_id.journal_id.company_id.id)
+=======
+        l10n_do_ecf_invoice = self.filtered(
+            lambda i: i.is_ecf_invoice
+            and i.is_l10n_do_internal_sequence
+            and i.l10n_do_ecf_security_code
+        )
+
+        for invoice in l10n_do_ecf_invoice:
+
+            ecf_service_env = self.env.context.get("l10n_do_ecf_service_env", "CerteCF")
+            doc_code_prefix = invoice.l10n_latam_document_type_id.doc_code_prefix
+            is_rfc = (  # Es un Resumen Factura Consumo
+                doc_code_prefix == "E32" and invoice.amount_total_signed < 250000
+            )
+
+            qr_string = "https://%s.dgii.gov.do/%s/ConsultaTimbre%s?" % (
+                "fc" if is_rfc else "ecf",
+                ecf_service_env,
+                "FC" if is_rfc else "",
+            )
+            qr_string += "RncEmisor=%s&" % invoice.company_id.vat or ""
+            if not is_rfc:
+                qr_string += (
+                    "RncComprador=%s&" % invoice.commercial_partner_id.vat
+                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:]
+                    not in ("43", "47")
+                    else ""
+                )
+            qr_string += "ENCF=%s&" % invoice.ref or ""
+            if not is_rfc:
+                qr_string += "FechaEmision=%s&" % (
+                    invoice.invoice_date or fields.Date.today()
+                ).strftime("%d-%m-%Y")
+
+            l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
+            l10n_do_total = (
+                l10n_do_amounts["itbis_taxable_amount"]
+                + l10n_do_amounts["itbis_amount"]
+            )
+
+            qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
+                "."
+            )
+            if not is_rfc:
+                qr_string += "FechaFirma=%s&" % invoice.l10n_do_ecf_sign_date.strftime(
+                    "%d-%m-%Y%%20%H:%M:%S"
+                )
+
+            special_chars = " !#$&'()*+,/:;=?@[]\"-.<>\\^_`"
+            security_code = "".join(
+                c.replace(c, "%" + c.encode("utf-8").hex()).upper()
+                if c in special_chars
+                else c
+                for c in invoice.l10n_do_ecf_security_code or ""
+            )
+            qr_string += "CodigoSeguridad=%s" % security_code
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
         if not self.product_id :
             return
 
+<<<<<<< HEAD
         fiscal_position = self.move_id.fiscal_position_id
         accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
         if self.move_id.is_sale_document(include_receipts=True) :
@@ -2983,6 +3153,50 @@ class AccountMoveLine(models.Model) :
 
     def _get_computed_taxes(self) :
         self.ensure_one()
+=======
+        (self - l10n_do_ecf_invoice).l10n_do_electronic_stamp = False
+
+    @api.constrains("name", "journal_id", "state", "ref")
+    def _check_unique_sequence_number(self):
+        l10n_do_invoices = self.filtered(
+            lambda inv: inv.l10n_latam_use_documents
+            and inv.l10n_latam_country_code == "DO"
+            and inv.is_sale_document()
+            and inv.state == "posted"
+        )
+        if l10n_do_invoices:
+            self.flush()
+            self._cr.execute(
+                """
+                SELECT move2.id
+                FROM account_move move
+                INNER JOIN account_move move2 ON
+                    move2.ref = move.ref
+                    AND move2.company_id = move.company_id
+                    AND move2.type = move.type
+                    AND move2.id != move.id
+                WHERE move.id IN %s AND move2.state = 'posted'
+            """,
+                [tuple(l10n_do_invoices.ids)],
+            )
+            res = self._cr.fetchone()
+            if res:
+                raise ValidationError(
+                    _("There is already a sale invoice with fiscal number %s")
+                    % self.ref
+                )
+
+        super(AccountMove, (self - l10n_do_invoices))._check_unique_sequence_number()
+
+    def button_cancel(self):
+
+        fiscal_invoice = self.filtered(
+            lambda inv: inv.l10n_latam_country_code == "DO"
+            and self.type[-6:] in ("nvoice", "refund")
+            and inv.l10n_latam_use_documents
+            and not inv.is_ecf_invoice
+        )
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
         if self.move_id.is_sale_document(include_receipts=True) :
             # Out invoice.
@@ -3098,6 +3312,7 @@ class AccountMoveLine(models.Model) :
     def _get_fields_onchange_subtotal(self, price_subtotal=None, move_type=None, currency=None, company=None,
                                       date=None) :
         self.ensure_one()
+<<<<<<< HEAD
         return self._get_fields_onchange_subtotal_model(
             price_subtotal=price_subtotal or self.price_subtotal,
             move_type=move_type or self.move_id.type,
@@ -3110,6 +3325,36 @@ class AccountMoveLine(models.Model) :
     def _get_fields_onchange_subtotal_model(self, price_subtotal, move_type, currency, company, date) :
         ''' This method is used to recompute the values of 'amount_currency', 'debit', 'credit' due to a change made
         in some business fields (affecting the 'price_subtotal' field).
+=======
+        if not (
+            self.journal_id.l10n_latam_use_documents
+            and self.journal_id.company_id.country_id == self.env.ref("base.do")
+        ):
+            return super()._get_l10n_latam_documents_domain()
+
+        internal_types = ["debit_note"]
+        if self.type in ["out_refund", "in_refund"]:
+            internal_types.append("credit_note")
+        else:
+            internal_types.append("invoice")
+
+        domain = [
+            ("internal_type", "in", internal_types),
+            ("country_id", "=", self.company_id.country_id.id),
+        ]
+        ncf_types = self.journal_id._get_journal_ncf_types(
+            counterpart_partner=self.partner_id.commercial_partner_id, invoice=self
+        )
+        domain += [
+            "|",
+            ("l10n_do_ncf_type", "=", False),
+            ("l10n_do_ncf_type", "in", ncf_types),
+        ]
+        codes = self.journal_id._get_journal_codes()
+        if codes:
+            domain.append(("code", "in", codes))
+        return domain
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
         :param price_subtotal:  The untaxed amount.
         :param move_type:       The type of the move.
@@ -3145,6 +3390,7 @@ class AccountMoveLine(models.Model) :
     def _get_fields_onchange_balance(self, quantity=None, discount=None, balance=None, move_type=None, currency=None,
                                      taxes=None, price_subtotal=None, force_computation=False) :
         self.ensure_one()
+<<<<<<< HEAD
         return self._get_fields_onchange_balance_model(
             quantity=quantity or self.quantity,
             discount=discount or self.discount,
@@ -3537,6 +3783,56 @@ class AccountMoveLine(models.Model) :
     def _affect_tax_report(self) :
         self.ensure_one()
         return self.tax_ids or self.tax_line_id or self.tag_ids.filtered(lambda x : x.applicability == "taxes")
+=======
+        if (
+            self.journal_id.l10n_latam_use_documents
+            and self.l10n_latam_country_code == "DO"
+        ):
+            res = self.journal_id.l10n_do_sequence_ids.filtered(
+                lambda x: x.l10n_latam_document_type_id
+                == self.l10n_latam_document_type_id
+            )
+            if (
+                not res
+                and self.type == "in_refund"
+                and self.is_l10n_do_internal_sequence
+            ):
+                journal = self.with_context(
+                    default_type="out_invoice"
+                )._get_default_journal()
+                res = journal and journal.l10n_do_sequence_ids.filtered(
+                    lambda x: x.l10n_latam_document_type_id
+                    == self.l10n_latam_document_type_id
+                )
+            return res
+        return super()._get_document_type_sequence()
+
+    @api.constrains("type", "l10n_latam_document_type_id")
+    def _check_invoice_type_document_type(self):
+        l10n_do_invoices = self.filtered(
+            lambda inv: inv.l10n_latam_country_code == "DO"
+            and inv.l10n_latam_use_documents
+            and inv.l10n_latam_document_type_id
+        )
+        for rec in l10n_do_invoices:
+            has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))
+            l10n_latam_document_type = rec.l10n_latam_document_type_id
+            if not has_vat and (
+                rec.amount_untaxed_signed >= 250000
+                or (
+                    l10n_latam_document_type.is_vat_required
+                    and rec.commercial_partner_id.l10n_do_dgii_tax_payer_type
+                    != "non_payer"
+                )
+            ):
+                raise ValidationError(
+                    _(
+                        "A VAT is mandatory for this type of NCF. "
+                        "Please set the current VAT of this client"
+                    )
+                )
+        super(AccountMove, self - l10n_do_invoices)._check_invoice_type_document_type()
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
     def _check_tax_lock_date(self) :
         for line in self.filtered(lambda l : l.move_id.state == 'posted') :
@@ -3568,11 +3864,21 @@ class AccountMoveLine(models.Model) :
         if not cr.fetchone() :
             cr.execute('CREATE INDEX account_move_line_partner_id_ref_idx ON account_move_line (partner_id, ref)')
 
+<<<<<<< HEAD
     @api.model_create_multi
     def create(self, vals_list) :
         # OVERRIDE
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
+=======
+        ctx = self.env.context
+        res["l10n_do_origin_ncf"] = self.l10n_latam_document_number
+        res["l10n_do_ecf_modification_code"] = ctx.get("l10n_do_ecf_modification_code")
+        res["is_l10n_do_internal_sequence"] = (
+            ctx.get("is_internal_purchase_refund", False) or self.is_sale_document()
+        )
+        return res
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1
 
         for vals in vals_list :
             move = self.env['account.move'].browse(vals['move_id'])
@@ -3793,6 +4099,7 @@ class AccountMoveLine(models.Model) :
 
         return res
 
+<<<<<<< HEAD
     @api.model
     def default_get(self, default_fields) :
         # OVERRIDE
@@ -4921,3 +5228,28 @@ class AccountFullReconcile(models.Model) :
         if move_date > (company.fiscalyear_lock_date or date.min) :
             res['date'] = move_date
         return res
+=======
+    def init(self):  # DO NOT FORWARD PORT
+        cancelled_invoices = self.search(
+            [
+                ("state", "=", "cancel"),
+                ("l10n_latam_use_documents", "=", True),
+                ("cancellation_type", "!=", False),
+                ("l10n_do_cancellation_type", "=", False),
+            ]
+        )
+        for invoice in cancelled_invoices:
+            invoice.l10n_do_cancellation_type = invoice.cancellation_type
+
+    def unlink(self):
+        if self.filtered(
+            lambda inv: inv.is_purchase_document()
+            and inv.l10n_latam_country_code == "DO"
+            and inv.l10n_latam_use_documents
+            and inv.name != "/"  # have been posted before
+        ):
+            raise UserError(
+                _("You cannot delete fiscal invoice which have been posted before")
+            )
+        return super(AccountMove, self).unlink()
+>>>>>>> 165f7fbc27cdd66b2a527d492647603491d9c3a1

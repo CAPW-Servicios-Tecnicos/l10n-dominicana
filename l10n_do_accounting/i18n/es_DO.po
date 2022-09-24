@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-17 21:13+0000\n"
-"PO-Revision-Date: 2021-02-17 17:14-0400\n"
+"POT-Creation-Date: 2021-12-15 17:17+0000\n"
+"PO-Revision-Date: 2021-12-15 13:18-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
 "Language: es_DO\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0\n"
 
 #. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/models/account_move.py:0
@@ -234,16 +234,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid ""
 "<span>\n"
-"                    <strong>Original:</strong>\n"
-"                    Cliente\n"
-"                </span>\n"
-"                <br/>\n"
-"                <span>\n"
-"                    <strong>Copia:</strong>\n"
-"                    Vendedor\n"
-"                </span>\n"
-"                <br/>\n"
-"                <br/>"
+"                        <strong>Original:</strong>\n"
+"                        Cliente\n"
+"                    </span>\n"
+"                    <br/>\n"
+"                    <span>\n"
+"                        <strong>Copia:</strong>\n"
+"                        Vendedor\n"
+"                    </span>\n"
+"                    <br/>\n"
+"                    <br/>"
 msgstr ""
 
 #. module: l10n_do_accounting
@@ -269,16 +269,6 @@ msgstr ""
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid "<strong>Fecha Firma Digital:</strong>"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "<strong>Monto Exento</strong>"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "<strong>Monto Gravado Total</strong>"
 msgstr ""
 
 #. module: l10n_do_accounting
@@ -492,12 +482,6 @@ msgid "Display Name"
 msgstr "Nombre mostrado"
 
 #. module: l10n_do_accounting
-#: code:addons/l10n_do_accounting/models/l10n_latam_document_type.py:0
-#, python-format
-msgid "NCF %s doesn't have the correct structure"
-msgstr "El NCF %s no tiene la estructura correcta"
-
-#. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_document_type_filter
 msgid "Dominican Documents"
 msgstr "Documento Fiscal"
@@ -506,6 +490,16 @@ msgstr "Documento Fiscal"
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.res_config_settings_view_form
 msgid "Dominican Localization"
 msgstr "Localización dominicana"
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_ecf_edi_file
+msgid "ECF XML File"
+msgstr "Archivo XML ECF"
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_ecf_edi_file_name
+msgid "ECF XML File Name"
+msgstr "Nombre Archivo XML ECF"
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_electronic_stamp
@@ -668,6 +662,12 @@ msgstr "Tipo de Comprobante"
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_origin_ncf
 msgid "Modifies"
 msgstr "Afecta a"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/l10n_latam_document_type.py:0
+#, python-format
+msgid "NCF %s doesn't have the correct structure"
+msgstr "El NCF %s no tiene la estructura correcta"
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_ir_sequence__expiration_date
@@ -846,6 +846,12 @@ msgstr ""
 "Puede usar este campo para búsquedas rápidas."
 
 #. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "There is already a sale invoice with fiscal number %s"
+msgstr "Ya existe una factura de ventas con el NCF %s"
+
+#. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_account_move_reversal_inherited
 msgid ""
 "Use this option if you want to fully apply a credit note.\n"
@@ -911,6 +917,12 @@ msgstr "No puede cancelar múltiples facturas fiscales a la vez."
 #, python-format
 msgid "You cannot create Credit Notes from multiple documents at a time."
 msgstr "No puede crear Notas de Crédito desde múltiples documentos a la vez."
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "You cannot delete fiscal invoice which have been posted before"
+msgstr "No puede eliminar una factura fiscal que ha sido validada anteriormente"
 
 #. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/wizard/account_move_reversal.py:0

@@ -188,7 +188,7 @@ def migrate_invoice_fields(env):
 
         for company in (
             env["res.company"]
-            .search([])
+            .search([("chart_template_id", "!=", False)])
             .filtered(lambda c: c.partner_id.country_id == env.ref("base.do"))
         ):
 
@@ -263,6 +263,7 @@ def migrate_fiscal_sequences(env):
                 "special": "14",
                 "fiscal": "01",
                 "informal": "11",
+                "export": "16",
             }
 
             env.cr.execute(

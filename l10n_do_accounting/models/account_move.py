@@ -259,6 +259,7 @@ class AccountMove(models.Model):
             )
             qr_string += "CodigoSeguridad=%s" % security_code
 
+
             invoice.l10n_do_electronic_stamp = urls.url_quote_plus(qr_string)
 
         (self - l10n_do_ecf_invoice).l10n_do_electronic_stamp = False
@@ -535,7 +536,10 @@ class AccountMove(models.Model):
                 )
         return super(AccountMove, self - l10n_do_invoice)._check_unique_vendor_number()
 
-    def post(self):
+class AccountPartialReconcile(models.Model) :
+    _name = "account.partial.reconcile"
+    _description = "Partial Reconcile"
+    _rec_name = "id"
 
         res = super(AccountMove, self).post()
 

@@ -221,42 +221,6 @@
                  <div id="total" class="row">
                      <div class="col-6">
                          <br/>
-<!--                            <table class="table" style="border-style: none;border-right-style: none;">-->
-<!--                                    <thead class="thead-light" style="border-style: none;border-right-style: none;">-->
-<!--                                        <th>-->
-<!--                                            <strong>Para Depositos y Transferencias:</strong>-->
-<!--                                        </th>-->
-<!--                                    </thead>-->
-<!--                                <tbody>-->
-<!--                                    <td style="text-align:left; background-color: white;border-style: none;border-right-style: none;">-->
-<!--                                        <span style="color: #766c66;">-->
-<!--                                            Banco Popular Dominicano-->
-<!--                                            <br/>-->
-<!--                                            Cuenta Corriente: #802324137-->
-<!--                                            <br/>-->
-<!--                                            <br/>-->
-<!--                                            Para Cheques:-->
-<!--                                            <br/>-->
-<!--                                            CAPW SERVICIOS TECNICOS, SRL-->
-<!--                                        </span>-->
-<!--                                    </td>-->
-<!--                                </tbody>-->
-<!--                            </table>-->
-<!--                         <table class="table" style="border-style: none;border-right-style: none;">-->
-<!--                              <thead class="thead-light" style="border-style: none;border-right-style: none;">-->
-<!--                                        <th>-->
-<!--                                            <strong>Para pagos Internacioles:</strong>-->
-<!--                                        </th>-->
-<!--                                    </thead>-->
-<!--                              <tbody>-->
-<!--                                    <td style="text-align:left;background-color: white; color: #766c66;border-style: none;border-right-style: none;">-->
-<!--                                        <li>Banco Popular Dominicano</li>-->
-<!--                                        <li>Swift "BPDODOSX"</li>-->
-<!--                                        <li>Cuenta Corriente: #802324137</li>-->
-<!--                                        <li>CAPW SERVICIOS TECNICOS SRL</li>-->
-<!--                                    </td>-->
-<!--                                </tbody>-->
-<!--                         </table>-->
                      </div>
                             <div class="col-6">
                                 <table class="table table-sm" style="page-break-inside: avoid;">
@@ -323,41 +287,7 @@
                     <br/>
                 </div>
             <br/>
-        </xpath>
-         <xpath expr="//p[@name='incoterm']" position="before">
-             <div class="col-12">
-                <table class="table" style="border-style: none;border-right-style: none;">
-                        <thead class="thead-light" style="border-style: none;border-right-style: none;">
-                            <th>
-                                <strong>Para Depositos y Transferencias:</strong>
-                            </th>
-                            <th>
-                                <strong>Para pagos Internacioles:</strong>
-                            </th>
-                        </thead>
-                    <tbody>
-                        <td style="text-align:left; background-color: white;border-style: none;border-right-style: none;">
-                            <span style="color: #766c66;">
-                                Banco Popular Dominicano
-                                <br/>
-                                Cuenta Corriente: #802324137
-                                <br/>
-                                <br/>
-                                Para Cheques:
-                                <br/>
-                                CAPW SERVICIOS TECNICOS, SRL
-                            </span>
-                        </td>
-                        <td style="text-align:left;background-color: white; color: #766c66;border-style: none;border-right-style: none;">
-                            <li>Banco Popular Dominicano</li>
-                            <li>Swift "BPDODOSX"</li>
-                            <li>Cuenta Corriente: #802324137</li>
-                            <li>CAPW SERVICIOS TECNICOS SRL</li>
-                        </td>
-                    </tbody>
-                </table>
-             </div>
-         </xpath>
+        </xpath>  
 
         <!-- Total monto descuento en líneas -->
         <xpath expr="//th[@name='th_price_unit']" position="after">

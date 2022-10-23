@@ -6,11 +6,8 @@
             <field name="model">res.currency.rate</field>
             <field name="inherit_id" ref="base.view_currency_rate_tree"/>
             <field name="arch" type="xml">
-                <field name="rate" position="after">
+                <field name="rate" position="before">
                     <field name="converted" string="Valor de Tasa"/>
-                </field>
-                <field name="rate" position="replace">
-                    <field name="rate" digits="[2,2]"/>
                 </field>
             </field>
         </record>

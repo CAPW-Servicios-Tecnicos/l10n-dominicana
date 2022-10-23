@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-20 00:15+0000\n"
-"PO-Revision-Date: 2022-06-20 00:15+0000\n"
+"POT-Creation-Date: 2022-10-23 14:15+0000\n"
+"PO-Revision-Date: 2022-10-23 14:15+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -31,27 +31,11 @@ msgstr ""
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid ""
-"<span style=\"color: #766c66;\">\n"
-"                                            Banco Popular Dominicano\n"
-"                                            <br/>\n"
-"                                            Cuenta Corriente: #802324137\n"
-"                                            <br/>\n"
-"                                            <br/>\n"
-"                                            Para Cheques:\n"
-"                                            <br/>\n"
-"                                            CAPW SERVICIOS TECNICOS, SRL\n"
-"                                        </span>"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid "<span>Monto descuento</span>"
 msgstr ""
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_boxed_inherited
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
 msgid "<span>RNC:</span>"
 msgstr ""
 
@@ -90,16 +74,6 @@ msgid ""
 "                        Vendedor\n"
 "                    <br/>\n"
 "                    <br/>"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "<strong>Para Depositos y Transferencias:</strong>"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "<strong>Para pagos Internacioles:</strong>"
 msgstr ""
 
 #. module: l10n_do_accounting
@@ -150,7 +124,7 @@ msgstr "Fecha de Inicio de Actividades"
 #. module: l10n_do_accounting
 #: model:ir.model,name:l10n_do_accounting.model_account_debit_note
 msgid "Add Debit Note wizard"
-msgstr "Wizard Agregar Nota Débito"
+msgstr "Asistente para agregar nota débito"
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note__l10n_do_amount
@@ -169,16 +143,6 @@ msgstr ""
 "identificar el tipo de documento sobre el que estamos trabajando. (no "
 "solamente relativo a account.move, podría ser relativo a otros modelos, como"
 " por ejemplo stock.picking)"
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "Banco Popular Dominicano"
-msgstr ""
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "CAPW SERVICIOS TECNICOS SRL"
-msgstr ""
 
 #. module: l10n_do_accounting
 #: model:res.groups,name:l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel
@@ -244,6 +208,11 @@ msgid "Companies"
 msgstr "Compañías"
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_do_account_journal_document_type__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_company_in_contingency
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_company_in_contingency
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_company_in_contingency
@@ -251,9 +220,24 @@ msgid "Company in contingency"
 msgstr "Compañía en contingencia"
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,help:l10n_do_accounting.field_l10n_do_account_journal_document_type__company_id
+msgid "Company related to this journal"
+msgstr ""
+
+#. module: l10n_do_accounting
+#: model:ir.model,name:l10n_do_accounting.model_res_config_settings
+msgid "Config Settings"
+msgstr "Opciones de configuración"
+
+#. module: l10n_do_accounting
 #: model:ir.model,name:l10n_do_accounting.model_res_partner
 msgid "Contact"
 msgstr "Contacto"
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_currency_rate__converted
+msgid "Converted"
+msgstr ""
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_expense_type
@@ -293,8 +277,10 @@ msgid "Created on"
 msgstr "Creado el"
 
 #. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "Cuenta Corriente: #802324137"
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__manual_currency_rate
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__manual_currency_rate
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__manual_currency_rate
+msgid "Currency Rate"
 msgstr ""
 
 #. module: l10n_do_accounting
@@ -344,16 +330,24 @@ msgid "Deferred submissions"
 msgstr "Envío diferido"
 
 #. module: l10n_do_accounting
+#: model:ir.model,name:l10n_do_accounting.model_res_currency_rate
+msgid "Description"
+msgstr "Descripcion"
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_journal__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_cancel__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_reversal__display_name
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_resequence_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_do_account_journal_document_type__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_latam_document_type__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_company__display_name
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_currency_rate__display_name
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_partner__display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
@@ -416,6 +410,11 @@ msgid "Electronic Stamp"
 msgstr "Sello Electrónico"
 
 #. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
+msgid "Email:"
+msgstr ""
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_enable_first_sequence
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_enable_first_sequence
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_enable_first_sequence
@@ -438,6 +437,12 @@ msgid "Final Consumer"
 msgstr "Cliente de Consumo"
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_company__financial_currency
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__financial_currency
+msgid "Financial Currency"
+msgstr ""
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields.selection,name:l10n_do_accounting.selection__res_company__l10n_do_default_client__taxpayer
 msgid "Fiscal Consumer"
 msgstr "Cliente Fiscal"
@@ -449,13 +454,16 @@ msgstr "Cliente Fiscal"
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_cancel__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_line__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_reversal__id
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_resequence_wizard__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_do_account_journal_document_type__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_latam_document_type__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_company__id
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__id
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_currency_rate__id
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_partner__id
 msgid "ID"
-msgstr "ID (identificación)"
+msgstr "Identificación"
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
@@ -552,14 +560,11 @@ msgid "L10N Latam Country Code"
 msgstr "Código de País"
 
 #. module: l10n_do_accounting
-#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_fiscal_number
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_ncf_expiration_date
-#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_fiscal_number
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_ncf_expiration_date
-#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_fiscal_number
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_ncf_expiration_date
 msgid "L10n_do_ncf_expiration_date"
-msgstr ""
+msgstr "Fecha de Expiracion de NCF"
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note____last_update
@@ -568,10 +573,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_cancel____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_line____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move_reversal____last_update
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_resequence_wizard____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_do_account_journal_document_type____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_latam_document_type____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_company____last_update
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings____last_update
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_currency_rate____last_update
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_partner____last_update
 msgid "Last Modified on"
 msgstr "Última modificación el"
@@ -592,6 +600,17 @@ msgstr "Última actualización en"
 #: model:ir.model,name:l10n_do_accounting.model_l10n_latam_document_type
 msgid "Latam Document Type"
 msgstr "Tipo de Comprobante"
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
+msgid "Logo"
+msgstr ""
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_company__manual_change_currency
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__manual_change_currency
+msgid "Manual Change Currency"
+msgstr ""
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_latam_manual_document_number
@@ -673,10 +692,27 @@ msgstr ""
 "emisión de Facturas Electrónicas. La emisión de NCF ha sido habilitada."
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_fiscal_number
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_fiscal_number
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_fiscal_number
+msgid "Número de Comprobante Fiscal"
+msgstr ""
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
+msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
+msgstr ""
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_import_journal_creation__l10n_do_payment_form
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_journal__l10n_do_payment_form
 msgid "Payment Form"
 msgstr "Forma de Pago"
+
+#. module: l10n_do_accounting
+#: model:ir.model,name:l10n_do_accounting.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note__l10n_do_percentage
@@ -712,7 +748,7 @@ msgstr "Tipo de Reembolso"
 #. module: l10n_do_accounting
 #: model:ir.model,name:l10n_do_accounting.model_account_resequence_wizard
 msgid "Remake the sequence of Journal Entries."
-msgstr "Rehaga la secuencia de entradas de diario."
+msgstr "Haz de nuevo la secuencia de asientos de diario."
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_bank_statement_line__l10n_do_fiscal_number
@@ -737,11 +773,6 @@ msgid "Supplier Invoices"
 msgstr "Facturas de Proveedor"
 
 #. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
-msgid "Swift \"BPDODOSX\""
-msgstr ""
-
-#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_partner__l10n_do_dgii_tax_payer_type
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_res_users__l10n_do_dgii_tax_payer_type
 msgid "Taxpayer Type"
@@ -764,6 +795,11 @@ msgstr ""
 msgid "Technical field used to hide/show fields regarding the localization"
 msgstr ""
 "Campo técnico usado para mostrar/ocultar campos dependiendo la localización"
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
+msgid "Tel:"
+msgstr ""
 
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note__l10n_latam_use_documents
@@ -794,6 +830,11 @@ msgstr ""
 "                            con la factura. No podrá modificar la Nota de Débito."
 
 #. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_currency_rate_form
+msgid "Valor de Tasa"
+msgstr ""
+
+#. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid "Vencimiento e-NCF:"
 msgstr ""
@@ -807,6 +848,11 @@ msgstr "Notas de Débito de Proveedor"
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid "Válida hasta:"
+msgstr ""
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.external_layout_clean_inherited
+msgid "Website:"
 msgstr ""
 
 #. module: l10n_do_accounting
@@ -858,6 +904,13 @@ msgstr "Fecha Firmado e-CF"
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
 msgid "e-NCF:"
+msgstr ""
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__is_currency_manual
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__is_currency_manual
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__is_currency_manual
+msgid "is_currency_manual"
 msgstr ""
 
 #. module: l10n_do_accounting

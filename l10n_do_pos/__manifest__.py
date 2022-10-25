@@ -1,11 +1,11 @@
 {
     "name": "Fiscal POS (Rep. Dominicana)",
     "summary": """Incorpora funcionalidades de facturación con NCF al POS.""",
-    "author": "Xmarts, " "Indexa, " "Iterativo SRL",
+    "author": "Xmarts, " "Indexa, " "Iterativo SRL", "CAPW Servicios Tecnicos",
     "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",
     "category": "Localization",
-    "version": "13.0.0.1.1",
+    "version": "15.0.0.0.1",
     "depends": [
         "point_of_sale",
         "l10n_do_accounting",
@@ -23,5 +23,5 @@
     'demo': [
 
     ],
-    'installable': False,
+    'installable': True,
 }

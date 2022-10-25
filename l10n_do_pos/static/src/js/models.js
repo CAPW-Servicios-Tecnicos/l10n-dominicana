@@ -122,7 +122,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             validation_date.setDate(today.getDate() - self.config.l10n_do_credit_notes_number_of_days);
             //TODO: try analize correct date
             return [
-                ['type', '=', 'out_refund'], ['state', '!=', 'paid'],
+                ['move_type', '=', 'out_refund'], ['state', '!=', 'paid'],
                 ['invoice_date', '>', validation_date.toISOString()],
             ];
         },

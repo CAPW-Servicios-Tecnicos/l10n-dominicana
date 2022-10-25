@@ -12,16 +12,19 @@
     ],
     "data": [
         "security/ir.model.access.csv",
-        "views/assets.xml",
         "views/pos_config_views.xml",
         "views/pos_order_views.xml",
     ],
-    "qweb": [
-        "static/src/xml/pos.xml",
-        "static/src/xml/posticket.xml",
-    ],
-    'demo': [
-
-    ],
+    'assets': {
+        'point_of_sale.assets': [
+            'l10n_do_pos/static/src/js/models.js',
+            'l10n_do_pos/static/src/js/screens.js',
+            'l10n_do_pos/static/src/css/pos.css',
+        ],
+        'web.assets_qweb': [
+            'static/src/xml/pos.xml',
+            'static/src/xml/posticket.xml',
+        ],
+    },
     'installable': True,
 }

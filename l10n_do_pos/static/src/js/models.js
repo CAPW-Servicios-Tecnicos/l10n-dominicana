@@ -34,13 +34,12 @@ odoo.define('l10n_do_pos.models', function (require) {
 
     models.load_fields('account.journal', [
         'l10n_latam_use_documents',
-        'l10n_do_sequence_ids',
         'l10n_do_payment_form',
     ]);
 
     models.load_models({
         model: 'account.journal',
-        fields: ['name', 'l10n_latam_use_documents', 'l10n_do_sequence_ids'],
+        fields: ['name', 'l10n_latam_use_documents',],
         domain: function (self) {
             return [['id', '=', self.config.invoice_journal_id[0]]];
         },
@@ -194,22 +193,6 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
     }], {
         'after': 'pos.payment.method',
-    });
-
-    models.load_models({
-        model: 'ir.sequence',
-        fields: [
-            'l10n_latam_document_type_id',
-        ],
-        domain: function (self) {
-            return [
-                ['id', 'in', self.invoice_journal.l10n_do_sequence_ids],
-            ];
-        },
-        loaded: function (self, latam_sequences) {
-            self.l10n_latam_sequences = latam_sequences;
-            console.log('Sequences loaded:', latam_sequences);
-        },
     });
 
     models.load_models({

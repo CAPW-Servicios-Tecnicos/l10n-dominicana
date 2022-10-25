@@ -498,7 +498,6 @@ odoo.define('l10n_do_pos.screens', function (require) {
                     self.pos.loading_screen_off();
                     current_order.l10n_latam_document_number = res.ncf;
                     current_order.l10n_do_ncf_expiration_date = res.expiration_date;
-                    current_order.l10n_latam_sequence_id = latam_sequence.id;
                     current_order.l10n_latam_document_type_id =
                         current_order.l10n_latam_document_type.id;
                     current_order.save_to_db();

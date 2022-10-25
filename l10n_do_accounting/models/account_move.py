@@ -741,11 +741,19 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_prefix = sequence[:3]
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
+<<<<<<< HEAD
     def _get_last_sequence(self, relaxed=False, lock=True):
 
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
                 relaxed=relaxed, lock=lock
+=======
+    def _get_last_sequence(self, relaxed=False, with_prefix=None, lock=True):
+
+        if not self._context.get("is_l10n_do_seq", False):
+            return super(AccountMove, self)._get_last_sequence(
+                relaxed=relaxed, with_prefix=with_prefix, lock=lock
+>>>>>>> b4c16696959742a06c4b68e143226fca3a0d205f
             )
 
         self.ensure_one()

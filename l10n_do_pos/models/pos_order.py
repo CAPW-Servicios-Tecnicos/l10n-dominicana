@@ -17,11 +17,6 @@ class PosOrder(models.Model):
         comodel_name="l10n_latam.document.type",
         string="Document Type",
     )
-    l10n_latam_sequence_id = fields.Many2one(
-        comodel_name="ir.sequence",
-        string="Fiscal Sequence",
-        copy=False,
-    )
     l10n_do_ncf_expiration_date = fields.Date(
         string="NCF expiration date",
     )
@@ -71,10 +66,9 @@ class PosOrder(models.Model):
         Prepare the dict of values to create the new pos order.
         """
         res = super(PosOrder, self)._order_fields(ui_order)
-        if ui_order.get("l10n_latam_sequence_id", False) and ui_order["to_invoice"]:
+        if ui_order["to_invoice"]:
             res.update(
                 {
-                    "l10n_latam_sequence_id": ui_order["l10n_latam_sequence_id"],
                     "l10n_latam_document_number": ui_order[
                         "l10n_latam_document_number"
                     ],
@@ -159,13 +153,11 @@ class PosOrder(models.Model):
         invoice_vals = super(PosOrder, self)._prepare_invoice_vals()
         documents = self.config_id.invoice_journal_id.l10n_latam_use_documents
         if documents and self.to_invoice:
-            invoice_vals["l10n_latam_sequence_id"] = self.l10n_latam_sequence_id.id
             invoice_vals["l10n_latam_document_number"] = self.l10n_latam_document_number
             invoice_vals[
                 "l10n_latam_document_type_id"
             ] = self.l10n_latam_document_type_id.id
             if invoice_vals["move_type"] == "out_refund":
-                del invoice_vals["l10n_latam_sequence_id"]
                 invoice_vals["l10n_latam_document_number"] = False
                 del invoice_vals["l10n_latam_document_type_id"]
             invoice_vals["ncf_expiration_date"] = self.l10n_do_ncf_expiration_date

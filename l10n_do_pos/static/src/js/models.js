@@ -229,7 +229,6 @@ odoo.define('l10n_do_pos.models', function (require) {
         initialize: function () {
             _super_order.initialize.apply(this, arguments);
             var self = this;
-            this.l10n_latam_sequence_id = false;
             this.l10n_latam_document_type_id = false;
             this.l10n_latam_document_type =
                 self.pos.get_latam_document_type_by_prefix();
@@ -296,7 +295,6 @@ odoo.define('l10n_do_pos.models', function (require) {
             _super_order.init_from_JSON.call(this, json);
             this.l10n_latam_document_number = json.l10n_latam_document_number;
             this.l10n_do_ncf_expiration_date = json.l10n_do_ncf_expiration_date
-            this.l10n_latam_sequence_id = json.l10n_latam_sequence_id;
             this.l10n_latam_document_type_id = json.l10n_latam_document_type_id;
             this.to_invoice_backend = json.to_invoice_backend;
             this.l10n_do_return_status = json.l10n_do_return_status;
@@ -317,8 +315,6 @@ odoo.define('l10n_do_pos.models', function (require) {
                 loaded.l10n_latam_document_number =
                     current_order.l10n_latam_document_number;
                 loaded.l10n_do_ncf_expiration_date = current_order.l10n_do_ncf_expiration_date;
-                loaded.l10n_latam_sequence_id =
-                    current_order.l10n_latam_sequence_id;
                 loaded.l10n_latam_document_type_id =
                     current_order.l10n_latam_document_type_id;
                 loaded.to_invoice_backend = current_order.to_invoice_backend;

@@ -59,7 +59,7 @@ class PosConfig(models.Model):
     def _check_company_journal(self):
         if (
             self.journal_id
-            and self.journal_id.company_id.l10n_do_country_code == "DO"
+            and self.journal_id.company_id.country_id.code == "DO"
             and self.journal_id.l10n_latam_use_documents
         ):
             raise ValidationError(

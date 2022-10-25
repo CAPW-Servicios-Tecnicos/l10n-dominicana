@@ -164,7 +164,7 @@ class PosOrder(models.Model):
             invoice_vals[
                 "l10n_latam_document_type_id"
             ] = self.l10n_latam_document_type_id.id
-            if invoice_vals["type"] == "out_refund":
+            if invoice_vals["move_type"] == "out_refund":
                 del invoice_vals["l10n_latam_sequence_id"]
                 invoice_vals["l10n_latam_document_number"] = False
                 del invoice_vals["l10n_latam_document_type_id"]
@@ -176,7 +176,7 @@ class PosOrder(models.Model):
             invoice_vals["is_l10n_do_internal_sequence"] = True
 
             if self.l10n_do_is_return_order:
-                invoice_vals["type"] = "out_refund"
+                invoice_vals["move_type"] = "out_refund"
 
         return invoice_vals
 
@@ -201,7 +201,7 @@ class PosOrder(models.Model):
 
     @api.model
     def order_search_from_ui(self, day_limit=0, config_id=0, session_id=0):
-        invoice_domain = [("type", "=", "out_invoice")]
+        invoice_domain = [("move_type", "=", "out_invoice")]
         pos_order_domain = []
 
         if day_limit:

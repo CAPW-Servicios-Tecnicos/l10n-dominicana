@@ -127,15 +127,9 @@ class L10nDOTestsCommon(AccountTestInvoicingCommon):
                     invoice_line_form.price_unit = line.get("price_unit", 100)
 
                     ncf_type = invoice_form.l10n_latam_document_type_id.l10n_do_ncf_type
-<<<<<<< HEAD
-                    if ncf_type[-7:] == "special":
-                        invoice_line_form.tax_ids.clear()
-                    elif ncf_type[-8:] == "informal":
-=======
                     if ncf_type and ncf_type[-7:] == "special":
                         invoice_line_form.tax_ids.clear()
                     elif ncf_type and ncf_type[-8:] == "informal":
->>>>>>> b4c16696959742a06c4b68e143226fca3a0d205f
                         invoice_line_form.tax_ids.clear()
                         taxes = self.env["account.tax"].search(
                             [

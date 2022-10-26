@@ -55,7 +55,7 @@ odoo.define('l10n_do_pos.models', function (require) {
     models.load_models([{
         model: 'pos.order',
         fields: ['id', 'name', 'date_order', 'partner_id', 'lines', 'pos_reference', 'account_move', 'amount_total',
-            'l10n_latam_document_number', 'payment_ids', 'l10n_do_return_order_id', 'l10n_do_is_return_order', 'l10n_do_return_status'],
+            'l10n_do_fiscal_number', 'payment_ids', 'l10n_do_return_order_id', 'l10n_do_is_return_order', 'l10n_do_return_status'],
         domain: function (self) {
             var domain_list = [];
 
@@ -90,7 +90,7 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
     }, {
         model: 'account.move',
-        fields: ['l10n_latam_document_number'],
+        fields: ['l10n_do_fiscal_number'],
         domain: function (self) {
             var invoice_ids = self.db.pos_all_orders.map(function (order) {
                 return order.account_move[0];
@@ -106,14 +106,14 @@ odoo.define('l10n_do_pos.models', function (require) {
             });
             self.db.pos_all_orders.forEach(function (order, ix) {
                 var invoice_id = invoice_by_id[order.account_move[0]];
-                var l10n_latam_document_number = invoice_id && invoice_id.l10n_latam_document_number;
-                self.db.pos_all_orders[ix].l10n_latam_document_number = l10n_latam_document_number;
-                self.db.order_by_id[order.id].l10n_latam_document_number = l10n_latam_document_number;
+                var l10n_do_fiscal_number = invoice_id && invoice_id.l10n_do_fiscal_number;
+                self.db.pos_all_orders[ix].l10n_do_fiscal_number = l10n_do_fiscal_number;
+                self.db.order_by_id[order.id].l10n_do_fiscal_number = l10n_do_fiscal_number;
             });
         },
     }, {
         model: 'account.move',
-        fields: ['l10n_latam_document_number', 'partner_id'],
+        fields: ['l10n_do_fiscal_number', 'partner_id'],
         // TODO: CHECK WTF IS residual
         domain: function (self) {
             var today = new Date();
@@ -121,7 +121,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             validation_date.setDate(today.getDate() - self.config.l10n_do_credit_notes_number_of_days);
             //TODO: try analize correct date
             return [
-                ['move_type', '=', 'out_refund'], ['state', '!=', 'paid'],
+                ['move_type', '=', 'out_refund'], ['payment_state', '!=', 'paid'],
                 ['invoice_date', '>', validation_date.toISOString()],
             ];
         },
@@ -293,7 +293,7 @@ odoo.define('l10n_do_pos.models', function (require) {
         // },
         init_from_JSON: function(json) {
             _super_order.init_from_JSON.call(this, json);
-            this.l10n_latam_document_number = json.l10n_latam_document_number;
+            this.l10n_do_fiscal_number = json.l10n_do_fiscal_number;
             this.l10n_do_ncf_expiration_date = json.l10n_do_ncf_expiration_date
             this.l10n_latam_document_type_id = json.l10n_latam_document_type_id;
             this.to_invoice_backend = json.to_invoice_backend;
@@ -312,8 +312,8 @@ odoo.define('l10n_do_pos.models', function (require) {
             var current_order = self.pos.get_order();
 
             if (current_order) {
-                loaded.l10n_latam_document_number =
-                    current_order.l10n_latam_document_number;
+                loaded.l10n_do_fiscal_number =
+                    current_order.l10n_do_fiscal_number;
                 loaded.l10n_do_ncf_expiration_date = current_order.l10n_do_ncf_expiration_date;
                 loaded.l10n_latam_document_type_id =
                     current_order.l10n_latam_document_type_id;

@@ -27,14 +27,14 @@
                     <br/>
                     <t t-esc="order.name"/>
                     <br/>
-                    <t t-if="order.l10n_latam_document_type and order.l10n_latam_document_number">
+                    <t t-if="order.l10n_latam_document_type and order.l10n_do_fiscal_number">
                         <div class="pos-receipt-center-align dotted_ticket_title">
                             <strong>Factura de
                                 <t t-esc="order.l10n_latam_document_type.name"/>
                             </strong>
                             <br/>
                             <strong>NCF:
-                                <t t-esc="order.l10n_latam_document_number"/>
+                                <t t-esc="order.l10n_do_fiscal_number"/>
                             </strong>
                             <t t-if="order.l10n_do_is_return_order">
                                 <br/>

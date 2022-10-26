@@ -484,7 +484,7 @@ odoo.define('l10n_do_pos.screens', function (require) {
             var _super = this._super.bind(this);
             if (current_order.to_invoice_backend &&
                 self.pos.invoice_journal.l10n_latam_use_documents &&
-                !current_order.l10n_latam_document_number) {
+                !current_order.l10n_do_fiscal_number) {
                 var latam_sequence =
                     self.pos.get_l10n_latam_sequence_by_document_type_id(
                         current_order.l10n_latam_document_type.id
@@ -496,7 +496,7 @@ odoo.define('l10n_do_pos.screens', function (require) {
                     args: [latam_sequence.id],
                 }).then(function (res) {
                     self.pos.loading_screen_off();
-                    current_order.l10n_latam_document_number = res.ncf;
+                    current_order.l10n_do_fiscal_number = res.ncf;
                     current_order.l10n_do_ncf_expiration_date = res.expiration_date;
                     current_order.l10n_latam_document_type_id =
                         current_order.l10n_latam_document_type.id;
@@ -875,7 +875,7 @@ odoo.define('l10n_do_pos.screens', function (require) {
                 refund_order = self.pos.get_order();
                 refund_order.l10n_do_is_return_order = true;
                 refund_order.l10n_do_return_order_id = order.id;
-                refund_order.l10n_do_origin_ncf = order.l10n_latam_document_number;
+                refund_order.l10n_do_origin_ncf = order.l10n_do_fiscal_number;
                 refund_order.set_client(self.pos.db.get_partner_by_id(order.partner_id[0]));
                 refund_order.set_latam_document_type(
                     self.pos.l10n_latam_document_type_credit_note)

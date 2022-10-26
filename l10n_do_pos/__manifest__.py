@@ -22,8 +22,7 @@
             'l10n_do_pos/static/src/css/pos.css',
         ],
         'web.assets_qweb': [
-            'static/src/xml/pos.xml/**/*',
-            'static/src/xml/posticket.xml/**/*',
+            'l10n_do_pos/static/src/xml/**/*',
         ],
     },
     'installable': True,

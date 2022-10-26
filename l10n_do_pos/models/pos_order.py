@@ -116,8 +116,8 @@ class PosOrder(models.Model):
             # USUARIO)
             account_move_credit_note = (
                 self.env["pos.order"]
-                .search([("l10n_do_fiscal_number", "=", data["name"])])
-                .account_move
+                    .search([("l10n_do_fiscal_number", "=", data["name"])])
+                    .account_move
             )
             self.env["pos.order.payment.credit.note"].create(
                 {
@@ -165,7 +165,8 @@ class PosOrder(models.Model):
             invoice_vals["l10n_do_origin_ncf"] = self.l10n_do_fiscal_number
 
             # a POS sale invoice NCF is always an internal sequence
-            invoice_vals["is_l10n_do_internal_sequence"] = True
+            # invoice_vals["is_l10n_do_internal_sequence"] = True
+            # TODO Revisar el porque se marca como secuencia interna con este campo.
 
             if self.l10n_do_is_return_order:
                 invoice_vals["move_type"] = "out_refund"
@@ -180,8 +181,8 @@ class PosOrder(models.Model):
             if not order["data"]["partner_id"]:
                 pos_config = (
                     self.env["pos.session"]
-                    .search([("id", "=", order["data"]["pos_session_id"])])
-                    .config_id
+                        .search([("id", "=", order["data"]["pos_session_id"])])
+                        .config_id
                 )
                 if not pos_config.l10n_do_default_partner_id:
                     raise UserError(
@@ -259,8 +260,8 @@ class PosOrder(models.Model):
 
     def _is_pos_order_paid(self):
         if self.filtered(
-            lambda order: order.l10n_latam_use_documents
-            and order.l10n_do_is_return_order
+                lambda order: order.l10n_latam_use_documents
+                              and order.l10n_do_is_return_order
         ):
             return True
         return super(PosOrder, self)._is_pos_order_paid()
@@ -288,13 +289,13 @@ class PosOrder(models.Model):
         # TODO: CHECK WTF l10n_latam_document_number cant filter
         out_refund_invoice = (
             self.env["pos.order"]
-            .search(
+                .search(
                 [
                     ("l10n_do_fiscal_number", "=", ncf),
                     ("l10n_do_is_return_order", "=", True),
                 ]
             )
-            .account_move
+                .account_move
         )
         return {
             "id": out_refund_invoice.id,

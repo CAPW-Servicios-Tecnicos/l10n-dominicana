@@ -396,20 +396,22 @@ odoo.define('l10n_do_pos.screens', function (require) {
             if (self.pos.invoice_journal.l10n_latam_use_documents &&
                 current_order.to_invoice_backend) {
 
-                var latam_sequence =
-                    self.pos.get_l10n_latam_sequence_by_document_type_id(
-                        current_order.l10n_latam_document_type.id
-                    );
+                // TODO ya no se obtiene por sequence el ncf lo genera internamente el sistema
 
-                if (!latam_sequence) {
-                    this.gui.show_popup('error', {
-                        'title': _t('Not fiscal sequence'),
-                        'body': _t('Please configure correct fiscal sequence in invoice journal'),
-                    });
-                    current_order.to_invoice = true;
-                    current_order.save_to_db();
-                    return false;
-                }
+//                var latam_sequence =
+//                    self.pos.get_l10n_latam_sequence_by_document_type_id(
+//                        current_order.l10n_latam_document_type.id
+//                    );
+
+//                if (!latam_sequence) {
+//                    this.gui.show_popup('error', {
+//                        'title': _t('Not fiscal sequence'),
+//                        'body': _t('Please configure correct fiscal sequence in invoice journal'),
+//                    });
+//                    current_order.to_invoice = true;
+//                    current_order.save_to_db();
+//                    return false;
+//                }
 
                 if (!self.pos.config.l10n_do_default_partner_id && !client) {
                     this.gui.show_popup('error', {
@@ -485,16 +487,18 @@ odoo.define('l10n_do_pos.screens', function (require) {
             if (current_order.to_invoice_backend &&
                 self.pos.invoice_journal.l10n_latam_use_documents &&
                 !current_order.l10n_do_fiscal_number) {
-                var latam_sequence =
-                    self.pos.get_l10n_latam_sequence_by_document_type_id(
-                        current_order.l10n_latam_document_type.id
-                    );
+                // TODO ya no se obtiene por sequence el ncf lo genera internamente el sistema
+//                var latam_sequence =
+//                    self.pos.get_l10n_latam_sequence_by_document_type_id(
+//                        current_order.l10n_latam_document_type.id
+//                    );
                 self.pos.loading_screen_on();
-                rpc.query({
-                    model: 'ir.sequence',
-                    method: 'get_l10n_do_fiscal_info',
-                    args: [latam_sequence.id],
-                }).then(function (res) {
+//                rpc.query({
+//                    model: 'ir.sequence',
+//                    method: 'get_l10n_do_fiscal_info',
+//                    args: [latam_sequence.id],
+//                }).then
+                function (res) {
                     self.pos.loading_screen_off();
                     current_order.l10n_do_fiscal_number = res.ncf;
                     current_order.l10n_do_ncf_expiration_date = res.expiration_date;
@@ -519,7 +523,7 @@ odoo.define('l10n_do_pos.screens', function (require) {
                         'title': _t('Error: Could not Save Changes'),
                         'body': error_body,
                     });
-                });
+                };
             } else {
                 this._super();
             }

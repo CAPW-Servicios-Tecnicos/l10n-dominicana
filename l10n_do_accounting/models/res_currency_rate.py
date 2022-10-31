@@ -5,12 +5,19 @@ class ResCurrencyRate(models.Model):
     _inherit = 'res.currency.rate'
     _description = 'Description'
 
-    converted = fields.Float(readonly=False, digits=(2, 2))
+    converted = fields.Float(readonly=False, store=True, digits=(2, 2))
 
     @api.onchange("converted")
     def _get_converted(self):
-        if self.converted > 0:
-            self.rate = 1 / self.converted
+        for con in self:
+            if con.converted > 0:
+                con.rate = 1 / con.converted
+
+    @api.onchange("rate")
+    def _get_rate(self):
+        for val in self:
+            if val.rate > 0:
+                val.converted = 1 / val.rate
 
     # def name_get(self):
     #     result = []

@@ -3,7 +3,7 @@ from psycopg2 import sql
 from werkzeug import urls
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, UserError, AccessError
+from odoo.exceptions import ValidationError, UserError, AccessError, RedirectWarning
 
 
 class AccountMove(models.Model):
@@ -103,7 +103,7 @@ class AccountMove(models.Model):
         string="Enable first fiscal sequence",
         compute="_compute_l10n_do_enable_first_sequence",
         help="Technical field that compute if internal generated fiscal sequence "
-        "is enabled to be set manually.",
+             "is enabled to be set manually.",
     )
     l10n_do_fiscal_number = fields.Char(
         "Fiscal Number",
@@ -165,9 +165,9 @@ class AccountMove(models.Model):
         """
         l10n_do_internal_invoices = self.filtered(
             lambda inv: inv.l10n_latam_use_documents
-            and inv.l10n_latam_document_type_id
-            and inv.country_code == "DO"
-            and not inv.l10n_latam_manual_document_number
+                        and inv.l10n_latam_document_type_id
+                        and inv.country_code == "DO"
+                        and not inv.l10n_latam_manual_document_number
         )
         for invoice in l10n_do_internal_invoices:
             invoice.l10n_do_enable_first_sequence = not bool(
@@ -208,7 +208,7 @@ class AccountMove(models.Model):
         taxed_move_lines = self.line_ids.filtered("tax_line_id")
         itbis_taxed_move_lines = taxed_move_lines.filtered(
             lambda l: itbis_tax_group in l.tax_line_id.mapped("tax_group_id")
-            and l.tax_line_id.amount > 0
+                      and l.tax_line_id.amount > 0
         )
 
         itbis_taxed_product_lines = self.invoice_line_ids.filtered(
@@ -218,13 +218,13 @@ class AccountMove(models.Model):
         return {
             "itbis_amount": sign * sum(itbis_taxed_move_lines.mapped(amount_field)),
             "itbis_taxable_amount": sign
-            * sum(
+                                    * sum(
                 line[amount_field]
                 for line in itbis_taxed_product_lines
                 if line.price_total != line.price_subtotal
             ),
             "itbis_exempt_amount": sign
-            * sum(
+                                   * sum(
                 line[amount_field]
                 for line in itbis_taxed_product_lines
                 if any(True for tax in line.tax_ids if tax.amount == 0)
@@ -238,11 +238,11 @@ class AccountMove(models.Model):
     def _compute_is_ecf_invoice(self):
         for invoice in self:
             invoice.is_ecf_invoice = (
-                invoice.company_id.country_id
-                and invoice.company_id.country_id.code == "DO"
-                and invoice.l10n_latam_document_type_id
-                and invoice.l10n_latam_document_type_id.l10n_do_ncf_type
-                and invoice.l10n_latam_document_type_id.l10n_do_ncf_type[:2] == "e-"
+                    invoice.company_id.country_id
+                    and invoice.company_id.country_id.code == "DO"
+                    and invoice.l10n_latam_document_type_id
+                    and invoice.l10n_latam_document_type_id.l10n_do_ncf_type
+                    and invoice.l10n_latam_document_type_id.l10n_do_ncf_type[:2] == "e-"
             )
 
     @api.depends('l10n_latam_document_number')
@@ -272,8 +272,8 @@ class AccountMove(models.Model):
 
         l10n_do_ecf_invoice = self.filtered(
             lambda i: i.is_ecf_invoice
-            and not i.l10n_latam_manual_document_number
-            and i.l10n_do_ecf_security_code
+                      and not i.l10n_latam_manual_document_number
+                      and i.l10n_do_ecf_security_code
         )
 
         for invoice in l10n_do_ecf_invoice:
@@ -281,7 +281,7 @@ class AccountMove(models.Model):
             ecf_service_env = self.env.context.get("l10n_do_ecf_service_env", "CerteCF")
             doc_code_prefix = invoice.l10n_latam_document_type_id.doc_code_prefix
             is_rfc = (  # Es un Resumen Factura Consumo
-                doc_code_prefix == "E32" and invoice.amount_total_signed < 250000
+                    doc_code_prefix == "E32" and invoice.amount_total_signed < 250000
             )
 
             qr_string = "https://%s.dgii.gov.do/%s/ConsultaTimbre%s?" % (
@@ -299,13 +299,13 @@ class AccountMove(models.Model):
             qr_string += "ENCF=%s&" % invoice.l10n_do_fiscal_number or ""
             if not is_rfc:
                 qr_string += "FechaEmision=%s&" % (
-                    invoice.invoice_date or fields.Date.today()
+                        invoice.invoice_date or fields.Date.today()
                 ).strftime("%d-%m-%Y")
 
             l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
             l10n_do_total = (
-                l10n_do_amounts["itbis_taxable_amount"]
-                + l10n_do_amounts["itbis_amount"]
+                    l10n_do_amounts["itbis_taxable_amount"]
+                    + l10n_do_amounts["itbis_amount"]
             )
 
             qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
@@ -333,9 +333,9 @@ class AccountMove(models.Model):
     def _check_unique_sequence_number(self):
         l10n_do_invoices = self.filtered(
             lambda inv: inv.l10n_latam_use_documents
-            and inv.country_code == "DO"
-            and inv.is_sale_document()
-            and inv.state == "posted"
+                        and inv.country_code == "DO"
+                        and inv.is_sale_document()
+                        and inv.state == "posted"
         )
         if l10n_do_invoices:
             self.flush(
@@ -377,9 +377,9 @@ class AccountMove(models.Model):
 
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
-            and self.move_type[-6:] in ("nvoice", "refund")
-            and inv.l10n_latam_use_documents
-            and not inv.is_ecf_invoice
+                        and self.move_type[-6:] in ("nvoice", "refund")
+                        and inv.l10n_latam_use_documents
+                        and not inv.is_ecf_invoice
         )
 
         if len(fiscal_invoice) > 1:
@@ -388,7 +388,7 @@ class AccountMove(models.Model):
             )
 
         if fiscal_invoice and not self.env.user.has_group(
-            "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
+                "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
         ):
             raise AccessError(_("You are not allowed to cancel Fiscal Invoices"))
 
@@ -405,10 +405,10 @@ class AccountMove(models.Model):
 
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
-            and self.move_type[-6:] in ("nvoice", "refund")
+                        and self.move_type[-6:] in ("nvoice", "refund")
         )
         if fiscal_invoice and not self.env.user.has_group(
-            "l10n_do_accounting.group_l10n_do_fiscal_credit_note"
+                "l10n_do_accounting.group_l10n_do_fiscal_credit_note"
         ):
             raise AccessError(_("You are not allowed to issue Fiscal Credit Notes"))
 
@@ -439,8 +439,8 @@ class AccountMove(models.Model):
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
         if not (
-            self.journal_id.l10n_latam_use_documents
-            and self.journal_id.company_id.country_id == self.env.ref("base.do")
+                self.journal_id.l10n_latam_use_documents
+                and self.journal_id.company_id.country_id == self.env.ref("base.do")
         ):
             return super()._get_l10n_latam_documents_domain()
 
@@ -471,19 +471,19 @@ class AccountMove(models.Model):
     def _check_invoice_type_document_type(self):
         l10n_do_invoices = self.filtered(
             lambda inv: inv.country_code == "DO"
-            and inv.l10n_latam_use_documents
-            and inv.l10n_latam_document_type_id
+                        and inv.l10n_latam_use_documents
+                        and inv.l10n_latam_document_type_id
         )
         for rec in l10n_do_invoices:
             has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))
             l10n_latam_document_type = rec.l10n_latam_document_type_id
             if not has_vat and (
-                rec.amount_untaxed_signed >= 250000
-                or (
-                    l10n_latam_document_type.is_vat_required
-                    and rec.commercial_partner_id.l10n_do_dgii_tax_payer_type
-                    != "non_payer"
-                )
+                    rec.amount_untaxed_signed >= 250000
+                    or (
+                            l10n_latam_document_type.is_vat_required
+                            and rec.commercial_partner_id.l10n_do_dgii_tax_payer_type
+                            != "non_payer"
+                    )
             ):
                 raise ValidationError(
                     _(
@@ -496,10 +496,10 @@ class AccountMove(models.Model):
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
         if (
-            self.company_id.country_id == self.env.ref("base.do")
-            and self.l10n_latam_document_type_id
-            and self.move_type == "in_invoice"
-            and self.partner_id
+                self.company_id.country_id == self.env.ref("base.do")
+                and self.l10n_latam_document_type_id
+                and self.move_type == "in_invoice"
+                and self.partner_id
         ):
             self.l10n_do_expense_type = (
                 self.partner_id.l10n_do_expense_type
@@ -544,9 +544,9 @@ class AccountMove(models.Model):
     def _compute_l10n_latam_manual_document_number(self):
         l10n_do_recs_with_journal_id = self.filtered(
             lambda x: x.journal_id
-            and x.journal_id.l10n_latam_use_documents
-            and x.l10n_latam_document_type_id
-            and x.country_code == "DO"
+                      and x.journal_id.l10n_latam_use_documents
+                      and x.l10n_latam_document_type_id
+                      and x.country_code == "DO"
         )
         for move in l10n_do_recs_with_journal_id:
             move.l10n_latam_manual_document_number = (
@@ -567,13 +567,13 @@ class AccountMove(models.Model):
             "in_invoice",
             "in_refund",
         ) and self.l10n_latam_document_type_id.l10n_do_ncf_type not in (
-            "minor",
-            "e-minor",
-            "informal",
-            "e-informal",
-            "exterior",
-            "e-exterior",
-        )
+                   "minor",
+                   "e-minor",
+                   "informal",
+                   "e-informal",
+                   "exterior",
+                   "e-exterior",
+               )
 
     def _get_debit_line_tax(self, debit_date):
 
@@ -582,7 +582,7 @@ class AccountMove(models.Model):
                 self.company_id.account_sale_tax_id
                 or self.env.ref("l10n_do.%s_tax_18_sale" % self.company_id.id)
                 if (debit_date - self.invoice_date).days <= 30
-                and self.partner_id.l10n_do_dgii_tax_payer_type != "special"
+                   and self.partner_id.l10n_do_dgii_tax_payer_type != "special"
                 else self.env.ref("l10n_do.%s_tax_0_sale" % self.company_id.id) or False
             )
         else:
@@ -618,7 +618,7 @@ class AccountMove(models.Model):
                     ctx.get("amount")
                     if refund_debit_type == "fixed_amount"
                     else origin_invoice_id.amount_untaxed
-                    * (ctx.get("percentage") / 100)
+                         * (ctx.get("percentage") / 100)
                 )
                 vals["invoice_line_ids"] = [
                     (
@@ -643,16 +643,16 @@ class AccountMove(models.Model):
 
         l10n_do_invoices = self.filtered(
             lambda inv: inv.company_id.country_id == self.env.ref("base.do")
-            and inv.l10n_latam_use_documents
+                        and inv.l10n_latam_use_documents
         )
 
         for invoice in l10n_do_invoices.filtered(
-            lambda inv: inv.l10n_latam_document_type_id
+                lambda inv: inv.l10n_latam_document_type_id
         ):
             invoice.l10n_do_ncf_expiration_date = (
                 invoice.journal_id.l10n_do_document_type_ids.filtered(
                     lambda doc: doc.l10n_latam_document_type_id
-                    == invoice.l10n_latam_document_type_id
+                                == invoice.l10n_latam_document_type_id
                 ).l10n_do_ncf_expiration_date
             )
 
@@ -672,8 +672,8 @@ class AccountMove(models.Model):
                 self.date.year,
             )
             if self.journal_id.refund_sequence and self.move_type in (
-                "out_refund",
-                "in_refund",
+                    "out_refund",
+                    "in_refund",
             ):
                 starting_sequence = "R" + starting_sequence
             return starting_sequence
@@ -688,9 +688,9 @@ class AccountMove(models.Model):
 
     def _get_starting_sequence(self):
         if (
-            self.journal_id.l10n_latam_use_documents
-            and self.company_id.country_id.code == "DO"
-            and self.l10n_latam_document_type_id
+                self.journal_id.l10n_latam_use_documents
+                and self.company_id.country_id.code == "DO"
+                and self.l10n_latam_document_type_id
         ):
             return self._l10n_do_get_formatted_sequence()
 
@@ -713,8 +713,8 @@ class AccountMove(models.Model):
                 " AND l10n_do_sequence_prefix IS NOT NULL"
             )
             if (
-                not self.l10n_latam_manual_document_number
-                and self.move_type != "in_refund"
+                    not self.l10n_latam_manual_document_number
+                    and self.move_type != "in_refund"
             ):
                 where_string += " AND move_type = %(move_type)s"
                 param["move_type"] = self.move_type
@@ -723,7 +723,7 @@ class AccountMove(models.Model):
 
             param["company_id"] = self.company_id.id or False
             param["l10n_latam_document_type_id"] = (
-                self.l10n_latam_document_type_id.id or 0
+                    self.l10n_latam_document_type_id.id or 0
             )
         return where_string, param
 
@@ -750,8 +750,8 @@ class AccountMove(models.Model):
 
         self.ensure_one()
         if (
-            self._l10n_do_sequence_field not in self._fields
-            or not self._fields[self._l10n_do_sequence_field].store
+                self._l10n_do_sequence_field not in self._fields
+                or not self._fields[self._l10n_do_sequence_field].store
         ):
             raise ValidationError(
                 _("%s is not a stored field", self._l10n_do_sequence_field)
@@ -816,7 +816,7 @@ class AccountMove(models.Model):
         new = not last_sequence
         if new:
             last_sequence = (
-                self._get_last_sequence(relaxed=True) or self._get_starting_sequence()
+                    self._get_last_sequence(relaxed=True) or self._get_starting_sequence()
             )
 
         format, format_values = self._get_sequence_format_param(last_sequence)
@@ -842,10 +842,10 @@ class AccountMove(models.Model):
 
     def unlink(self):
         if self.filtered(
-            lambda inv: inv.is_purchase_document()
-            and inv.country_code == "DO"
-            and inv.l10n_latam_use_documents
-            and inv.posted_before
+                lambda inv: inv.is_purchase_document()
+                            and inv.country_code == "DO"
+                            and inv.l10n_latam_use_documents
+                            and inv.posted_before
         ):
             raise UserError(
                 _("You cannot delete fiscal invoice which have been posted before")
@@ -861,3 +861,27 @@ class AccountMove(models.Model):
             self.is_currency_manual = False
         else:
             self.is_currency_manual = True
+
+    # funcion para validar  que al seleccionar un proveedor identifique si es cliente de consumo y si tiene datos en el campo NIF
+
+    @api.onchange('partner_id')
+    def validate_nif(self):
+        msg = ("Please add value in the Identification Card/RNC field to the Selected User: %s" % self.partner_id.name)
+        action_error = {
+            'view_mode': 'form',
+            'name': 'Edit Contact',
+            'res_model': 'res.partner',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'res_id': int(self.partner_id.id),
+            'views': [[self.env.ref('base.view_partner_form').id, 'form']],
+        }
+        print(action_error)
+        if self.move_type == 'in_invoice':
+            if self.partner_id:
+                for rec in self:
+                    if rec.partner_id.l10n_do_dgii_tax_payer_type == 'non_payer':
+                        if rec.partner_id.vat:
+                            print("Validate")
+                        else:
+                            raise RedirectWarning(msg, action_error, "Add ID/RNC")

@@ -246,7 +246,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             this.l10n_latam_document_type = l10n_latam_document_type;
             this.l10n_latam_document_type_id = l10n_latam_document_type.id;
             this.save_to_db();
-            this.latam_document_type_changed();
+//            this.latam_document_type_changed();
         },
 
         get_latam_document_type: function () {
@@ -312,13 +312,10 @@ odoo.define('l10n_do_pos.models', function (require) {
             var current_order = self.pos.get_order();
 
             if (current_order) {
-                loaded.l10n_do_fiscal_number =
-                    current_order.l10n_do_fiscal_number;
+                loaded.l10n_do_fiscal_number = current_order.l10n_do_fiscal_number;
                 loaded.l10n_do_ncf_expiration_date = current_order.l10n_do_ncf_expiration_date;
-                loaded.l10n_latam_document_type_id =
-                    current_order.l10n_latam_document_type_id;
+                loaded.l10n_latam_document_type_id = current_order.l10n_latam_document_type_id;
                 loaded.to_invoice_backend = current_order.to_invoice_backend;
-
                 loaded.l10n_do_return_status = current_order.l10n_do_return_status;
                 loaded.l10n_do_origin_ncf = current_order.l10n_do_origin_ncf;
                 loaded.l10n_do_is_return_order = current_order.l10n_do_is_return_order;

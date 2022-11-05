@@ -69,9 +69,11 @@ class PosOrder(models.Model):
         if ui_order["to_invoice"]:
             res.update(
                 {
-                    "l10n_do_fiscal_number": ui_order[
-                        "l10n_do_fiscal_number"
-                    ],
+                    # TODO el numero de comprobante es generado por el sistema directo luego de crear la factura
+                    #  debemos de llamarlo para presentarlo en la factura del pos
+                    # "l10n_do_fiscal_number": ui_order[
+                    #     "l10n_do_fiscal_number"
+                    # ],
                     "l10n_latam_document_type_id": ui_order[
                         "l10n_latam_document_type_id"
                     ],
@@ -80,9 +82,10 @@ class PosOrder(models.Model):
                     "l10n_do_return_status": ui_order["l10n_do_return_status"],
                     "l10n_do_is_return_order": ui_order["l10n_do_is_return_order"],
                     "l10n_do_return_order_id": ui_order["l10n_do_return_order_id"],
-                    "l10n_do_ncf_expiration_date": ui_order[
-                        "l10n_do_ncf_expiration_date"
-                    ],
+                    # TODO la fecha de expiracion viene de la factura o del document_type - A REALIZAR
+                    # "l10n_do_ncf_expiration_date": ui_order[
+                    #     "l10n_do_ncf_expiration_date"
+                    # ],
                 }
             )
 
@@ -153,15 +156,14 @@ class PosOrder(models.Model):
         invoice_vals = super(PosOrder, self)._prepare_invoice_vals()
         documents = self.config_id.invoice_journal_id.l10n_latam_use_documents
         if documents and self.to_invoice:
-            invoice_vals["l10n_do_fiscal_number"] = self.l10n_do_fiscal_number
+            # invoice_vals["l10n_do_fiscal_number"] = self.l10n_do_fiscal_number
             invoice_vals[
                 "l10n_latam_document_type_id"
             ] = self.l10n_latam_document_type_id.id
             if invoice_vals["move_type"] == "out_refund":
                 invoice_vals["l10n_do_fiscal_number"] = False
                 del invoice_vals["l10n_latam_document_type_id"]
-            invoice_vals["ncf_expiration_date"] = self.l10n_do_ncf_expiration_date
-
+            # invoice_vals["ncf_expiration_date"] = self.l10n_do_ncf_expiration_date
             invoice_vals["l10n_do_origin_ncf"] = self.l10n_do_fiscal_number
 
             # a POS sale invoice NCF is always an internal sequence
@@ -170,7 +172,6 @@ class PosOrder(models.Model):
 
             if self.l10n_do_is_return_order:
                 invoice_vals["move_type"] = "out_refund"
-
         return invoice_vals
 
     @api.model

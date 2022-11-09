@@ -72,10 +72,10 @@ class PosOrder(models.Model):
                     # TODO el numero de comprobante es generado por el sistema directo luego de crear la factura
                     #  debemos de llamarlo para presentarlo en la factura del pos
                     # "l10n_do_fiscal_number": ui_order[
-                    #     "l10n_do_fiscal_number"
+                    #     "account_move.l10n_do_fiscal_number"
                     # ],
                     "l10n_latam_document_type_id": ui_order[
-                        "l10n_latam_document_type_id"
+                        "account_move.l10n_latam_document_type_id"
                     ],
                     "l10n_latam_use_documents": True,
                     "l10n_do_origin_ncf": ui_order["l10n_do_origin_ncf"],
@@ -153,6 +153,7 @@ class PosOrder(models.Model):
             order.payment_ids.unlink()
 
     def _prepare_invoice_vals(self):
+        # account_move
         invoice_vals = super(PosOrder, self)._prepare_invoice_vals()
         documents = self.config_id.invoice_journal_id.l10n_latam_use_documents
         if documents and self.to_invoice:

@@ -22,9 +22,10 @@
 odoo.define('l10n_do_pos.models', function (require) {
     "use strict";
 
-    var models = require('point_of_sale.models');
-    var core = require('web.core');
+// TODO para analizar estas variables que hacen
     var _t = core._t;
+    var models = require('point_of_sale.models');
+//    var _super_product = models.PosModel.prototype;
     var _super_order = models.Order.prototype;
     var _super_posmodel = models.PosModel.prototype;
     var rpc = require('web.rpc');
@@ -113,17 +114,22 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
     }, {
         model: 'account.move',
-        fields: ['l10n_do_fiscal_number', 'partner_id'],
+        fields: ['l10n_do_fiscal_number', 'partner_id', 'l10n_latam_document_type_id'],
         // TODO: CHECK WTF IS residual
         domain: function (self) {
             var today = new Date();
             var validation_date = new Date(today);
             validation_date.setDate(today.getDate() - self.config.l10n_do_credit_notes_number_of_days);
             //TODO: try analize correct date
-            return [
-                ['move_type', '=', 'out_refund'], ['payment_state', '!=', 'paid'],
-                ['invoice_date', '>', validation_date.toISOString()],
-            ];
+            // TODO Quitando el payment state el sistema paga de forma automatica y tambien existe ahora la cuenta por cobrar
+//            return [
+//                ['move_type', '=', 'out_refund'], ['payment_state', '!=', 'paid'],
+//                ['invoice_date', '>', validation_date.toISOString()],
+//            ];
+              return [
+                  ['move_type', '=', 'out_refund'],
+                  ['invoice_date', '>', validation_date.toISOString()],
+              ];
         },
         loaded: function (self, invoices) {
             var credit_note_by_id = {};

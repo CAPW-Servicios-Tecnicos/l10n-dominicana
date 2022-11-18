@@ -314,14 +314,13 @@
         </xpath>
 
         <xpath expr="//t[@t-as='amount_by_group']" position="after">
-            <t t-if="is_l10n_do_invoice" t-foreach="o.l10n_latam_tax_ids" t-as="tax_aml">
+             <t t-if="is_l10n_do_invoice" t-foreach="o.l10n_latam_tax_ids" t-as="tax_aml">
                 <t t-set="l10n_do_tax_amount" t-value="abs(tax_aml.debit or tax_aml.credit if o.currency_id == o.company_id.currency_id else tax_aml.amount_currency)"/>
-                <tr t-if="o.move_type == 'in_invoice'" style="">
+                <tr t-if="tax_aml.tax_line_id.amount > 0" style="">
                     <t>
                         <td><span class="text-nowrap" t-esc="tax_aml.tax_line_id.description"/></td>
                         <td class="text-right o_price_total">
-                            <span class="text-nowrap" t-esc="l10n_do_tax_amount"
-                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            <span class="text-nowrap" t-esc="l10n_do_tax_amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                         </td>
                     </t>
                 </tr>

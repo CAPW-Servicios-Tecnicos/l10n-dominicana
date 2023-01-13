@@ -3,6 +3,7 @@
 // © 2018 Francisco Peñaló <frankpenalo24@gmail.com>
 // © 2018 Kevin Jiménez <kevinjimenezlorenzo@gmail.com>
 // © 2019-2020 Raul  Ovalle <raulovallet@gmail.com>
+// © 2021-2022 Alejandro Capellan <acapellan@capw.com.do>
 
 // This file is part of NCF Manager.
 
@@ -22,10 +23,10 @@
 odoo.define('l10n_do_pos.models', function (require) {
     "use strict";
 
-// TODO para analizar estas variables que hacen
+    // TODO para analizar estas variables que hacen
     var _t = core._t;
     var models = require('point_of_sale.models');
-//    var _super_product = models.PosModel.prototype;
+    //    var _super_product = models.PosModel.prototype;
     var _super_order = models.Order.prototype;
     var _super_posmodel = models.PosModel.prototype;
     var rpc = require('web.rpc');
@@ -35,12 +36,12 @@ odoo.define('l10n_do_pos.models', function (require) {
 
     models.load_fields('account.journal', [
         'l10n_latam_use_documents',
-        'l10n_do_payment_form',
+        'l10n_do_payment_form'
     ]);
 
     models.load_models({
         model: 'account.journal',
-        fields: ['name', 'l10n_latam_use_documents',],
+        fields: ['name', 'l10n_latam_use_documents'],
         domain: function (self) {
             return [['id', '=', self.config.invoice_journal_id[0]]];
         },
@@ -55,8 +56,8 @@ odoo.define('l10n_do_pos.models', function (require) {
     //TODO: CHECK THIS
     models.load_models([{
         model: 'pos.order',
-        fields: ['id', 'name', 'date_order', 'partner_id', 'lines', 'pos_reference', 'account_move', 'amount_total',
-            'l10n_do_fiscal_number', 'payment_ids', 'l10n_do_return_order_id', 'l10n_do_is_return_order', 'l10n_do_return_status'],
+        fields: ['id', 'name', 'date_order', 'partner_id', 'lines', 'pos_reference', 'account_move', 'amount_total', 'l10n_latam_document_type_id',
+        'l10n_latam_document_number', 'payment_ids', 'l10n_do_return_order_id', 'l10n_do_is_return_order', 'l10n_do_return_status'],
         domain: function (self) {
             var domain_list = [];
 
@@ -91,7 +92,7 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
     }, {
         model: 'account.move',
-        fields: ['l10n_do_fiscal_number'],
+        fields: ['l10n_do_fiscal_number', 'l10n_latam_document_number'],
         domain: function (self) {
             var invoice_ids = self.db.pos_all_orders.map(function (order) {
                 return order.account_move[0];
@@ -114,7 +115,7 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
     }, {
         model: 'account.move',
-        fields: ['l10n_do_fiscal_number', 'partner_id', 'l10n_latam_document_type_id'],
+        fields: ['l10n_latam_document_number', 'partner_id'],
         // TODO: CHECK WTF IS residual
         domain: function (self) {
             var today = new Date();
@@ -127,7 +128,7 @@ odoo.define('l10n_do_pos.models', function (require) {
 //                ['invoice_date', '>', validation_date.toISOString()],
 //            ];
               return [
-                  ['move_type', '=', 'out_refund'],
+                  ['move_type', '=', 'out_refund'], ['payment_state', '!=', 'paid'],
                   ['invoice_date', '>', validation_date.toISOString()],
               ];
         },
@@ -200,7 +201,7 @@ odoo.define('l10n_do_pos.models', function (require) {
     }], {
         'after': 'pos.payment.method',
     });
-
+    // TODO Para manejos de la nota de credito
     models.load_models({
         model: 'l10n_latam.document.type',
         fields: [
@@ -239,7 +240,6 @@ odoo.define('l10n_do_pos.models', function (require) {
             this.l10n_latam_document_type =
                 self.pos.get_latam_document_type_by_prefix();
             this.to_invoice_backend = false;
-
             this.l10n_do_return_status = '-';
             this.l10n_do_origin_ncf = '';
             this.l10n_do_is_return_order = false;
@@ -252,7 +252,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             this.l10n_latam_document_type = l10n_latam_document_type;
             this.l10n_latam_document_type_id = l10n_latam_document_type.id;
             this.save_to_db();
-//            this.latam_document_type_changed();
+            this.latam_document_type_changed();
         },
 
         get_latam_document_type: function () {
@@ -272,34 +272,10 @@ odoo.define('l10n_do_pos.models', function (require) {
                     latam_document_type_name);
             }
         },
-        // TODO: check this is meaby its important
-        // init_from_JSON: function (json) {
-        //     var self = this;
-        //     _super_order.init_from_JSON.call(this, json);
-        //     this.l10n_do_return_status = json.l10n_do_return_status;
-        //     this.l10n_do_is_return_order = json.l10n_do_is_return_order;
-        //     this.l10n_do_return_order_id = json.l10n_do_return_order_id;
-        //     this.amount_total = json.amount_total;
-        //     this.to_invoice = json.to_invoice;
-        //     this.ncf = json.ncf;
-        //     this.ncf_control = json.ncf_control;
-        //     if (this.orderlines && $.isArray(this.orderlines.models)) {
-        //         this.orderlines.models.forEach(function (line) {
-        //             var productDefCode = line.product.default_code;
-        //             self.orderlineList.push(
-        //                 {
-        //                     line_id: line.id,
-        //                     product_id: line.product.id,
-        //                     product_name: (productDefCode && '[' + productDefCode + '] ' || '') + line.product.display_name,
-        //                     quantity: line.quantity,
-        //                     price: line.price,
-        //                 });
-        //         });
-        //     }
-        // },
+
         init_from_JSON: function(json) {
             _super_order.init_from_JSON.call(this, json);
-            this.l10n_do_fiscal_number = json.l10n_do_fiscal_number;
+            this.l10n_latam_document_number  = json.l10n_latam_document_number ;
             this.l10n_do_ncf_expiration_date = json.l10n_do_ncf_expiration_date
             this.l10n_latam_document_type_id = json.l10n_latam_document_type_id;
             this.to_invoice_backend = json.to_invoice_backend;
@@ -318,7 +294,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             var current_order = self.pos.get_order();
 
             if (current_order) {
-                loaded.l10n_do_fiscal_number = current_order.l10n_do_fiscal_number;
+                loaded.l10n_latam_document_number  = current_order.l10n_latam_document_number;
                 loaded.l10n_do_ncf_expiration_date = current_order.l10n_do_ncf_expiration_date;
                 loaded.l10n_latam_document_type_id = current_order.l10n_latam_document_type_id;
                 loaded.to_invoice_backend = current_order.to_invoice_backend;
@@ -377,7 +353,6 @@ odoo.define('l10n_do_pos.models', function (require) {
     });
 
     //TODO: CHECK AVOVE THIS PART
-
     var _super_orderline = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
         initialize: function (attr, options) {
@@ -433,19 +408,19 @@ odoo.define('l10n_do_pos.models', function (require) {
         },
 
         // TODO ya no se obtiene por sequence el ncf lo genera internamente el sistema
-//        get_l10n_latam_sequence_by_document_type_id:
-//            function (document_type_id) {
-//                var result = false;
-//                var self = this;
-//                self.l10n_latam_sequences.forEach(
-//                    function (latam_sequence) {
-//                        if (latam_sequence.l10n_latam_document_type_id[0] ===
-//                            document_type_id) {
-//                            result = latam_sequence;
-//                        }
-//                    });
-//                return result;
-//            },
+        get_l10n_latam_sequence_by_document_type_id:
+            function (document_type_id) {
+                var result = false;
+                var self = this;
+                self.l10n_latam_sequences.forEach(
+                    function (latam_sequence) {
+                        if (latam_sequence.l10n_latam_document_type_id[0] ===
+                            document_type_id) {
+                            result = latam_sequence;
+                        }
+                    });
+                return result;
+            },
 
         get_latam_document_type_by_l10n_do_ncf_type: function (l10n_do_ncf_type) {
             var self = this;

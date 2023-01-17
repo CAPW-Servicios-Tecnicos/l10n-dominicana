@@ -42,12 +42,12 @@
                                 <div>Asistido por: <t t-esc="receipt.cashier" /></div>
                             </div>
                         </t>
+                        <t t-if="env.pos.account_move">
+                            <t t-esc="env.pos.account_move"/>
+                        </t>
                     </div>
                     <br />
 
-<!--                    <strong>Factura de-->
-<!--                        <t t-esc="order.l10n_latam_document_type_id.name"/>-->
-<!--                    </strong>-->
 
                     <!-- Contact Information or Company Information -->
                     <div class="text-left pos-receipt-contact">

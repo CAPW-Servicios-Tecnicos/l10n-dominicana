@@ -69,6 +69,9 @@ class PosOrder(models.Model):
         help="Technical field used to hide/show fields regarding the localization",
     )
 
+     def _create_invoice(self, move_vals):
+
+
     @api.model
     def _order_fields(self, ui_order):
         """
@@ -154,7 +157,6 @@ class PosOrder(models.Model):
             order.payment_ids.unlink()
 
     def _prepare_invoice_vals(self):
-        # account_move
         invoice_vals = super(PosOrder, self)._prepare_invoice_vals()
         documents = self.config_id.invoice_journal_id.l10n_latam_use_documents
         if documents and self.to_invoice:

@@ -27,14 +27,14 @@
                     <br/>
                     <t t-esc="order.name"/>
                     <br/>
-                    <t t-if="order.l10n_latam_document_type and order.l10n_latam_document_number">
+                    <t t-if="order.l10n_latam_document_type and order.l10n_do_fiscal_number">
                         <div class="pos-receipt-center-align dotted_ticket_title">
                             <strong>Factura de
                                 <t t-esc="order.l10n_latam_document_type.name"/>
                             </strong>
                             <br/>
                             <strong>NCF:
-                                <t t-esc="order.l10n_latam_document_number"/>
+                                <t t-esc="order.l10n_do_fiscal_number"/>
                             </strong>
                             <t t-if="order.l10n_do_is_return_order">
                                 <br/>
@@ -56,7 +56,7 @@
                     <strong>Fecha....:</strong>
                     <t t-esc="order.formatted_validation_date"/>
                     <br/>
-                     <t t-set="client" t-value="widget.pos.get_client()"/>
+                    <t t-set="client" t-value="widget.pos.get_client()"/>
                     <t t-if="client">
                         <strong>Cliente..:</strong>
                         <t t-esc="client.name || ''"/>
@@ -179,18 +179,21 @@
                 <br/>
                 <div class="receipt-total">
                     <div class="pos-receipt-right-align">
-                        SubTotal: <t t-esc="widget.format_currency_no_symbol(order.get_total_without_tax())"/>
+                        SubTotal:
+                        <t t-esc="widget.format_currency_no_symbol(order.get_total_without_tax())"/>
                     </div>
                     <br/>
                     <t t-as="taxdetail" t-foreach="order.get_tax_details()">
                         <div class="pos-receipt-right-align">
-                            <span t-esc="taxdetail.name"/>: <span t-esc="widget.format_currency_no_symbol(taxdetail.amount)"/>
+                            <span t-esc="taxdetail.name"/>:
+                            <span t-esc="widget.format_currency_no_symbol(taxdetail.amount)"/>
                         </div>
                         <br/>
                     </t>
                     <t t-if="receipt.total_discount">
                         <td class="pos-receipt-right-align">
-                            Descuento: <span t-esc="widget.format_currency(receipt.total_discount)"/>
+                            Descuento:
+                            <span t-esc="widget.format_currency(receipt.total_discount)"/>
                         </td>
                         <br/>
                     </t>
@@ -198,7 +201,8 @@
                 <div class="emph">
                     <div class="pos-receipt-right-align">
                         <strong>
-                            Total: <span t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                            Total:
+                            <span t-esc="widget.format_currency(order.get_total_with_tax())"/>
                         </strong>
                     </div>
                     <br/>
@@ -219,23 +223,67 @@
                 <div class="receipt-change">
                     <t t-if="order.get_change() > 0">
                         <div class="pos-receipt-right-align">
-                            <strong>Cambio: </strong>
+                            <strong>Cambio:</strong>
                             <span t-esc="widget.format_currency_no_symbol(order.get_change())"/>
                         </div>
                         <br/>
                     </t>
                 </div>
                 <br/>
-                <div class='before-footer' />
+                <div class='before-footer'/>
                 <!-- Footer -->
-                <div t-if='receipt.footer_html'  class="pos-receipt-center-align">
+                <div t-if='receipt.footer_html' class="pos-receipt-center-align">
                     <t t-raw='receipt.footer_html'/>
                 </div>
 
-                <div t-if='!receipt.footer_html and receipt.footer'  class="pos-receipt-center-align" style="white-space:pre-line">
+                <div t-if='!receipt.footer_html and receipt.footer' class="pos-receipt-center-align"
+                     style="white-space:pre-line">
                     <t t-esc='receipt.footer'/>
                 </div>
             </div>
         </t>
+    </t>
+    <t t-name="OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@class='pos-receipt-contact']" position="inside">
+            <div>NCF:
+                <t t-esc='receipt.l10n_do_fiscal_number'/>
+            </div>
+        </xpath>
+    </t>
+    <t t-name="CashMovePopup" t-inherit="point_of_sale.CashMovePopup" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@class='popup drag-handle']" position="replace">
+            <div class="popup">
+                <main class="body">
+                    <div class="cash-move">
+                        <div class="input-amount">
+                            <span t-on-click="onClickButton('in')" class="input-type"
+                                  t-att-class="{ highlight: state.inputType == 'in' }">
+                                Cash In
+                            </span>
+                            <span t-on-click="onClickButton('out')" class="input-type"
+                                  t-att-class="{ highlight: state.inputType == 'out' }">
+                                Cash Out
+                            </span>
+                            <div>
+                                <input type="text" name="amount" t-model="state.inputAmount" t-ref="input-amount-ref"/>
+                                <span class="currency" t-esc="env.pos.currency.symbol"/>
+                            </div>
+                        </div>
+                        <textarea name="reason" t-model="state.inputReason" placeholder="Reason"></textarea>
+                        <span t-if="state.inputHasError" class="error-message">
+                            <t t-esc="errorMessage"/>
+                        </span>
+                    </div>
+                </main>
+                <footer class="footer">
+                    <div class="button confirm" t-on-click="confirm">
+                        Confirm
+                    </div>
+                    <div class="button cancel" t-on-click="cancel">
+                        <t t-esc="props.cancelText"/>
+                    </div>
+                </footer>
+            </div>
+        </xpath>
     </t>
 </templates>

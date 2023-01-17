@@ -10,17 +10,12 @@ _logger = logging.getLogger(__name__)
 class PosOrder(models.Model):
     _inherit = "pos.order"
 
-    l10n_latam_document_number = fields.Char(
+    l10n_do_fiscal_number = fields.Char(
         string="Fiscal Number",
     )
     l10n_latam_document_type_id = fields.Many2one(
         comodel_name="l10n_latam.document.type",
         string="Document Type",
-    )
-    l10n_latam_sequence_id = fields.Many2one(
-        comodel_name="ir.sequence",
-        string="Fiscal Sequence",
-        copy=False,
     )
     l10n_do_ncf_expiration_date = fields.Date(
         string="NCF expiration date",
@@ -71,13 +66,14 @@ class PosOrder(models.Model):
         Prepare the dict of values to create the new pos order.
         """
         res = super(PosOrder, self)._order_fields(ui_order)
-        if ui_order.get("l10n_latam_sequence_id", False) and ui_order["to_invoice"]:
+        if ui_order["to_invoice"]:
             res.update(
                 {
-                    "l10n_latam_sequence_id": ui_order["l10n_latam_sequence_id"],
-                    "l10n_latam_document_number": ui_order[
-                        "l10n_latam_document_number"
-                    ],
+                    # TODO el numero de comprobante es generado por el sistema directo luego de crear la factura
+                    #  debemos de llamarlo para presentarlo en la factura del pos
+                    # "l10n_do_fiscal_number": ui_order[
+                    #     "l10n_do_fiscal_number"
+                    # ],
                     "l10n_latam_document_type_id": ui_order[
                         "l10n_latam_document_type_id"
                     ],
@@ -86,9 +82,10 @@ class PosOrder(models.Model):
                     "l10n_do_return_status": ui_order["l10n_do_return_status"],
                     "l10n_do_is_return_order": ui_order["l10n_do_is_return_order"],
                     "l10n_do_return_order_id": ui_order["l10n_do_return_order_id"],
-                    "l10n_do_ncf_expiration_date": ui_order[
-                        "l10n_do_ncf_expiration_date"
-                    ],
+                    # TODO la fecha de expiracion viene de la factura o del document_type - A REALIZAR
+                    # "l10n_do_ncf_expiration_date": ui_order[
+                    #     "l10n_do_ncf_expiration_date"
+                    # ],
                 }
             )
 
@@ -122,8 +119,8 @@ class PosOrder(models.Model):
             # USUARIO)
             account_move_credit_note = (
                 self.env["pos.order"]
-                .search([("l10n_latam_document_number", "=", data["name"])])
-                .account_move
+                    .search([("l10n_do_fiscal_number", "=", data["name"])])
+                    .account_move
             )
             self.env["pos.order.payment.credit.note"].create(
                 {
@@ -159,25 +156,22 @@ class PosOrder(models.Model):
         invoice_vals = super(PosOrder, self)._prepare_invoice_vals()
         documents = self.config_id.invoice_journal_id.l10n_latam_use_documents
         if documents and self.to_invoice:
-            invoice_vals["l10n_latam_sequence_id"] = self.l10n_latam_sequence_id.id
-            invoice_vals["l10n_latam_document_number"] = self.l10n_latam_document_number
+            # invoice_vals["l10n_do_fiscal_number"] = self.l10n_do_fiscal_number
             invoice_vals[
                 "l10n_latam_document_type_id"
             ] = self.l10n_latam_document_type_id.id
-            if invoice_vals["type"] == "out_refund":
-                del invoice_vals["l10n_latam_sequence_id"]
-                invoice_vals["l10n_latam_document_number"] = False
+            if invoice_vals["move_type"] == "out_refund":
+                invoice_vals["l10n_do_fiscal_number"] = False
                 del invoice_vals["l10n_latam_document_type_id"]
-            invoice_vals["ncf_expiration_date"] = self.l10n_do_ncf_expiration_date
-
-            invoice_vals["l10n_do_origin_ncf"] = self.l10n_latam_document_number
+            # invoice_vals["ncf_expiration_date"] = self.l10n_do_ncf_expiration_date
+            invoice_vals["l10n_do_origin_ncf"] = self.l10n_do_fiscal_number
 
             # a POS sale invoice NCF is always an internal sequence
-            invoice_vals["is_l10n_do_internal_sequence"] = True
+            # invoice_vals["is_l10n_do_internal_sequence"] = True
+            # TODO Revisar el porque se marca como secuencia interna con este campo.
 
             if self.l10n_do_is_return_order:
-                invoice_vals["type"] = "out_refund"
-
+                invoice_vals["move_type"] = "out_refund"
         return invoice_vals
 
     @api.model
@@ -188,8 +182,8 @@ class PosOrder(models.Model):
             if not order["data"]["partner_id"]:
                 pos_config = (
                     self.env["pos.session"]
-                    .search([("id", "=", order["data"]["pos_session_id"])])
-                    .config_id
+                        .search([("id", "=", order["data"]["pos_session_id"])])
+                        .config_id
                 )
                 if not pos_config.l10n_do_default_partner_id:
                     raise UserError(
@@ -201,7 +195,7 @@ class PosOrder(models.Model):
 
     @api.model
     def order_search_from_ui(self, day_limit=0, config_id=0, session_id=0):
-        invoice_domain = [("type", "=", "out_invoice")]
+        invoice_domain = [("move_type", "=", "out_invoice")]
         pos_order_domain = []
 
         if day_limit:
@@ -230,10 +224,10 @@ class PosOrder(models.Model):
                 "pos_reference": order.pos_reference,
                 "account_move": [
                     order.account_move.id,
-                    order.account_move.l10n_latam_document_number,
+                    order.account_move.l10n_do_fiscal_number,
                 ],
                 "amount_total": order.amount_total,
-                "l10n_latam_document_number": order.account_move.l10n_latam_document_number,
+                "l10n_do_fiscal_number": order.account_move.l10n_do_fiscal_number,
                 "lines": [line.id for line in order.lines],
                 "payment_ids": [payment_id.id for payment_id in order.payment_ids],
                 "l10n_do_is_return_order": order.l10n_do_is_return_order,
@@ -267,8 +261,8 @@ class PosOrder(models.Model):
 
     def _is_pos_order_paid(self):
         if self.filtered(
-            lambda order: order.l10n_latam_use_documents
-            and order.l10n_do_is_return_order
+                lambda order: order.l10n_latam_use_documents
+                              and order.l10n_do_is_return_order
         ):
             return True
         return super(PosOrder, self)._is_pos_order_paid()
@@ -296,13 +290,13 @@ class PosOrder(models.Model):
         # TODO: CHECK WTF l10n_latam_document_number cant filter
         out_refund_invoice = (
             self.env["pos.order"]
-            .search(
+                .search(
                 [
-                    ("l10n_latam_document_number", "=", ncf),
+                    ("l10n_do_fiscal_number", "=", ncf),
                     ("l10n_do_is_return_order", "=", True),
                 ]
             )
-            .account_move
+                .account_move
         )
         return {
             "id": out_refund_invoice.id,

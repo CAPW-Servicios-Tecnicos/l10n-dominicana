@@ -306,6 +306,7 @@ class AccountMove(models.Model):
             l10n_do_total = (
                 l10n_do_amounts["itbis_taxable_amount"]
                 + l10n_do_amounts["itbis_amount"]
+                + l10n_do_amounts["itbis_exempt_amount"]
             )
 
             qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
@@ -392,7 +393,7 @@ class AccountMove(models.Model):
         ):
             raise AccessError(_("You are not allowed to cancel Fiscal Invoices"))
 
-        if fiscal_invoice:
+        if fiscal_invoice and not self.env.context.get("skip_cancel_wizard", False):
             action = self.env.ref(
                 "l10n_do_accounting.action_account_move_cancel"
             ).read()[0]
@@ -741,11 +742,11 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_prefix = sequence[:3]
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
-    def _get_last_sequence(self, relaxed=False, lock=True):
 
+    def _get_last_sequence(self, relaxed=False, with_prefix=None, lock=True):
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
-                relaxed=relaxed, lock=lock
+                relaxed=relaxed, with_prefix=with_prefix, lock=lock
             )
 
         self.ensure_one()

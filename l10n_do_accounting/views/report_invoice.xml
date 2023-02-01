@@ -94,16 +94,7 @@
 <!--                    <strong>RNC:</strong>-->
 <!--                    <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>-->
 <!--                </span>-->
-<!--                <br/>-->
-<!--                <span>-->
-<!--                    <strong>Fecha Emisión:</strong>-->
-<!--                    <span t-field="o.invoice_date"/>-->
-<!--                </span>-->
-<!--                <br/>-->
-<!--                <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">-->
-<!--                    <strong>Vence:</strong>-->
-<!--                    <span t-field="o.invoice_date_due"/>-->
-<!--                </span>-->
+
             </div>
 
             <!--Fiscal info-->
@@ -117,6 +108,7 @@
                 </strong>
                 <span t-field="o.l10n_do_fiscal_number"/>
                 <br/>
+
                 <span t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
                     <strong>NCF modificado:</strong>
                     <span t-field="o.l10n_do_origin_ncf"/>
@@ -141,6 +133,18 @@
                     <span id="ecf_exp_date"
                           t-field="o.l10n_do_ncf_expiration_date"/>
                 </span>
+                <br/>
+                <br/>
+                 <span>
+                    <strong>Fecha Emisión:</strong>
+                    <span t-field="o.invoice_date"/>
+                </span>
+                <br/>
+                <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
+                    <strong>Vence:</strong>
+                    <span t-field="o.invoice_date_due"/>
+                </span>
+                <br/>
             </div>
         </div>
         <br/>

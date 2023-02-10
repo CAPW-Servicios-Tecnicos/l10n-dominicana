@@ -13,3 +13,8 @@ class ResConfigSettings(models.TransientModel):
         string='Manual Change Currency',
         related='company_id.manual_change_currency',
         readonly=False,)
+
+    view_discount_in_account = fields.Boolean(
+        string='Visualizar descuentos',
+        config_parameter='l10n_dominicana.view_discount_in_account',
+        required=False)

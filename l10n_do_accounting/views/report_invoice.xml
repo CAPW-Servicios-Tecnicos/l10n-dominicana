@@ -275,6 +275,17 @@
         </tr>
 
         <!-- Total = subtotal + impuestos + retenciones -->
+        <t t-if="o.total_descontado > 0">
+            <tr class="border-black">
+                <td>
+                    <strong>Total Descontado</strong>
+                </td>
+                 <td class="text-right">
+                    <span class="text-nowrap" t-esc="o.total_descontado"
+                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                </td>
+            </tr>
+        </t>
         <tr class="border-black o_total">
             <td>
                 <strong>Total</strong>

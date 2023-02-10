@@ -4,7 +4,7 @@
         Este módulo implementa la administración y gestión de los números de
          comprobantes fiscales para el cumplimento de la norma 06-18 de la
          Dirección de Impuestos Internos en la República Dominicana.""",
-    "author": "iterativo LLC, " "Indexa",
+    "author": "iterativo LLC, " "Indexa, " "CAPW Servicios Tecnicos",
     "category": "Localization",
     "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",

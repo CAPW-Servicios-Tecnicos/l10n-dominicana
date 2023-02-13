@@ -123,6 +123,7 @@ class AccountMove(models.Model):
 
     def calculo_total_descontado(self):
         total = 0
+        self.total_descontado = 0.00
         params = self.env['ir.config_parameter'].search([('key', '=', 'l10n_dominicana.view_discount_in_account')])
         if params:
             for rec in self:

@@ -98,7 +98,7 @@
                 <t t-esc='order.pos_reference'/>
             </td>
             <td>
-                <t t-esc='order.l10n_do_fiscal_number'/>
+                <t t-esc='order.l10n_latam_document_number'/>
             </td>
             <td>
                 <t t-esc="order.partner_id[1] || '-'"/>

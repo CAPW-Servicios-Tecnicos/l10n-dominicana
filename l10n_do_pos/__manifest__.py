@@ -18,7 +18,7 @@
     'assets': {
         'point_of_sale.assets': [
             'l10n_do_pos/static/src/js/models.js',
-            'l10n_do_pos/static/src/js/screens.js',
+            # 'l10n_do_pos/static/src/js/PaymentScreen.js',
             'l10n_do_pos/static/src/css/pos.css',
         ],
         'web.assets_qweb': [

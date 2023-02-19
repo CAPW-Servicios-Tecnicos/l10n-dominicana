@@ -24,13 +24,15 @@
 odoo.define('l10n_do_pos.screens', function (require) {
     "use strict";
 
-    var screens = require('point_of_sale.screens');
-    var gui = require('point_of_sale.gui');
-    var popups = require('point_of_sale.popups');
+// TODO componentes no existen hay que validar cuales son los nuevos en odoo V15
+//    var screens = require('point_of_sale.screens');
+//    var gui = require('point_of_sale.gui');
+//    var popups = require('point_of_sale.popups');
+
+    const PaymentScreen = require('point_of_sale.PaymentScreen');
     var core = require('web.core');
     var rpc = require('web.rpc');
     var QWeb = core.qweb;
-    var _t = core._t;
 
     var QueryInvoicesButton = screens.ActionButtonWidget.extend({
         template: 'QueryInvoicesButton',

@@ -69,9 +69,6 @@ class PosOrder(models.Model):
         help="Technical field used to hide/show fields regarding the localization",
     )
 
-     def _create_invoice(self, move_vals):
-
-
     @api.model
     def _order_fields(self, ui_order):
         """

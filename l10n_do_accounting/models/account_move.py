@@ -247,14 +247,15 @@ class AccountMove(models.Model):
 
     @api.depends('l10n_latam_document_number')
     def _block_duplicate_fiscal_number_supplier(self):
-        invs = self.env['account.move'].search([("move_type", "=", "in_invoice"),
-                                                ("l10n_latam_use_documents", "=", True),
-                                                ("l10n_do_fiscal_number", "=", self.l10n_latam_document_number),
-                                                ("partner_id", "=", self.partner_id.id)], limit=1)
-        if invs:
-            raise ValidationError(
-                _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note: "
-                  "%s") % self.l10n_latam_document_number)
+        for invoice in self:
+            invs = self.env['account.move'].search([("move_type", "=", "in_invoice"),
+                                                    ("l10n_latam_use_documents", "=", True),
+                                                    ("l10n_do_fiscal_number", "=", invoice.l10n_latam_document_number),
+                                                    ("partner_id", "=", invoice.partner_id.id)], limit=1)
+            if invs:
+                raise ValidationError(
+                    _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note: "
+                      "%s") % invoice.l10n_latam_document_number)
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):
@@ -740,7 +741,6 @@ class AccountMove(models.Model):
             matching = re.match(regex, sequence)
             record.l10n_do_sequence_prefix = sequence[:3]
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
-
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None, lock=True):
         if not self._context.get("is_l10n_do_seq", False):

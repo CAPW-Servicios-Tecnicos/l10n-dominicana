@@ -7,4 +7,4 @@ from . import account_move
 from . import monkey_patch
 from . import account_move_line
 from . import account_payment
-from . import res_currency_rate
+# from . import res_currency_rate

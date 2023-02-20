@@ -7,37 +7,51 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@id='invoicing_settings']" position="after">
-                <div id="l10n_do_title" attrs="{'invisible': True}">
+                <div id="l10n_do_title" attrs="{'invisible': False}">
                     <h2>Dominican Localization</h2>
                 </div>
                 <div id="l10n_do_section" class="row mt16 o_settings_container"
-                     groups="account.group_account_manager"/>
+                     groups="account.group_account_manager">
+                    <div class="row mt16 o_settings_container" name="catalog_setting_container">
+                        <div class="col-12 col-lg-6 o_setting_box" id="account_options">
+                            <div class="o_setting_left_pane">
+                                <field name="view_discount_in_account"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="view_discount_in_account"/>
+                                <div class="text-muted">
+                                    Poder vizualizar los descuentos aplicados a la factura en el reporte
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </xpath>
-<!--            @TODO trabajando en el proceso de valor de moneda en factura y en pagos manual y la moneda financiera.-->
-<!--            <xpath expr="//div[@id='main_currency']" position="after">-->
-<!--                <div class="col-12 col-lg-6 o_setting_box">-->
-<!--                    <div class="o_setting_left_pane">-->
-<!--                        <field name="financial_currency" widget="upgrade_boolean"/>-->
-<!--                    </div>-->
-<!--                    <div class="o_setting_right_pane">-->
-<!--                        <label for="financial_currency"/>-->
-<!--                        <div class="text-muted">-->
-<!--                            Financial Currency Change-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="col-12 col-lg-6 o_setting_box">-->
-<!--                    <div class="o_setting_left_pane">-->
-<!--                        <field name="manual_change_currency" widget="upgrade_boolean"/>-->
-<!--                    </div>-->
-<!--                    <div class="o_setting_right_pane">-->
-<!--                        <label for="manual_change_currency"/>-->
-<!--                        <div class="text-muted">-->
-<!--                            Manual Currency Change for Invoice-->
-<!--                         </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </xpath>-->
+            <!--            @TODO trabajando en el proceso de valor de moneda en factura y en pagos manual y la moneda financiera.-->
+            <!--            <xpath expr="//div[@id='main_currency']" position="after">-->
+            <!--                <div class="col-12 col-lg-6 o_setting_box">-->
+            <!--                    <div class="o_setting_left_pane">-->
+            <!--                        <field name="financial_currency" widget="upgrade_boolean"/>-->
+            <!--                    </div>-->
+            <!--                    <div class="o_setting_right_pane">-->
+            <!--                        <label for="financial_currency"/>-->
+            <!--                        <div class="text-muted">-->
+            <!--                            Financial Currency Change-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--                <div class="col-12 col-lg-6 o_setting_box">-->
+            <!--                    <div class="o_setting_left_pane">-->
+            <!--                        <field name="manual_change_currency" widget="upgrade_boolean"/>-->
+            <!--                    </div>-->
+            <!--                    <div class="o_setting_right_pane">-->
+            <!--                        <label for="manual_change_currency"/>-->
+            <!--                        <div class="text-muted">-->
+            <!--                            Manual Currency Change for Invoice-->
+            <!--                         </div>-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--            </xpath>-->
         </field>
     </record>
 

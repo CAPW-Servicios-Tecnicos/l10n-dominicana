@@ -248,9 +248,9 @@ def migrate_fiscal_sequences(env):
                 ]
             )
 
-            fiscal_sequences = env["ir.sequence"].search(
-                [("l10n_latam_journal_id", "in", fiscal_journals.ids)]
-            )
+            # fiscal_sequences = env["ir.sequence"].search(
+            #     [("l10n_latam_journal_id", "in", fiscal_journals.ids)]
+            # )
 
             sale_fiscal_type_dict = {
                 "minor": "13",
@@ -278,19 +278,19 @@ def migrate_fiscal_sequences(env):
                 % company.id
             )
 
-            for fiscal_type, number_next in env.cr.fetchall():
-
-                sequence_ids = fiscal_sequences.filtered(
-                    lambda fs: fs.l10n_latam_document_type_id.id
-                    == dict(get_document_type_dict(env))[
-                        sale_fiscal_type_dict[fiscal_type]
-                    ]
-                )
-                if sequence_ids and sequence_ids[0].number_next_actual < number_next:
-                    _logger.info(
-                        "Setting up %s number_next_actual" % sequence_ids[0].name
-                    )
-                    sequence_ids.write({"number_next_actual": number_next})
+            # for fiscal_type, number_next in env.cr.fetchall():
+            #
+            #     sequence_ids = fiscal_sequences.filtered(
+            #         lambda fs: fs.l10n_latam_document_type_id.id
+            #         == dict(get_document_type_dict(env))[
+            #             sale_fiscal_type_dict[fiscal_type]
+            #         ]
+            #     )
+            #     if sequence_ids and sequence_ids[0].number_next_actual < number_next:
+            #         _logger.info(
+            #             "Setting up %s number_next_actual" % sequence_ids[0].name
+            #         )
+            #         sequence_ids.write({"number_next_actual": number_next})
 
 
 def migrate_partner_fields(env):
@@ -340,5 +340,5 @@ def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
     migrate_invoice_fields(env)
-    migrate_fiscal_sequences(env)
+    # migrate_fiscal_sequences(env)
     migrate_partner_fields(env)

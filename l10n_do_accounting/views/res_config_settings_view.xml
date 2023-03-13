@@ -12,16 +12,25 @@
                 </div>
                 <div id="l10n_do_section" class="row mt16 o_settings_container"
                      groups="account.group_account_manager">
-                    <div class="row mt16 o_settings_container" name="catalog_setting_container">
-                        <div class="col-12 col-lg-6 o_setting_box" id="account_options">
-                            <div class="o_setting_left_pane">
-                                <field name="view_discount_in_account"/>
+                    <div class="col-12 col-lg-6 o_setting_box" id="account_options">
+                        <div class="o_setting_left_pane">
+                            <field name="view_discount_in_account"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="view_discount_in_account"/>
+                            <div class="text-muted">
+                                Poder vizualizar los descuentos aplicados a la factura en el reporte
                             </div>
-                            <div class="o_setting_right_pane">
-                                <label for="view_discount_in_account"/>
-                                <div class="text-muted">
-                                    Poder vizualizar los descuentos aplicados a la factura en el reporte
-                                </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="view_delivered_received" widget="upgrade_boolean"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="view_delivered_received"/>
+                            <div class="text-muted">
+                                Received by/Delivered by on invoice reports
                             </div>
                         </div>
                     </div>

@@ -24,6 +24,26 @@ msgid "%s is not a stored field"
 msgstr "%s no es un campo almacenado"
 
 #. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
+msgid "DELIVERED BY"
+msgstr "ENTREGADO POR"
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
+msgid "RECEIVED BY"
+msgstr "RECIBIDO POR"
+
+#. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__view_delivered_received
+msgid "Delivered/Received"
+msgstr "Entregado/Recibido"
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.res_config_settings_view_form
+msgid "Received by/Delivered by on invoice reports"
+msgstr "Recibido por/Entregado por en los informes de facturas"
+
+#. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/models/account_move.py:0
 #, python-format
 msgid "01 - Operational Incomes"

@@ -121,6 +121,7 @@ class AccountMove(models.Model):
     manual_currency_rate = fields.Float(string="Currency Rate")
     is_currency_manual = fields.Boolean(string="is_currency_manual", )
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
+    received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
 
     def calculo_total_descontado(self):
         total = 0
@@ -135,6 +136,12 @@ class AccountMove(models.Model):
                         rec.total_descontado = total - amount
         else:
             self.total_descontado = 0.00
+
+    def get_received_delivered(self):
+        self.received_delivered = False
+        params = self.env['ir.config_parameter'].search([('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        if params:
+            self.received_delivered = True
 
     def init(self):
 
@@ -170,7 +177,7 @@ class AccountMove(models.Model):
 
     @api.model
     def _name_search(
-        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
+            self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         args = args or []
         domain = []

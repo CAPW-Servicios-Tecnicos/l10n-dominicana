@@ -329,6 +329,29 @@
                t-value="o.l10n_latam_use_documents and o.company_id.country_id and o.country_code == 'DO'"/>
         </t>
 
+        <xpath expr="//div[@id='qrcode']" position="after">
+            <t t-if="o.received_delivered">
+                <br/>
+                <br/>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <p>____________________________________________</p>
+                    </div>
+                    <div class="col-6 text-center">
+                        <p>____________________________________________</p>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <p>RECEIVED BY</p>
+                    </div>
+                    <div class="col-6 text-center">
+                        <p>DELIVERED BY</p>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
         <t t-set="address" position="replace"/>
         <xpath expr="//h2" position="replace"/>
 

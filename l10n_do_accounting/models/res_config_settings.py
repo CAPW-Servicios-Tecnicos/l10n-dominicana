@@ -18,3 +18,8 @@ class ResConfigSettings(models.TransientModel):
         string='Visualizar descuentos',
         config_parameter='l10n_dominicana.view_discount_in_account',
         required=False)
+    
+    view_delivered_received = fields.Boolean(
+        string='Delivered/Received',
+        config_parameter='l10n_do_accounting.view_delivered_received',
+        required=False)

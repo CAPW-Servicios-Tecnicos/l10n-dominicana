@@ -23,3 +23,13 @@ class ResConfigSettings(models.TransientModel):
         string='Delivered/Received',
         config_parameter='l10n_do_accounting.view_delivered_received',
         required=False)
+    
+    label_one_report = fields.Char(
+        string='Show name in report label left',
+        config_parameter='l10n_do_accounting.label_one_report',
+        required=False)
+
+    label_one_report_2 = fields.Char(
+        string='Show name in report label right',
+        config_parameter='l10n_do_accounting.label_one_report_2',
+        required=False)

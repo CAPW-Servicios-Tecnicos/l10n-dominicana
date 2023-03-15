@@ -33,6 +33,19 @@
                                 Received by/Delivered by on invoice reports
                             </div>
                         </div>
+                        <br/>
+                        <div class="o_setting_right_pane" attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
+                            <span class="o_form_label">Show name in report left</span>
+                            <div class="text-muted">
+                                <field name="label_one_report"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane" attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
+                            <span class="o_form_label">Show name in report right</span>
+                            <div class="text-muted">
+                                <field name="label_one_report_2"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </xpath>

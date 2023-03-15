@@ -13,6 +13,9 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="total_descontado" invisible="1"/>
                 <field name="received_delivered" invisible="1"/>
+                <field name="label_report_one" invisible="0"/>
+                <field name="label_report_two" invisible="0"/>
+
             </xpath>
             <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
                 <div class="alert alert-warning"

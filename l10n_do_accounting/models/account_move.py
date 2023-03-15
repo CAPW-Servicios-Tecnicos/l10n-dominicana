@@ -122,6 +122,14 @@ class AccountMove(models.Model):
     is_currency_manual = fields.Boolean(string="is_currency_manual", )
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
     received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
+    label_report_one = fields.Char(
+        string='Label_report_one',
+        compute='get_received_delivered',
+        required=False)
+    label_report_two = fields.Char(
+        string='Label_report_two',
+        compute='get_received_delivered',
+        required=False)
 
     def calculo_total_descontado(self):
         total = 0
@@ -139,9 +147,16 @@ class AccountMove(models.Model):
 
     def get_received_delivered(self):
         self.received_delivered = False
+        self.label_report_one = ''
+        self.label_report_two = ''
         params = self.env['ir.config_parameter'].search([('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        params_label_one = self.env['ir.config_parameter'].search([('key', '=', 'l10n_do_accounting.label_one_report')])
+        params_label_two = self.env['ir.config_parameter'].search(
+            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
         if params:
             self.received_delivered = True
+            self.label_report_one = params_label_one.value
+            self.label_report_two = params_label_two.value
 
     def init(self):
 

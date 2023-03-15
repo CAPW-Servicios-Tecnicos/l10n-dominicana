@@ -10,6 +10,7 @@
                 'invisible': ['|', ('type','not in',('cash','bank')), ('country_code', '!=', 'DO')],
                 'required': [('type','in',('cash','bank')), ('country_code', '!=', 'DO')]
                 }"/>
+                <field name="get_value" string="Limite de Comprobantes" attrs="{'invisible': [('l10n_latam_use_documents', '=', False)]}"/>
             </xpath>
             <xpath expr="//page[@name='bank_account']/group" position="inside">
                 <group name="document_types" string="Document Types"
@@ -20,6 +21,7 @@
                             <field name="journal_id" invisible="1"/>
                             <field name="l10n_latam_document_type_id"/>
                             <field name="l10n_do_ncf_expiration_date"/>
+                            <field name="l10n_do_limit_vouchers" string="Limit of Compro.."/>
                         </tree>
                     </field>
                 </group>

@@ -28,6 +28,11 @@ class AccountJournal(models.Model):
         copy=False,
     )
 
+    get_value = fields.Char(
+        string='Get_value',
+        store=True,
+        required=False)
+
     def _get_all_ncf_types(self, types_list, invoice=False):
         """
         Include ECF type prefixes if company is ECF issuer
@@ -43,10 +48,10 @@ class AccountJournal(models.Model):
             return types_list + ecf_types
 
         if (
-            invoice.is_purchase_document()
-            and invoice.partner_id.l10n_do_dgii_tax_payer_type
-            and invoice.partner_id.l10n_do_dgii_tax_payer_type
-            in ("non_payer", "foreigner")
+                invoice.is_purchase_document()
+                and invoice.partner_id.l10n_do_dgii_tax_payer_type
+                and invoice.partner_id.l10n_do_dgii_tax_payer_type
+                in ("non_payer", "foreigner")
         ):
             # Return ncf/ecf types depending on company ECF issuing status
             return ecf_types if self.company_id.l10n_do_ecf_issuer else types_list
@@ -98,8 +103,8 @@ class AccountJournal(models.Model):
                 [
                     value
                     for dic in ncf_types_data[
-                        "issued" if self.type == "sale" else "received"
-                    ].values()
+                    "issued" if self.type == "sale" else "received"
+                ].values()
                     for value in dic
                 ]
             )
@@ -130,9 +135,9 @@ class AccountJournal(models.Model):
             ncf_types = ["credit_note"]
 
         if (
-            invoice
-            and invoice.debit_origin_id
-            or self.env.context.get("internal_type") == "debit_note"
+                invoice
+                and invoice.debit_origin_id
+                or self.env.context.get("internal_type") == "debit_note"
         ):
             return ["debit_note", "e-debit_note"]
 
@@ -150,8 +155,8 @@ class AccountJournal(models.Model):
         self.ensure_one()
 
         if (
-            not self.l10n_latam_use_documents
-            or self.company_id.country_id != self.env.ref("base.do")
+                not self.l10n_latam_use_documents
+                or self.company_id.country_id != self.env.ref("base.do")
         ):
             return
 
@@ -171,8 +176,8 @@ class AccountJournal(models.Model):
         ]
         documents = self.env["l10n_latam.document.type"].search(domain)
         for document in documents.filtered(
-            lambda doc: doc.l10n_do_ncf_type
-            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
+                lambda doc: doc.l10n_do_ncf_type
+                            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
         ):
             document_types |= (
                 self.env["l10n_do.account.journal.document_type"]
@@ -199,6 +204,12 @@ class AccountJournal(models.Model):
                 rec._l10n_do_create_document_types()
         return res
 
+    @api.onchange('get_value')
+    def set_value(self):
+        for rec in self.l10n_do_document_type_ids:
+            print(rec)
+            rec.l10n_do_limit_vouchers = self.get_value
+
 
 class AccountJournalDocumentType(models.Model):
     _name = "l10n_do.account.journal.document_type"
@@ -207,6 +218,11 @@ class AccountJournalDocumentType(models.Model):
     journal_id = fields.Many2one(
         "account.journal", "Journal", required=True, readonly=True
     )
+
+    l10n_do_limit_vouchers = fields.Char(
+        string='L10n_do_limit_vouchers',
+        required=False)
+
     l10n_latam_document_type_id = fields.Many2one(
         "l10n_latam.document.type", "Document type", required=True, readonly=True
     )
@@ -218,3 +234,10 @@ class AccountJournalDocumentType(models.Model):
     company_id = fields.Many2one(
         string="Company", related="journal_id.company_id", readonly=True
     )
+
+    def write(self, values):
+        res = super(AccountJournalDocumentType, self).write(values)
+        for rec in self:
+            if rec.l10n_do_limit_vouchers:
+                rec.journal_id.get_value = rec.l10n_do_limit_vouchers
+        return res

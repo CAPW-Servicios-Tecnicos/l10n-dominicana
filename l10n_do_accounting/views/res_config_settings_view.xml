@@ -30,7 +30,7 @@
                         <div class="o_setting_right_pane">
                             <label for="view_delivered_received"/>
                             <div class="text-muted">
-                                Received by/Delivered by on invoice reports
+                                Ability to add manual signatures to the report
                             </div>
                         </div>
                         <br/>

@@ -150,6 +150,28 @@ class AccountMove(models.Model):
                 for line in itbis_taxed_product_lines
                 if any(True for tax in line.tax_ids if tax.amount == 0)
             ),
+            "company_invoice_total": abs(self.amount_untaxed_signed)
+            + sum(
+                (
+                    line.debit or line.credit
+                    if self.currency_id == self.company_id.currency_id
+                    else abs(line.amount_currency)
+                )
+                for line in self.line_ids.filtered(
+                    lambda l: l.tax_line_id and l.tax_line_id.amount > 0
+                )
+            ),
+            "invoice_total": abs(self.amount_untaxed)
+            + sum(
+                (
+                    line.debit or line.credit
+                    if self.currency_id == self.company_id.currency_id
+                    else abs(line.amount_currency)
+                )
+                for line in self.line_ids.filtered(
+                    lambda l: l.tax_line_id and l.tax_line_id.amount > 0
+                )
+            ),
         }
 
     @api.depends(
@@ -157,7 +179,7 @@ class AccountMove(models.Model):
         "l10n_latam_document_type_id.l10n_do_ncf_type",
     )
     def _compute_is_ecf_invoice(self):
-        for invoice in self:
+        for invoice in self.filtered(lambda inv: inv.state == "draft"):
             invoice.is_ecf_invoice = (
                 invoice.l10n_latam_country_code == "DO"
                 and invoice.l10n_latam_document_type_id
@@ -172,7 +194,7 @@ class AccountMove(models.Model):
     def _compute_l10n_latam_document_type(self):
         super(AccountMove, self)._compute_l10n_latam_document_type()
 
-        for invoice in self:
+        for invoice in self.filtered(lambda inv: inv.state == "draft"):
             invoice.is_l10n_do_internal_sequence = invoice.type in (
                 "out_invoice",
                 "out_refund",
@@ -187,14 +209,19 @@ class AccountMove(models.Model):
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):
-        for invoice in self:
-            ecf_invoices = self.search(
-                [
-                    ("is_ecf_invoice", "=", True),
-                    ("is_l10n_do_internal_sequence", "=", True),
-                ],
-                limit=1,
-            )
+        ecf_invoices = self.search(
+            [
+                ("is_ecf_invoice", "=", True),
+                ("is_l10n_do_internal_sequence", "=", True),
+            ],
+            limit=1,
+        )
+
+        # first set all invoices l10n_do_company_in_contingency = False
+        self.write({"l10n_do_company_in_contingency": False})
+
+        # then get draft invoices and do the thing
+        for invoice in self.filtered(lambda inv: inv.state == "draft"):
             invoice.l10n_do_company_in_contingency = bool(
                 ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
             )
@@ -207,6 +234,7 @@ class AccountMove(models.Model):
             lambda i: i.is_ecf_invoice
             and i.is_l10n_do_internal_sequence
             and i.l10n_do_ecf_security_code
+            and i.state == "posted"
         )
 
         for invoice in l10n_do_ecf_invoice:
@@ -236,12 +264,9 @@ class AccountMove(models.Model):
                     invoice.invoice_date or fields.Date.today()
                 ).strftime("%d-%m-%Y")
 
-            l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
-            l10n_do_total = (
-                l10n_do_amounts["itbis_taxable_amount"]
-                + l10n_do_amounts["itbis_amount"]
-                + l10n_do_amounts["itbis_exempt_amount"]
-            )
+            l10n_do_total = invoice._get_l10n_do_amounts(company_currency=True)[
+                "company_invoice_total"
+            ]
 
             qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
                 "."

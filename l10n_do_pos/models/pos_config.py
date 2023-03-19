@@ -4,7 +4,6 @@ from odoo.exceptions import UserError, ValidationError
 
 class PosConfig(models.Model):
     _inherit = "pos.config"
-
     l10n_do_default_partner_id = fields.Many2one(
         "res.partner",
         string="Default partner",

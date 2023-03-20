@@ -343,10 +343,10 @@
                 </div>
                 <div class="row text-center">
                     <div class="col-6">
-                        <p style="text-transform: uppercase;" t-field="o.label_report_one"/>
+                        <p  t-field="o.label_report_one"/>
                     </div>
                     <div class="col-6 text-center">
-                        <p style="text-transform: uppercase;" t-field="o.label_report_two"/>
+                        <p  t-field="o.label_report_two"/>
                     </div>
                 </div>
             </t>

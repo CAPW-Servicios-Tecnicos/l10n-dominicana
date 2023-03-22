@@ -110,15 +110,13 @@ class AccountMove(models.Model):
         index=True,
         tracking=True,
         copy=False,
-        help="Stored field equivalent of l10n_latam_document number",
+        help="Stored field equivalent of l10n_latam_document_number",
     )
     l10n_do_ecf_edi_file = fields.Binary("ECF XML File", copy=False, readonly=True)
     l10n_do_ecf_edi_file_name = fields.Char(
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
-    manual_currency_rate = fields.Float(string="Currency Rate")
-    is_currency_manual = fields.Boolean(string="is_currency_manual", )
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
 
     def calculo_total_descontado(self):
@@ -269,7 +267,8 @@ class AccountMove(models.Model):
                                                     ("partner_id", "=", invoice.partner_id.id)], limit=1)
             if invs:
                 raise ValidationError(
-                    _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note: "
+                    _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit "
+                      "note: "
                       "%s") % invoice.l10n_latam_document_number)
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
@@ -868,12 +867,4 @@ class AccountMove(models.Model):
             )
         return super(AccountMove, self).unlink()
 
-    @api.onchange('currency_id')
-    def compute_manual_currency_rate(self):
-        currency_company = self.company_id.currency_id
-        currency_id = self.currency_id
-        manual_currency_active = self.company_id.manual_change_currency
-        if manual_currency_active and currency_company != currency_id:
-            self.is_currency_manual = False
-        else:
-            self.is_currency_manual = True
+

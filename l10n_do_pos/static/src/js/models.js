@@ -90,7 +90,7 @@ odoo.define('l10n_do_pos.models', function (require) {
             });
             self.db.pos_all_orders.forEach(function (order, ix) {
                 var invoice_id = invoice_by_id[order.account_move[0]];
-                var l10n_latam_document_number = invoice_id && invoice_id.l10n_do_fiscal_number;
+                var l10n_latam_document_number = invoice_id && invoice_id.l10n_latam_document_number;
                 self.db.pos_all_orders[ix].l10n_latam_document_number = l10n_latam_document_number;
                 self.db.order_by_id[order.id].l10n_latam_document_number = l10n_latam_document_number;
             });

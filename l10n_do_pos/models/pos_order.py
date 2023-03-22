@@ -25,6 +25,7 @@ class PosOrder(models.Model):
         default=get_default_document_type,
     )
 
+
     # l10n_latam_sequence_id = fields.Many2one(
     #     comodel_name="ir.sequence",
     #     string="Fiscal Sequence",
@@ -272,8 +273,8 @@ class PosOrder(models.Model):
 
     def _is_pos_order_paid(self):
         if self.filtered(
-                lambda order: order.l10n_latam_use_documents
-                              and order.l10n_do_is_return_order
+            lambda order: order.l10n_latam_use_documents
+            and order.l10n_do_is_return_order
         ):
             return True
         return super(PosOrder, self)._is_pos_order_paid()
@@ -326,18 +327,17 @@ class PosOrder(models.Model):
 
         if pos_order_id:
             if pos_order_id.account_move:
-                pos_order_id.write({'l10n_latam_document_number': pos_order_id.account_move.l10n_do_fiscal_number})
-                return pos_order_id.account_move.l10n_do_fiscal_number
+                pos_order_id.write({'l10n_latam_document_number': pos_order_id.account_move.l10n_latam_document_number})
+                return pos_order_id.account_move.l10n_latam_document_number
         return ""
 
+
     @api.model
-    def get_expiration_date(self, l10n_latam_document_type_id):
+    def get_expiration_date(self,  l10n_latam_document_type_id):
         document_type_id = self.env['l10n_latam.document.type'].search([('id', '=', l10n_latam_document_type_id)])
         if document_type_id:
             return document_type_id.l10n_do_ncf_expiration_date
         return ""
-
-
 class PosOrderLine(models.Model):
     _inherit = "pos.order.line"
 

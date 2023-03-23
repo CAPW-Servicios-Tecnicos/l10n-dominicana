@@ -21,6 +21,11 @@ class AccountJournal(models.Model):
         selection="_get_l10n_do_payment_form",
         string="Payment Form",
     )
+
+    hidden_payment_form = fields.Boolean(
+        string='Payment Form With Method Lines',
+        required=False)
+
     l10n_do_document_type_ids = fields.One2many(
         "l10n_do.account.journal.document_type",
         "journal_id",
@@ -32,6 +37,11 @@ class AccountJournal(models.Model):
         string='Get_value',
         store=True,
         required=False)
+
+    @api.onchange('hidden_payment_form')
+    def clear_field_payment(self):
+        if self.l10n_do_payment_form:
+            self.l10n_do_payment_form = False
 
     def _get_all_ncf_types(self, types_list, invoice=False):
         """
@@ -241,3 +251,24 @@ class AccountJournalDocumentType(models.Model):
             if rec.l10n_do_limit_vouchers:
                 rec.journal_id.get_value = rec.l10n_do_limit_vouchers
         return res
+
+
+class AccountPaymentMethod(models.Model):
+    _inherit = 'account.payment.method.line'
+
+    def _get_l10n_do_payment_form(self):
+        """ Return the list of payment forms allowed by DGII. """
+        return [
+            ("cash", _("Cash")),
+            ("bank", _("Check / Transfer")),
+            ("card", _("Credit Card")),
+            ("credit", _("Credit")),
+            ("swap", _("Swap")),
+            ("bond", _("Bonds or Gift Certificate")),
+            ("others", _("Other Sale Type")),
+        ]
+
+    l10n_do_payment_form = fields.Selection(
+        string='Payment Form',
+        selection='_get_l10n_do_payment_form',
+        required=False, )

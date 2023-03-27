@@ -19,9 +19,10 @@
             </xpath>
             <xpath expr="//page[@name='extra']" position="inside">
                 <group string="Fiscal info"
-                       attrs="{'invisible':['|', '|', ('l10n_latam_document_number', '=', False), ('l10n_latam_use_documents', '=', False), ('l10n_latam_country_code', '!=', 'DO')]}">
+                       >
                     <field name="l10n_latam_document_number" readonly="1"/>
                     <field name="l10n_latam_document_type_id" readonly="1"/>
+<!--                    <field name="l10n_latam_sequence_id" readonly="0"/>-->
 
                     <field name="l10n_do_origin_ncf" readonly="1"
                            attrs="{'invisible':[('l10n_do_is_return_order', '=', False)]}"/>

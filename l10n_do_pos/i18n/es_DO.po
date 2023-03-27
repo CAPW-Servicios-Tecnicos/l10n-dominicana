@@ -334,6 +334,11 @@ msgid "Fiscal Number"
 msgstr "NCF"
 
 #. module: l10n_do_pos
+#: model:ir.model.fields,field_description:l10n_do_pos.field_pos_order__l10n_latam_sequence_id
+msgid "Fiscal Sequence"
+msgstr "Secuencia Fiscal"
+
+#. module: l10n_do_pos
 #. openerp-web
 #: code:addons/l10n_do_pos/static/src/js/models.js:0
 #, python-format

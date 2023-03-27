@@ -1,39 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-    <t t-extend="PaymentScreenWidget">
-        <t t-jquery="div.button.js_email" t-operation="before">
-            <t t-if="widget.pos.invoice_journal.l10n_latam_use_documents">
-                <div class='button js_set_latam_document_type'>
-                    <i class='fa fa-edit' aria-label="Document type"
-                       title="Document type"/>
-                    <span class='js_latam_document_type_name' style="color:red">
-                        <t t-if="widget.pos.get_order()">
-                            <t t-if="widget.pos.get_order().l10n_latam_document_type">
-                                <t t-esc="widget.pos.get_order().l10n_latam_document_type.name"/>
-                            </t>
-                            <t t-if="!widget.pos.get_order().l10n_latam_document_type">
-                                Select document type
-                            </t>
-                        </t>
-                    </span>
-                </div>
-            </t>
-        </t>
-    </t>
+<!--   <t t-extend="PaymentScreen">-->
 
-    <t t-extend="ActionpadWidget">
-        <t t-jquery=".fa.fa-user" t-operation="after">
-            <t t-if="widget.pos.invoice_journal.l10n_latam_use_documents">
-                <t t-set="order" t-value="widget.pos.get_order()"/>
-                <t t-if="order">
-                    <span class="js_latam_document_type_name" style="color:red">
-                        <t t-esc="order.get_latam_document_type().name"/>
-                    </span>
+<!--        <t t-jquery="div.js_invoice" t-operation="before">-->
+<!--            <button><t t-esc="env.pos.invoice_journal.l10n_latam_use_documents"/></button>-->
+<!--            <t t-if="env.pos.invoice_journal.l10n_latam_use_documents">-->
+<!--                <div class='button js_set_latam_document_type'>-->
+<!--                    <i class='fa fa-edit' aria-label="Document type"-->
+<!--                       title="Document type"/>-->
+<!--                    <span class='js_latam_document_type_name' style="color:red">-->
+<!--                        <t t-if="env.pos.get_order()">-->
+<!--                            <t t-if="env.pos.get_order().l10n_latam_document_type">-->
+<!--                                <t t-esc="env.pos.get_order().l10n_latam_document_type.name"/>-->
+<!--                            </t>-->
+<!--                            <t t-if="!env.pos.get_order().l10n_latam_document_type">-->
+<!--                                Select document type-->
+<!--                            </t>-->
+<!--                        </t>-->
+<!--                    </span>-->
+<!--                </div>-->
+<!--            </t>-->
+<!--        </t>-->
+<!--   </t>-->
+   <t t-name="ActionpadWidget" owl="1">
+        <div class="actionpad">
+            <button class="button set-customer" t-att-class="{'decentered': isLongName}"
+                    t-on-click="trigger('click-customer')">
+                <t t-if="!env.isMobile"><i class="fa fa-user" role="img" aria-label="Customer" title="Customer" /></t>
+                <t t-if="client">
+                    <t t-esc="client.name" />
                     <br/>
+
+                        <t t-set="order" t-value="env.pos.get_order()"/>
+                        <t t-if="order">
+                            <span class="js_latam_document_type_name" style="color:red">
+                                <t t-esc="order.get_latam_document_type().name"/>
+                            </span>
+                            <br/>
+                        </t>
+
                 </t>
-            </t>
-        </t>
+                <t t-else="">
+                    Customer
+                </t>
+            </button>
+            <button class="button pay" t-on-click="trigger(props.actionToTrigger or 'click-pay')">
+                <div class="pay-circle" t-att-class="{ 'highlight': props.isActionButtonHighlighted }">
+                    <i class="fa fa-chevron-right" role="img" aria-label="Pay" title="Pay" />
+                </div>
+                <t t-esc="props.actionName" />
+            </button>
+            <button t-if="env.isMobile" class="button back-button" t-on-click="trigger('switchpane')">
+                <i class="fa fa-angle-double-left"/>
+                Back
+            </button>
+        </div>
     </t>
 
     <t t-name="QueryInvoicesButton">
@@ -434,46 +456,46 @@
         </div>
     </t>
 
-    <t t-extend="PaymentScreenWidget">
-        <t t-jquery=".payment-screen .screen-content" t-operation="append">
-            <div class="refund-confirm-content touch-scrollable scrollable-y">
-            </div>
-        </t>
-        <t t-jquery=".payment-screen .top-content" t-operation="append">
-            <span class="button cancel oe_hidden">
-                <i class="fa fa-times"/>
-                Cancel
-            </span>
-            <span class="button confirm oe_hidden">
-                <i class="fa fa-check"/>
-                Confirm
-            </span>
-        </t>
-        <t t-jquery=".button.js_set_customer" t-operation="replace">
-            <t t-set="client" t-value="widget.pos.get_client()"/>
-            <button class='button js_set_customer'
-                    style="padding: 4px 5px 4px 58px; height: 75px; line-height: 18px; font-weight: bold; width: 100%;">
-                <i class='fa fa-user'/>
-                <span class="sale_fiscal_type_label">
-                    <t t-esc="(client and client.sale_fiscal_type ?
-                                widget.pos.get_sale_fiscal_type(client.sale_fiscal_type).name: '')"/>
-                </span>
-                <br/>
-                <span class='js_customer_name'>
-                    <t t-esc="(client ? client.name: 'Customer')"/>
-                </span>
-            </button>
-        </t>
-    </t>
+<!--    <t t-extend="PaymentScreenWidget">-->
+<!--&lt;!&ndash;        <t t-jquery=".payment-screen .screen-content" t-operation="append">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="refund-confirm-content touch-scrollable scrollable-y">&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </t>&ndash;&gt;-->
+<!--        <t t-jquery=".payment-screen .top-content" t-operation="append">-->
+<!--&lt;!&ndash;            <span class="button cancel oe_hidden">&ndash;&gt;-->
+<!--&lt;!&ndash;                <i class="fa fa-times"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                Cancel&ndash;&gt;-->
+<!--&lt;!&ndash;            </span>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span class="button confirm oe_hidden">&ndash;&gt;-->
+<!--&lt;!&ndash;                <i class="fa fa-check"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                Confirm&ndash;&gt;-->
+<!--&lt;!&ndash;            </span>&ndash;&gt;-->
+<!--        </t>-->
+<!--        <t t-jquery=".button.js_set_customer" t-operation="replace">-->
+<!--&lt;!&ndash;            <t t-set="client" t-value="widget.pos.get_client()"/>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class='button js_set_customer'&ndash;&gt;-->
+<!--&lt;!&ndash;                    style="padding: 4px 5px 4px 58px; height: 75px; line-height: 18px; font-weight: bold; width: 100%;">&ndash;&gt;-->
+<!--&lt;!&ndash;                <i class='fa fa-user'/>&ndash;&gt;-->
+<!--&lt;!&ndash;                <span class="sale_fiscal_type_label">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <t t-esc="(client and client.sale_fiscal_type ?&ndash;&gt;-->
+<!--&lt;!&ndash;                                widget.pos.get_sale_fiscal_type(client.sale_fiscal_type).name: '')"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+<!--&lt;!&ndash;                <br/>&ndash;&gt;-->
+<!--&lt;!&ndash;                <span class='js_customer_name'>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <t t-esc="(client ? client.name: 'Customer')"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+<!--&lt;!&ndash;            </button>&ndash;&gt;-->
+<!--        </t>-->
+<!--    </t>-->
 
-    <t t-extend="PaymentScreen-Paymentmethods">
-        <t t-jquery=".paymentmethod" t-operation="replace">
-            <div t-attf-class="button paymentmethod {{ payment_method.css_class || '' }}"
-                 t-att-data-id="payment_method.id">
-                <t t-esc="payment_method.name"/>
-            </div>
-        </t>
-    </t>
+<!--    <t t-extend="PaymentScreen-Paymentmethods">-->
+<!--        <t t-jquery=".paymentmethod" t-operation="replace">-->
+<!--            <div t-attf-class="button paymentmethod {{ payment_method.css_class || '' }}"-->
+<!--                 t-att-data-id="payment_method.id">-->
+<!--                <t t-esc="payment_method.name"/>-->
+<!--            </div>-->
+<!--        </t>-->
+<!--    </t>-->
 
     <t t-extend="PaymentScreen-Paymentlines">
         <t t-jquery=".col-name" t-operation="replace">
@@ -572,4 +594,36 @@
              </div>
          </t>
      </t>
+<t t-name="DocumentTypeSelectInfoPopup" owl="1">
+        <div role="dialog" class="modal-dialog">
+            <div class="popup product-info-popup">
+                <header class="title">
+                    Tipos de documentos
+                </header>
+                <main class="body">
+                    <div class="row" style="width: auto !important; display: flex !important;margin: auto !important;justify-content: center;">
+
+<select title="Select your surfboard" class="selectpicker" style="width: 350px !important; height: 50px !important; border-radius: 8px !important; padding: 10px !important; border-color: rgb(200,200,200) !important;" t-on-change="change_doc_type_order">
+
+    <t t-foreach="props.latam_document_type_list" t-as="doc_type" >
+                <option t-if="doc_type"  t-att-value="doc_type.item.id" t-att-selected="props.current_order.l10n_latam_document_type.id == doc_type.item.id" t-key="doc_type.item.id">
+                    <t t-esc="doc_type.label"/>
+                </option>
+            </t>
+
+</select>
+                    </div>
+
+                </main>
+                <footer class="footer">
+                    <div class="button confirm" t-on-click="confirm">
+                            Aceptar
+                        </div>
+                    <div class="button cancel" t-on-click="cancel">
+                        Close
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </t>
 </templates>

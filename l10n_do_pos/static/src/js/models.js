@@ -129,7 +129,7 @@ odoo.define('l10n_do_pos.models', function (require) {
     }, {
         model: 'pos.order.line',
         fields: ['product_id', 'order_id', 'qty', 'discount', 'price_unit', 'price_subtotal_incl',
-            'price_subtotal', 'l10n_do_line_qty_returned', 'salesperson_id'],
+            'price_subtotal', 'l10n_do_line_qty_returned'],
         domain: function (self) {
             var orders = self.db.pos_all_orders;
             var order_lines = [];

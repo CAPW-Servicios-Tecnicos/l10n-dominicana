@@ -22,6 +22,7 @@
             'l10n_do_pos/static/src/js/Popup.js',
             'l10n_do_pos/static/src/css/pos.css',
             ('replace', 'point_of_sale/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js', 'l10n_do_pos/static/src/js/ReceiptScreen.js'),
+            ('replace', 'point_of_sale/static/src/js/Screens/ClientListScreen/ClientDetailsEdit.js', 'l10n_do_pos/static/src/js/ClientDetailsEdit.js'),
 
         ],
         'web.assets_qweb': [
@@ -29,6 +30,7 @@
             ('replace', 'point_of_sale/static/src/xml/Screens/PaymentScreen/PaymentScreen.xml', 'l10n_do_pos/static/src/xml/PaymentScreen.xml'),
 
             'l10n_do_pos/static/src/xml/posticket.xml',
+            'l10n_do_pos/static/src/xml/ClientDetailsEditPlus.xml',
         ],
     },
     "installable": True,

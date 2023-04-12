@@ -282,7 +282,6 @@ odoo.define('l10n_do_pos.models', function (require) {
 //                    self.set_latam_document_number(data.l10n_latam_document_number)
 //                    localStorage.setItem('ncf', JSON.stringify(data.l10n_latam_document_number))
                     $("#ncf").text(data.l10n_latam_document_number);
-                    console.log('ACTUALIZADO1: ', self)
                 })
 
             return self.l10n_latam_document_number

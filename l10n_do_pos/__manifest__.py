@@ -28,6 +28,7 @@
         'web.assets_qweb': [
             ('replace', 'point_of_sale/static/src/xml/Screens/ProductScreen/ActionpadWidget.xml', 'l10n_do_pos/static/src/xml/pos.xml'),
             ('replace', 'point_of_sale/static/src/xml/Screens/PaymentScreen/PaymentScreen.xml', 'l10n_do_pos/static/src/xml/PaymentScreen.xml'),
+            ('replace', 'point_of_sale/static/src/xml/Popups/CashMovePopup.xml', 'l10n_do_pos/static/src/xml/CashMovePopup.xml'),
 
             'l10n_do_pos/static/src/xml/posticket.xml',
             'l10n_do_pos/static/src/xml/ClientDetailsEditPlus.xml',

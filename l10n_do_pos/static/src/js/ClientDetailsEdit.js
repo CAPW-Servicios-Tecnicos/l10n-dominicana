@@ -14,7 +14,7 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
             this.changes = {
                 'country_id': partner.country_id && partner.country_id[0],
                 'state_id': partner.state_id && partner.state_id[0],
-                'l10n_do_dgii_tax_payer_type': this.props.partner.l10n_do_dgii_tax_payer_type
+                'l10n_do_dgii_tax_payer_type': this.props.partner.l10n_do_dgii_tax_payer_type || "non_payer"
             };
             if (!partner.property_product_pricelist)
                 this.changes['property_product_pricelist'] = this.env.pos.default_pricelist.id;
@@ -47,6 +47,7 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
             let processedChanges = {};
             for (let [key, value] of Object.entries(this.changes)) {
                 if (this.intFields.includes(key)) {
+                    console.log("VAT", this.props.partner.vat)
                     processedChanges[key] = value || false;
                 } else {
                     processedChanges[key] = value;

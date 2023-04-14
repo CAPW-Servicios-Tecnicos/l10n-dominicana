@@ -39,6 +39,7 @@
          <div class="client-detail">
              <span class='label'>Taxpayer Type</span>
                  <select class='detail tax_payer_type needsclick' name='l10n_do_dgii_tax_payer_type' t-on-change="captureChange">
+                     <option t-att-value="0"/>
                      <t t-foreach='env.pos.tax_payer_type_list' t-as='item' t-key="item">
                          <t t-if="props.partner.l10n_do_dgii_tax_payer_type and item[0] === props.partner.l10n_do_dgii_tax_payer_type">
                              <option t-att-value='item[0]' t-att-selected="true">

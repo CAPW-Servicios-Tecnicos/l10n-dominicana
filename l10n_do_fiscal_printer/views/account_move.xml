@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="account_move_fiscal_form_inherit" model="ir.ui.view">
+            <field name="name">l10n_do_fiscal_printer.account_move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_invoice_sent']" position="before">
+                    <button name="print_fiscal_invoice" id="print_fiscal_invoice" string="Print Fiscal Invoice"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

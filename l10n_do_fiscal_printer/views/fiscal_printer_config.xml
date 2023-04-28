@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+       <record id="fiscal_printer_config_form_view" model="ir.ui.view">
+            <field name="name">fiscal.printer.config.form</field>
+            <field name="model">fiscal.printer.config</field>
+            <field name="arch" type="xml">
+                <form string="Fiscal Printer Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="host" />
+                        </group>
+                        <group>
+                            <field name="print_copy"/>
+                            <field name="subsidiary"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="fiscal_printer_config_tree_view" model="ir.ui.view">
+            <field name="name">fiscal.printer.config.tree</field>
+            <field name="model">fiscal.printer.config</field>
+            <field name="arch" type="xml">
+                <tree string="Fiscal Printers">
+                    <field name="name"/>
+                    <field name="host"/>
+                </tree>
+            </field>
+        </record>
+
+<!--        <record id="ModelName_search_view" model="ir.ui.view">-->
+<!--            <field name="name">ProjectName.ModelName.search</field>-->
+<!--            <field name="model">ProjectName.ModelName</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <search string="ModelTitle">-->
+<!--                    <group expand="1" string="Group By">-->
+<!--                        <filter string="Example Field" name="example_field" domain="[]" context="{'group_by':'example_field'}"/>-->
+<!--                    </group>-->
+<!--               </search>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="fiscal_printer_config_act_window" model="ir.actions.act_window">
+            <field name="name">Fiscal Printer Configuration</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">fiscal.printer.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Aqui se creara las impresoras fiscales.
+                </p>
+            </field>
+        </record>
+
+        <menuitem name="Impresora Fiscal" id="fiscal_printer_config_menu" parent="account.menu_finance_configuration" action="fiscal_printer_config_act_window"/>
+
+    </data>
+</odoo>

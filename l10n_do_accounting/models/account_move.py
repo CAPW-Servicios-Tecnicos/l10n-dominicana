@@ -134,7 +134,7 @@ class AccountMove(models.Model):
     def calculo_total_descontado(self):
         total = 0
         self.total_descontado = 0.00
-        params = self.env['ir.config_parameter'].search([('key', '=', 'l10n_dominicana.view_discount_in_account')])
+        params = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_dominicana.view_discount_in_account')])
         if params:
             for rec in self:
                 for order in rec.invoice_line_ids:
@@ -149,9 +149,9 @@ class AccountMove(models.Model):
         self.received_delivered = False
         self.label_report_one = ''
         self.label_report_two = ''
-        params = self.env['ir.config_parameter'].search([('key', '=', 'l10n_do_accounting.view_delivered_received')])
-        params_label_one = self.env['ir.config_parameter'].search([('key', '=', 'l10n_do_accounting.label_one_report')])
-        params_label_two = self.env['ir.config_parameter'].search(
+        params = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        params_label_one = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_do_accounting.label_one_report')])
+        params_label_two = self.env['ir.config_parameter'].sudo().search(
             [('key', '=', 'l10n_do_accounting.label_one_report_2')])
         if params:
             self.received_delivered = True

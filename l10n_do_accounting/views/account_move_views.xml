@@ -111,15 +111,15 @@
             <xpath expr="//page[@id='aml_tab']/field[@name='line_ids']/tree/field[@name='payment_id']" position="after">
                 <field name="l10n_do_itbis_amount" invisible="1" force_save="1"/>
             </xpath>
-            <xpath expr="//div[@name='journal_div']" position="after">
-                <label for="manual_currency_rate" attrs="{'invisible': [('is_currency_manual', '=', True)]}"/>
-                <div>
-                    <field name="is_currency_manual" invisible="1"/>
-                    <field name="manual_currency_rate" attrs="{
-                    'invisible': [('is_currency_manual', '=', True)],
-                    'readonly': [('state', '!=', 'draft')]}"/>
-                </div>
-            </xpath>
+<!--            <xpath expr="//div[@name='journal_div']" position="after">-->
+<!--                <label for="manual_currency_rate" attrs="{'invisible': [('is_currency_manual', '=', True)]}"/>-->
+<!--                <div>-->
+<!--                    <field name="is_currency_manual" invisible="1"/>-->
+<!--                    <field name="manual_currency_rate" attrs="{-->
+<!--                    'invisible': [('is_currency_manual', '=', True)],-->
+<!--                    'readonly': [('state', '!=', 'draft')]}"/>-->
+<!--                </div>-->
+<!--            </xpath>-->
         </field>
     </record>
 

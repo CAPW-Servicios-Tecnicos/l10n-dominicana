@@ -347,9 +347,12 @@ class PosOrder(models.Model):
             if pos_order_id.account_move:
                 pos_order_id.write({'l10n_latam_document_number': pos_order_id.account_move.l10n_latam_document_number})
                 return {
-                    'l10n_latam_document_number': pos_order_id.account_move.l10n_latam_document_number
+                    'l10n_latam_document_number': pos_order_id.account_move.l10n_latam_document_number,
+                    'l10n_do_origin_ncf': pos_order_id.account_move.l10n_do_origin_ncf 
                 }
-        return {'l10n_latam_document_number': ''}
+            
+        return {'l10n_latam_document_number': '',
+                'l10n_do_origin_ncf':''}
 
 
     @api.model

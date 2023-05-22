@@ -11,6 +11,7 @@
                 <field name="l10n_do_enable_first_sequence" invisible="1" force_save="1"/>
             </field>
             <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="fiscal_type_name" invisible="1"/>
                 <field name="total_descontado" invisible="1"/>
                 <field name="received_delivered" invisible="1"/>
                 <field name="label_report_one" invisible="1"/>

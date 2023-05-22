@@ -131,10 +131,20 @@ class AccountMove(models.Model):
         compute='get_received_delivered',
         required=False)
 
+    fiscal_type_name = fields.Char(
+        string='Name_fiscal_type',
+        compute='call_name_type_fiscal',
+        required=False)
+
+    def call_name_type_fiscal(self):
+        for rec in self:
+            rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
+
     def calculo_total_descontado(self):
         total = 0
         self.total_descontado = 0.00
-        params = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_dominicana.view_discount_in_account')])
+        params = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_dominicana.view_discount_in_account')])
         if params:
             for rec in self:
                 for order in rec.invoice_line_ids:
@@ -149,8 +159,10 @@ class AccountMove(models.Model):
         self.received_delivered = False
         self.label_report_one = ''
         self.label_report_two = ''
-        params = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_do_accounting.view_delivered_received')])
-        params_label_one = self.env['ir.config_parameter'].sudo().search([('key', '=', 'l10n_do_accounting.label_one_report')])
+        params = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        params_label_one = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.label_one_report')])
         params_label_two = self.env['ir.config_parameter'].sudo().search(
             [('key', '=', 'l10n_do_accounting.label_one_report_2')])
         if params:
@@ -469,27 +481,38 @@ class AccountMove(models.Model):
 
         return super(AccountMove, self).action_reverse()
 
+    # def clear_fiscal_number(self):
+    #     for rec in self:
+    #         if rec.l10n_do_fiscal_number and rec.move_type == "in_invoice":
+    #             rec.l10n_do_fiscal_number = ""
+
     @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
     def _inverse_l10n_latam_document_number(self):
+        # Call method clear fiscal number
+        # name_fiscal_type = self.fiscal_type_name
         self.ref = self.l10n_latam_document_number
         for rec in self.filtered("l10n_latam_document_type_id"):
             if not rec.l10n_latam_document_number:
                 rec.l10n_do_fiscal_number = ""
             else:
                 document_type_id = rec.l10n_latam_document_type_id
-                if document_type_id.l10n_do_ncf_type:
-                    document_number = document_type_id._format_document_number(
-                        rec.l10n_latam_document_number
-                    )
-                else:
-                    document_number = rec.l10n_latam_document_number
+                if self.fiscal_type_name == str(document_type_id.id):
+                    if document_type_id.l10n_do_ncf_type:
+                        document_number = document_type_id._format_document_number(
+                            rec.l10n_latam_document_number
+                        )
+                    else:
+                        document_number = rec.l10n_latam_document_number
 
-                if rec.l10n_latam_document_number != document_number:
-                    rec.l10n_latam_document_number = document_number
-                rec.l10n_do_fiscal_number = document_number
-        super(
-            AccountMove, self.filtered(lambda m: m.country_code != "DO")
-        )._inverse_l10n_latam_document_number()
+                    if rec.l10n_latam_document_number != document_number:
+                        rec.l10n_latam_document_number = document_number
+                    rec.l10n_do_fiscal_number = document_number
+                else:
+                    self.l10n_latam_document_number = ""
+                self.fiscal_type_name = self.l10n_latam_document_type_id.id
+            super(
+                AccountMove, self.filtered(lambda m: m.country_code != "DO")
+            )._inverse_l10n_latam_document_number()
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()

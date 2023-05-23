@@ -496,7 +496,7 @@ class AccountMove(models.Model):
                 rec.l10n_do_fiscal_number = ""
             else:
                 document_type_id = rec.l10n_latam_document_type_id
-                if self.fiscal_type_name == str(document_type_id.id):
+                if self.fiscal_type_name == str(document_type_id.id) or self.name == "/":
                     if document_type_id.l10n_do_ncf_type:
                         document_number = document_type_id._format_document_number(
                             rec.l10n_latam_document_number

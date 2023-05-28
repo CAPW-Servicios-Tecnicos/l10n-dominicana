@@ -490,7 +490,9 @@ class AccountMove(models.Model):
     def _inverse_l10n_latam_document_number(self):
         # Call method clear fiscal number
         # name_fiscal_type = self.fiscal_type_name
-        self.ref = self.l10n_latam_document_number
+        for con in self:
+            if con.move_type != 'entry':
+                con.ref = con.l10n_latam_document_number
         for rec in self.filtered("l10n_latam_document_type_id"):
             if not rec.l10n_latam_document_number:
                 rec.l10n_do_fiscal_number = ""

@@ -11,10 +11,3 @@ class ResCurrencyRate(models.Model):
     def _get_converted(self):
         if self.converted > 0:
             self.rate = 1 / self.converted
-
-    # def name_get(self):
-    #     result = []
-    #     for rate in self:
-    #         result.append(
-    #             (rate.id, "{} | Tasa: {}".format(rate.name, rate.converted)))
-    #     return result

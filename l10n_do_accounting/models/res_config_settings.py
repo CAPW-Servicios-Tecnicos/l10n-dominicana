@@ -14,6 +14,11 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.manual_change_currency',
         readonly=False,)
 
+    date_equal_to_invoice_retention = fields.Boolean(
+        string='Date Retention Equal to Date Invoice',
+        related='company_id.date_equal_to_invoice_retention',
+        readonly=False, )
+
     view_discount_in_account = fields.Boolean(
         string='Visualizar descuentos',
         config_parameter='l10n_dominicana.view_discount_in_account',

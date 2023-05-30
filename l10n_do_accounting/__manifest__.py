@@ -27,7 +27,7 @@
         "views/account_journal_views.xml",
         "views/l10n_latam_document_type_views.xml",
         "views/report_templates.xml",
-        "views/report_invoice.xml"
+        "views/report_invoice.xml",
     ],
     # only loaded in demonstration mode
     "demo": [

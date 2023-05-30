@@ -23,8 +23,12 @@ class ResCompany(models.Model):
     )
     financial_currency = fields.Boolean(
         string='Financial Currency',)
+
     manual_change_currency = fields.Boolean(
         string='Manual Change Currency',)
+
+    date_equal_to_invoice_retention = fields.Boolean(
+        string='Date Retention Equal to Date Invoice', )
 
     def _localization_use_documents(self):
         """ Dominican localization uses documents """

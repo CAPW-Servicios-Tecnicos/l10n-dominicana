@@ -1,13 +1,16 @@
+# © 2018 Manuel Marquez <buzondemam@gmail.com>
+
 {
-    'name': 'Fiscal Purchase',
-    'version': '13.0.1',
-    'summary': 'Summery',
-    'description': 'Description',
-    'category': 'Localization',
-    'author': 'CAPW Servicios Tecnicos',
-    'website': 'https://capw.com.do',
-    'license': 'LGPL-3',
-    'depends': ['l10n_do_accounting', 'purchase'],
-    'installable': False,
-    'auto_install': False
+    "name": "Fiscal Purchases (Rep. Dominicana)",
+    "summary": """
+        This is a technical module which uses the available reference in
+        purchases and use it as the invoice name.
+    """,
+    "author": "iterativo SRL",
+    "license": "LGPL-3",
+    "website": "https://github.com/odoo-dominicana",
+    "category": "Localization",
+    "version": "13.0.1.0.0",
+    # any module necessary for this one to work correctly
+    "depends": ["l10n_do_accounting", "purchase"],
 }

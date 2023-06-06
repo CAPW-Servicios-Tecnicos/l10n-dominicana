@@ -1,10 +1,8 @@
-from odoo import fields, models, api
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo import models
 
 
 class PurchaseOrder(models.Model):
-    _inherit = 'purchase.order'
-    _description = 'Description'
+    _inherit = "purchase.order"
 
     def action_create_invoice(self):
         res = super(PurchaseOrder, self).action_create_invoice()

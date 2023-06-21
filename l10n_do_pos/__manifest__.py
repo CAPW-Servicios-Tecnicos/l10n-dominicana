@@ -2,10 +2,9 @@
     "name": "Fiscal POS (Rep. Dominicana)",
     "summary": """Incorpora funcionalidades de facturación con NCF al POS.""",
     "author": "Easicoders",
-    "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",
     "category": "Localization",
-    "version": "15.0.1.1.2",
+    "version": "15.1.2",
     "depends": [
         "point_of_sale",
         "l10n_do_accounting",
@@ -35,4 +34,5 @@
         ],
     },
     "installable": True,
+    "license": "LGPL-3",
 }

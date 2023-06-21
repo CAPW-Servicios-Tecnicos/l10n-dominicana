@@ -6,7 +6,6 @@
          Dirección de Impuestos Internos en la República Dominicana.""",
     "author": "iterativo LLC, " "Indexa, " "CAPW Servicios Tecnicos",
     "category": "Localization",
-    "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",
     "version": "15.0.0.9.3",
     # any module necessary for this one to work correctly
@@ -16,6 +15,7 @@
         "security/res_groups.xml",
         "security/ir.model.access.csv",
         "data/l10n_latam.document.type.csv",
+        "data/ir_config_parameter_data.xml",
         "wizard/account_move_reversal_views.xml",
         "wizard/account_move_cancel_views.xml",
         "wizard/account_debit_note_views.xml",
@@ -36,4 +36,5 @@
     "installable": True,
     "auto_install": False,
     "application": False,
+    "license": "LGPL-3",
 }

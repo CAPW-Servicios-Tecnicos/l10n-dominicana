@@ -8,7 +8,6 @@
     'category': 'Localization',
     'author': 'CAPW Servicios Tecnicos',
     'website': 'www.capw.com.do',
-    'license': 'LGPL-3',
     'depends': ['l10n_do'],
     'data': [
         'security/ir.model.access.csv',
@@ -21,5 +20,6 @@
         ],
     },
     'installable': True,
-    'auto_install': False
+    'auto_install': False,
+    'license': 'LGPL-3'
 }

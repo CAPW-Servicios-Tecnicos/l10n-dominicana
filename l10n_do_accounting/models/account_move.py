@@ -5,6 +5,7 @@ from werkzeug import urls
 from odoo import models, fields, api, _
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
+from datetime import datetime
 
 
 class AccountMove(models.Model):
@@ -171,9 +172,7 @@ class AccountMove(models.Model):
             self.label_report_two = params_label_two.value
 
     def init(self):
-
         super(AccountMove, self).init()
-
         if not self._abstract and self._sequence_index:
             index_name = self._table + "_l10n_do_sequence_index"
             self.env.cr.execute(
@@ -437,11 +436,9 @@ class AccountMove(models.Model):
         )
         for rec in l10n_do_recs:
             rec.l10n_latam_document_number = rec.l10n_do_fiscal_number
-
         super(AccountMove, self - l10n_do_recs)._compute_l10n_latam_document_number()
 
     def button_cancel(self):
-
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
                         and self.move_type[-6:] in ("nvoice", "refund")
@@ -469,7 +466,6 @@ class AccountMove(models.Model):
         return super(AccountMove, self).button_cancel()
 
     def action_reverse(self):
-
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
                         and self.move_type[-6:] in ("nvoice", "refund")
@@ -478,13 +474,7 @@ class AccountMove(models.Model):
                 "l10n_do_accounting.group_l10n_do_fiscal_credit_note"
         ):
             raise AccessError(_("You are not allowed to issue Fiscal Credit Notes"))
-
         return super(AccountMove, self).action_reverse()
-
-    # def clear_fiscal_number(self):
-    #     for rec in self:
-    #         if rec.l10n_do_fiscal_number and rec.move_type == "in_invoice":
-    #             rec.l10n_do_fiscal_number = ""
 
     @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
     def _inverse_l10n_latam_document_number(self):
@@ -590,24 +580,20 @@ class AccountMove(models.Model):
         return super(AccountMove, self)._onchange_partner_id()
 
     def _reverse_move_vals(self, default_values, cancel=True):
-
         ctx = self.env.context
         amount = ctx.get("amount")
         percentage = ctx.get("percentage")
         refund_type = ctx.get("refund_type")
         reason = ctx.get("reason")
         l10n_do_ecf_modification_code = ctx.get("l10n_do_ecf_modification_code")
-
         res = super(AccountMove, self)._reverse_move_vals(
             default_values=default_values, cancel=cancel
         )
         if self.country_code != "DO":
             return res
-
         if self.country_code == "DO":
             res["l10n_do_origin_ncf"] = self.l10n_latam_document_number
             res["l10n_do_ecf_modification_code"] = l10n_do_ecf_modification_code
-
         if refund_type in ("percentage", "fixed_amount"):
             price_unit = (
                 amount
@@ -656,7 +642,6 @@ class AccountMove(models.Model):
         )
 
     def _get_debit_line_tax(self, debit_date):
-
         if self.move_type == "out_invoice":
             return (
                 self.company_id.account_sale_tax_id
@@ -671,7 +656,6 @@ class AccountMove(models.Model):
             )
 
     def _move_autocomplete_invoice_lines_create(self, vals_list):
-
         ctx = self.env.context
         refund_type = ctx.get("refund_type")
         refund_debit_type = ctx.get("l10n_do_debit_type", refund_type)
@@ -869,7 +853,6 @@ class AccountMove(models.Model):
         return (self.env.cr.fetchone() or [None])[0]
 
     def _get_sequence_format_param(self, previous):
-
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 
@@ -887,7 +870,6 @@ class AccountMove(models.Model):
 
     def _set_next_sequence(self):
         self.ensure_one()
-
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._set_next_sequence()
 
@@ -904,6 +886,21 @@ class AccountMove(models.Model):
         format_values["seq"] = format_values["seq"] + 1
 
         if self.state != "draft" and not self[self._l10n_do_sequence_field]:
+
+            new_seq = format_values["seq"]
+            for inv in self:
+                doc_latam = inv.journal_id.l10n_do_document_type_ids.filtered(
+                    lambda doc: doc.l10n_latam_document_type_id == inv.l10n_latam_document_type_id
+                )
+                limit_set = int(doc_latam.l10n_do_limit_vouchers)
+                warning_seq = int(doc_latam.l10n_do_warning_vouchers)
+
+            if new_seq == warning_seq:
+                print("Pending")
+                # raise ValidationError(_("Fiscal invoices require partner fiscal type"))
+            elif new_seq > limit_set:
+                raise ValidationError(_("Fiscal invoices sequence is not available, please contact the Administrator"))
+
             self[
                 self._l10n_do_sequence_field
             ] = self.l10n_latam_document_type_id._format_document_number(

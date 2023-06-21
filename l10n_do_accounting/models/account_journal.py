@@ -229,6 +229,10 @@ class AccountJournalDocumentType(models.Model):
         "account.journal", "Journal", required=True, readonly=True
     )
 
+    l10n_do_warning_vouchers = fields.Char(
+        string='l10n_do_warning_vouchers',
+        required=False)
+
     l10n_do_limit_vouchers = fields.Char(
         string='L10n_do_limit_vouchers',
         required=False)

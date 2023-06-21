@@ -29,6 +29,7 @@
                             <field name="l10n_latam_document_type_id"/>
                             <field name="l10n_do_ncf_expiration_date"/>
                             <field name="l10n_do_limit_vouchers" string="Limit of Compro.."/>
+                            <field name="l10n_do_warning_vouchers" string="Warning of Compro.."/>
                         </tree>
                     </field>
                 </group>

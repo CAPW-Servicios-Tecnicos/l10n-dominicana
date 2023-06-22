@@ -156,6 +156,25 @@ class AccountMove(models.Model):
         else:
             self.total_descontado = 0.00
 
+    def action_post(self):
+        result = super(AccountMove, self).action_post()
+        control = self.env['ir.config_parameter'].sudo().get_param('l10n_dominicana.with_localization_control')
+        if control:
+            limit_date = self.env['ir.config_parameter'].sudo().get_param('l10n_dominicana.expiration_date_localization')
+            for rec in self:
+                latam_use = rec.journal_id.l10n_latam_use_documents
+                if latam_use:
+                    actual_date = fields.Date.today()
+                    expiration_date = datetime.strptime(limit_date, '%Y-%m-%d').date()
+                    if actual_date > expiration_date:
+                        raise ValidationError(
+                            _(
+                                "Please Contact the Administrator, "
+                                "The Dominican Localization Plan is Expired"
+                            )
+                        )
+        return result
+
     def get_received_delivered(self):
         self.received_delivered = False
         self.label_report_one = ''
@@ -928,12 +947,12 @@ class AccountMove(models.Model):
             )
         return super(AccountMove, self).unlink()
 
-    @api.onchange('currency_id')
-    def compute_manual_currency_rate(self):
-        currency_company = self.company_id.currency_id
-        currency_id = self.currency_id
-        manual_currency_active = self.company_id.manual_change_currency
-        if manual_currency_active and currency_company != currency_id:
-            self.is_currency_manual = False
-        else:
-            self.is_currency_manual = True
+    # @api.onchange('currency_id')
+    # def compute_manual_currency_rate(self):
+    #     currency_company = self.company_id.currency_id
+    #     currency_id = self.currency_id
+    #     manual_currency_active = self.company_id.manual_change_currency
+    #     if manual_currency_active and currency_company != currency_id:
+    #         self.is_currency_manual = False
+    #     else:
+    #         self.is_currency_manual = True

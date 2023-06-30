@@ -914,11 +914,12 @@ class AccountMove(models.Model):
                 limit_set = int(doc_latam.l10n_do_limit_vouchers)
                 warning_seq = int(doc_latam.l10n_do_warning_vouchers)
 
-            if new_seq == warning_seq:
-                print("Pending")
-                # raise ValidationError(_("Fiscal invoices require partner fiscal type"))
-            elif new_seq > limit_set:
-                raise ValidationError(_("Fiscal invoices sequence is not available, please contact the Administrator"))
+                # journals_sp = self.env['account.journal'].search([('type', 'in', ['sale', 'purchase']),
+                # ('l10n_latam_use_documents', '=', True)]) journal_with_seq = journals_sp.filtered( lambda doc:
+                # doc.l10n_latam_document_type_id == inv.l10n_latam_document_type_id )
+            # if new_seq == warning_seq: print("Pending") # raise ValidationError(_("Fiscal invoices require partner
+            # fiscal type")) elif new_seq > limit_set: raise ValidationError(_("Fiscal invoices sequence is not
+            # available, please contact the Administrator"))
 
             self[
                 self._l10n_do_sequence_field

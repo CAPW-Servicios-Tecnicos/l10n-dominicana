@@ -123,8 +123,11 @@ class AccountJournal(models.Model):
             ncf_types = list(set(ncf_types) & set(counterpart_ncf_types))
         else:
             raise ValidationError(
-                _("Partner %s is needed to issue a fiscal invoice")
-                % counterpart_partner._fields["l10n_do_dgii_tax_payer_type"].string
+                _("Partner (%s) %s is needed to issue a fiscal invoice")
+                % (
+                    counterpart_partner.id,
+                    counterpart_partner._fields["l10n_do_dgii_tax_payer_type"].string,
+                )
             )
         if invoice and invoice.move_type in ["out_refund", "in_refund"]:
             ncf_types = ["credit_note"]
@@ -142,7 +145,9 @@ class AccountJournal(models.Model):
         self.ensure_one()
         if self.type == "purchase":
             return []
-        return ["E"] if self.company_id.l10n_do_ecf_issuer else ["B"]
+        elif self.type == "sale" and self.company_id.l10n_do_ecf_issuer:
+            return ["E"]
+        return ["B"]
 
     def _l10n_do_create_document_types(self):
         self.ensure_one()

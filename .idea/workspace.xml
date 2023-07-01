@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="612d22fb-4422-4fe1-a67d-984f1a86a148" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/account_journal.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/account_journal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/account_move.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/account_move.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/tests/test_account_move.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/tests/test_account_move.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/report_invoice.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/report_invoice.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/i18n/es_DO.po" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/models/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/models/ir_sequence.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/security/ir.model.access.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/description/icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/src/img/icon-cross.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/src/img/icon-features.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/src/img/icon-help.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/src/img/icon-support.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/static/src/img/icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_pos/views/assets.xml" beforeDir="false" />
-    </list>
+    <list default="true" id="612d22fb-4422-4fe1-a67d-984f1a86a148" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,7 +26,6 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Git.Branch.Popup.ShowAllRemotes": "true",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "last_opened_file_path": "C:/Users/acape/OneDrive"

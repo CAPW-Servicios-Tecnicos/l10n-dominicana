@@ -3,7 +3,12 @@ from psycopg2 import sql
 from werkzeug import urls
 
 from odoo import models, fields, api, _
+<<<<<<< HEAD
 from odoo.exceptions import ValidationError, UserError, AccessError, RedirectWarning
+=======
+from odoo.osv import expression
+from odoo.exceptions import ValidationError, UserError, AccessError
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
 
 
 class AccountMove(models.Model):
@@ -152,6 +157,22 @@ class AccountMove(models.Model):
                     )
                 )
 
+    @api.model
+    def _name_search(
+        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
+    ):
+        args = args or []
+        domain = []
+        if name:
+            domain = [
+                "|",
+                ("name", operator, name),
+                ("l10n_do_fiscal_number", operator, name),
+            ]
+        return self._search(
+            expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid
+        )
+
     @api.depends(
         "journal_id.l10n_latam_use_documents",
         "l10n_latam_manual_document_number",
@@ -188,33 +209,56 @@ class AccountMove(models.Model):
 
         (self - l10n_do_internal_invoices).l10n_do_enable_first_sequence = False
 
-    def _get_l10n_do_amounts(self, company_currency=False):
+    def _get_l10n_do_amounts(self):
         """
         Method used to to prepare dominican fiscal invoices amounts data. Widely used
         on reports and electronic invoicing.
-
-        Returned values:
-
-        itbis_amount: Total ITBIS
-        itbis_taxable_amount: Monto Gravado Total (con ITBIS)
-        itbis_exempt_amount: Monto Exento
         """
         self.ensure_one()
-        amount_field = company_currency and "balance" or "price_subtotal"
-        sign = -1 if (company_currency and self.is_inbound()) else 1
 
+<<<<<<< HEAD
         itbis_tax_group = self.env.ref("l10n_do.group_itbis", False)
 
         taxed_move_lines = self.line_ids.filtered("tax_line_id")
         itbis_taxed_move_lines = taxed_move_lines.filtered(
             lambda l: itbis_tax_group in l.tax_line_id.mapped("tax_group_id")
                       and l.tax_line_id.amount > 0
+=======
+        tax_lines = self.line_ids.filtered(
+            lambda x: x.tax_group_id.id
+            in [
+                self.env.ref("l10n_do.group_itbis").id,
+                self.env.ref("l10n_do.group_isr").id,
+            ]
+        )
+        itbis_tax_lines = tax_lines.filtered(
+            lambda line: line.tax_group_id == self.env.ref("l10n_do.group_itbis")
+        )
+        isr_tax_lines = tax_lines.filtered(
+            lambda line: line.tax_group_id == self.env.ref("l10n_do.group_isr")
+        )
+        taxed_lines = self.invoice_line_ids.filtered(
+            lambda x: x.tax_ids and any(tax for tax in x.tax_ids if tax.amount)
+        )
+        exempt_lines = self.invoice_line_ids.filtered(
+            lambda x: not x.tax_ids or any(tax for tax in x.tax_ids if not tax.amount)
+        )
+        itbis_taxed_lines = taxed_lines.filtered(
+            lambda line: self.env.ref("l10n_do.group_itbis")
+            in line.tax_ids.mapped("tax_group_id")
+        )
+        isr_taxed_lines = taxed_lines.filtered(
+            lambda line: self.env.ref("l10n_do.group_isr")
+            in line.tax_ids.mapped("tax_group_id")
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
         )
 
-        itbis_taxed_product_lines = self.invoice_line_ids.filtered(
-            lambda l: itbis_tax_group in l.tax_ids.mapped("tax_group_id")
-        )
+        itbis_tax_amount_map = {
+            "18": (18, 1.8),
+            "16": (16, 1.6),
+        }
 
+<<<<<<< HEAD
         return {
             "itbis_amount": sign * sum(itbis_taxed_move_lines.mapped(amount_field)),
             "itbis_taxable_amount": sign
@@ -228,15 +272,89 @@ class AccountMove(models.Model):
                 line[amount_field]
                 for line in itbis_taxed_product_lines
                 if any(True for tax in line.tax_ids if tax.amount == 0)
+=======
+        result = {
+            "base_amount": sum(taxed_lines.mapped("price_subtotal")),
+            "exempt_amount": sum(exempt_lines.mapped("price_subtotal")),
+            "itbis_18_tax_amount": sum(
+                self.currency_id.round(line.price_subtotal)
+                for line in itbis_tax_lines.filtered(
+                    lambda tl: tl.tax_line_id.amount in itbis_tax_amount_map["18"]
+                )
+            ),
+            "itbis_18_base_amount": sum(
+                itbis_taxed_lines.filtered(
+                    lambda line: any(
+                        tax
+                        for tax in line.tax_ids
+                        if tax.amount in itbis_tax_amount_map["18"]
+                    )
+                ).mapped("price_subtotal")
+            ),
+            "itbis_16_tax_amount": sum(
+                self.currency_id.round(line.price_subtotal)
+                for line in itbis_tax_lines.filtered(
+                    lambda tl: tl.tax_line_id.amount in itbis_tax_amount_map["16"]
+                )
+            ),
+            "itbis_16_base_amount": sum(
+                itbis_taxed_lines.filtered(
+                    lambda line: any(
+                        tax
+                        for tax in line.tax_ids
+                        if tax.amount in itbis_tax_amount_map["16"]
+                    )
+                ).mapped("price_subtotal")
+            ),
+            "itbis_0_tax_amount": 0,  # not supported
+            "itbis_0_base_amount": 0,  # not supported
+            "itbis_withholding_amount": sum(
+                self.currency_id.round(line.price_subtotal)
+                for line in itbis_tax_lines.filtered(
+                    lambda tl: tl.tax_line_id.amount < 0
+                )
+            ),
+            "itbis_withholding_base_amount": sum(
+                itbis_taxed_lines.filtered(
+                    lambda line: any(tax for tax in line.tax_ids if tax.amount < 0)
+                ).mapped("price_subtotal")
+            ),
+            "isr_withholding_amount": sum(
+                self.currency_id.round(line.price_subtotal)
+                for line in isr_tax_lines.filtered(lambda tl: tl.tax_line_id.amount < 0)
+            ),
+            "isr_withholding_base_amount": sum(
+                isr_taxed_lines.filtered(
+                    lambda line: any(tax for tax in line.tax_ids if tax.amount < 0)
+                ).mapped("price_subtotal")
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
             ),
         }
 
+        result["l10n_do_invoice_total"] = (
+            self.amount_untaxed
+            + result["itbis_18_tax_amount"]
+            + result["itbis_16_tax_amount"]
+            + result["itbis_0_tax_amount"]
+        )
+
+        if self.currency_id != self.company_id.currency_id:
+            rate = (self.currency_id + self.company_id.currency_id)._get_rates(
+                self.company_id, self.date
+            ).get(self.currency_id.id) or 1
+            currency_vals = {}
+            for k, v in result.items():
+                currency_vals[k + "_currency"] = v / rate
+            result.update(currency_vals)
+
+        return result
+
     @api.depends(
         "company_id",
-        "l10n_latam_document_type_id.l10n_do_ncf_type",
+        "l10n_latam_document_type_id",
     )
     def _compute_is_ecf_invoice(self):
-        for invoice in self:
+        for invoice in self.filtered(lambda inv: inv.state == "draft"):
             invoice.is_ecf_invoice = (
                     invoice.company_id.country_id
                     and invoice.company_id.country_id.code == "DO"
@@ -258,27 +376,44 @@ class AccountMove(models.Model):
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):
-        for invoice in self:
-            ecf_invoices = self.search(
-                [("is_ecf_invoice", "=", True)], limit=1
-            ).filtered(lambda i: not i.l10n_latam_manual_document_number)
+        ecf_invoices = self.search(
+            [
+                ("is_ecf_invoice", "=", True),
+            ],
+            limit=1,
+        ).filtered(lambda i: not i.l10n_latam_manual_document_number)
+
+        # first set all invoices l10n_do_company_in_contingency = False
+        self.write({"l10n_do_company_in_contingency": False})
+
+        # then get draft invoices and do the thing
+        for invoice in self.filtered(lambda inv: inv.state == "draft"):
             invoice.l10n_do_company_in_contingency = bool(
                 ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
             )
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
-    @api.depends_context("l10n_do_ecf_service_env")
     def _compute_l10n_do_electronic_stamp(self):
 
         l10n_do_ecf_invoice = self.filtered(
             lambda i: i.is_ecf_invoice
+<<<<<<< HEAD
                       and not i.l10n_latam_manual_document_number
                       and i.l10n_do_ecf_security_code
+=======
+            and not i.l10n_latam_manual_document_number
+            and i.l10n_do_ecf_security_code
+            and i.state == "posted"
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
         )
 
         for invoice in l10n_do_ecf_invoice:
 
-            ecf_service_env = self.env.context.get("l10n_do_ecf_service_env", "CerteCF")
+            if hasattr(invoice.company_id, "l10n_do_ecf_service_env"):
+                ecf_service_env = invoice.company_id.l10n_do_ecf_service_env
+            else:
+                ecf_service_env = "TesteCF"
+
             doc_code_prefix = invoice.l10n_latam_document_type_id.doc_code_prefix
             is_rfc = (  # Es un Resumen Factura Consumo
                     doc_code_prefix == "E32" and invoice.amount_total_signed < 250000
@@ -302,18 +437,25 @@ class AccountMove(models.Model):
                         invoice.invoice_date or fields.Date.today()
                 ).strftime("%d-%m-%Y")
 
+<<<<<<< HEAD
             l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
             l10n_do_total = (
                     l10n_do_amounts["itbis_taxable_amount"]
                     + l10n_do_amounts["itbis_amount"]
             )
+=======
+            total_field = "l10n_do_invoice_total"
+            if invoice.currency_id != invoice.company_id.currency_id:
+                total_field += "_currency"
+            l10n_do_total = invoice._get_l10n_do_amounts()[total_field]
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
 
             qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
                 "."
             )
             if not is_rfc:
                 qr_string += "FechaFirma=%s&" % invoice.l10n_do_ecf_sign_date.strftime(
-                    "%d-%m-%Y%%20%H:%M:%S"
+                    "%d-%m-%Y %H:%M:%S"
                 )
 
             special_chars = " !#$&'()*+,/:;=?@[]\"-.<>\\^_`"
@@ -325,7 +467,7 @@ class AccountMove(models.Model):
             )
             qr_string += "CodigoSeguridad=%s" % security_code
 
-            invoice.l10n_do_electronic_stamp = urls.url_quote_plus(qr_string)
+            invoice.l10n_do_electronic_stamp = urls.url_quote_plus(qr_string, safe="%")
 
         (self - l10n_do_ecf_invoice).l10n_do_electronic_stamp = False
 
@@ -471,8 +613,14 @@ class AccountMove(models.Model):
     def _check_invoice_type_document_type(self):
         l10n_do_invoices = self.filtered(
             lambda inv: inv.country_code == "DO"
+<<<<<<< HEAD
                         and inv.l10n_latam_use_documents
                         and inv.l10n_latam_document_type_id
+=======
+            and inv.l10n_latam_use_documents
+            and inv.l10n_latam_document_type_id
+            and inv.state == "posted"
+>>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
         )
         for rec in l10n_do_invoices:
             has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))
@@ -824,7 +972,11 @@ class AccountMove(models.Model):
             format_values["seq"] = 0
         format_values["seq"] = format_values["seq"] + 1
 
-        if self.state != "draft" and not self[self._l10n_do_sequence_field]:
+        if (
+            self.env.context.get("prefetch_seq")
+            or self.state != "draft"
+            and not self[self._l10n_do_sequence_field]
+        ):
             self[
                 self._l10n_do_sequence_field
             ] = self.l10n_latam_document_type_id._format_document_number(

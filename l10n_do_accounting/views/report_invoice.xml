@@ -290,13 +290,7 @@
             <td>
                 <strong>Total</strong>
             </td>
-
-<<<<<<< HEAD
-            <t t-set="l10n_do_amount_total"
-               t-value="o.amount_untaxed + sum((line.debit or line.credit if o.currency_id == o.company_id.currency_id else abs(line.amount_currency)) for line in o.line_ids.filtered(lambda l: l.tax_line_id and l.tax_line_id.amount > 0))"/>
-=======
             <t t-set="l10n_do_amount_total" t-value="l10n_do_amounts['l10n_do_invoice_total']"/>
->>>>>>> 4aa6328aece725b17f9a09469a8ace01a9e6e01b
             <td class="text-right">
                 <span class="text-nowrap" t-esc="l10n_do_amount_total"
                       t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
@@ -323,8 +317,7 @@
 
     </template>
 
-    <template id="report_invoice_document_inherited"
-              inherit_id="account.report_invoice_document" primary="True">
+    <template id="report_invoice_document_inherited" inherit_id="account.report_invoice_document" primary="True">
 
         <t t-set="o" position="after">
             <t t-set="custom_header" t-value="'l10n_do_accounting.custom_header'"/>

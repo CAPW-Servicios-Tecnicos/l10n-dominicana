@@ -64,6 +64,7 @@ class L10nLatamDocumentType(models.Model):
         default=False,
     )
 
+
     def _format_document_number(self, document_number):
         """Make validation of Import Dispatch Number
         * making validations on the document_number.

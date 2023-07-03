@@ -25,6 +25,17 @@
                     </div>
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane">
+                            <field name="l10n_do_fiscal_sequence_control"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="l10n_do_fiscal_sequence_control"/>
+                            <div class="text-muted">
+                                Habilitar la opcion de control de sequencia de comprobantes.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
                             <field name="view_delivered_received" widget="upgrade_boolean"/>
                         </div>
                         <div class="o_setting_right_pane">
@@ -49,32 +60,6 @@
                     </div>
                 </div>
             </xpath>
-            <!--            @TODO trabajando en el proceso de valor de moneda en factura y en pagos manual y la moneda financiera.-->
-            <!--            <xpath expr="//div[@id='main_currency']" position="after">-->
-            <!--                <div class="col-12 col-lg-6 o_setting_box">-->
-            <!--                    <div class="o_setting_left_pane">-->
-            <!--                        <field name="financial_currency" widget="upgrade_boolean"/>-->
-            <!--                    </div>-->
-            <!--                    <div class="o_setting_right_pane">-->
-            <!--                        <label for="financial_currency"/>-->
-            <!--                        <div class="text-muted">-->
-            <!--                            Financial Currency Change-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--                <div class="col-12 col-lg-6 o_setting_box">-->
-            <!--                    <div class="o_setting_left_pane">-->
-            <!--                        <field name="manual_change_currency" widget="upgrade_boolean"/>-->
-            <!--                    </div>-->
-            <!--                    <div class="o_setting_right_pane">-->
-            <!--                        <label for="manual_change_currency"/>-->
-            <!--                        <div class="text-muted">-->
-            <!--                            Manual Currency Change for Invoice-->
-            <!--                         </div>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--            </xpath>-->
         </field>
     </record>
-
 </odoo>

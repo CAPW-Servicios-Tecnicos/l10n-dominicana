@@ -33,11 +33,6 @@ class AccountJournal(models.Model):
         copy=False,
     )
 
-    get_value = fields.Char(
-        string='Get_value',
-        store=True,
-        required=False)
-
     @api.onchange('hidden_payment_form')
     def clear_field_payment(self):
         if self.l10n_do_payment_form:
@@ -217,12 +212,6 @@ class AccountJournal(models.Model):
                 rec._l10n_do_create_document_types()
         return res
 
-    @api.onchange('get_value')
-    def set_value(self):
-        for rec in self.l10n_do_document_type_ids:
-            print(rec)
-            rec.l10n_do_limit_vouchers = self.get_value
-
 
 class AccountJournalDocumentType(models.Model):
     _name = "l10n_do.account.journal.document_type"
@@ -231,14 +220,6 @@ class AccountJournalDocumentType(models.Model):
     journal_id = fields.Many2one(
         "account.journal", "Journal", required=True, readonly=True
     )
-
-    l10n_do_warning_vouchers = fields.Char(
-        string='l10n_do_warning_vouchers',
-        required=False)
-
-    l10n_do_limit_vouchers = fields.Char(
-        string='L10n_do_limit_vouchers',
-        required=False)
 
     l10n_latam_document_type_id = fields.Many2one(
         "l10n_latam.document.type", "Document type", required=True, readonly=True
@@ -251,13 +232,6 @@ class AccountJournalDocumentType(models.Model):
     company_id = fields.Many2one(
         string="Company", related="journal_id.company_id", readonly=True
     )
-
-    def write(self, values):
-        res = super(AccountJournalDocumentType, self).write(values)
-        for rec in self:
-            if rec.l10n_do_limit_vouchers:
-                rec.journal_id.get_value = rec.l10n_do_limit_vouchers
-        return res
 
 
 class AccountPaymentMethod(models.Model):
@@ -279,3 +253,34 @@ class AccountPaymentMethod(models.Model):
         string='Payment Form',
         selection='_get_l10n_do_payment_form',
         required=False, )
+
+
+class AccountFiscalSequence(models.Model):
+    _name = 'account.fiscal.sequence'
+    _description = "Account Fiscal Sequence"
+
+    l10n_do_warning_vouchers = fields.Char(
+        string='Warning Sequence',
+        required=False)
+
+    l10n_do_limit_vouchers = fields.Char(
+        string='Limit Sequence',
+        required=False)
+    
+    document_type = fields.Many2one(
+        comodel_name='l10n_latam.document.type',
+        string='Document Type',
+        required=False)
+
+    code = fields.Char(related='document_type.doc_code_prefix')
+
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company', required=True, readonly=True,
+        default=lambda self: self.env.company)
+
+    _sql_constraints = [
+        ('document_type', 'unique (code, company_id)',
+         'You only can use one document type per company')
+    ]
+

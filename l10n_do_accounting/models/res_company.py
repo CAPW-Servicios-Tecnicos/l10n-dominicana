@@ -21,14 +21,14 @@ class ResCompany(models.Model):
         "to have sales through offline mobile devices such as "
         "sales with Handheld, enter others.",
     )
-    financial_currency = fields.Boolean(
-        string='Financial Currency',)
-
-    manual_change_currency = fields.Boolean(
-        string='Manual Change Currency',)
 
     date_equal_to_invoice_retention = fields.Boolean(
-        string='Date Retention Equal to Date Invoice', )
+        string='Date Retention Equal to Date Invoice',
+        readonly=False,)
+
+    l10n_do_fiscal_sequence_control = fields.Boolean(
+        string='Activate Fiscal Sequence Control',
+        readonly=False,)
 
     def _localization_use_documents(self):
         """ Dominican localization uses documents """

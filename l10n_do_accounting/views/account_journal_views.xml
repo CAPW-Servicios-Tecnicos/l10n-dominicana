@@ -11,7 +11,6 @@
                 'invisible': ['|', '|', ('type','not in',('cash','bank')), ('country_code', '!=', 'DO'), ('hidden_payment_form', '=', True)],
                 'required': [('type','in',('cash','bank')), ('country_code', '!=', 'DO')]
                 }"/>
-                <field name="get_value" string="Limite de Comprobantes" attrs="{'invisible': [('l10n_latam_use_documents', '=', False)]}"/>
             </xpath>
             <xpath expr="//page[@id='outbound_payment_settings']/field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']" position="after">
                 <field name="l10n_do_payment_form" attrs="{'column_invisible': [('parent.hidden_payment_form', '=', False)]}"/>
@@ -28,8 +27,6 @@
                             <field name="journal_id" invisible="1"/>
                             <field name="l10n_latam_document_type_id"/>
                             <field name="l10n_do_ncf_expiration_date"/>
-                            <field name="l10n_do_limit_vouchers" string="Limit of Compro.."/>
-                            <field name="l10n_do_warning_vouchers" string="Warning of Compro.."/>
                         </tree>
                     </field>
                 </group>

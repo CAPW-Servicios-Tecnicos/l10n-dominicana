@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherited</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                    <!--            @TODO trabajando en el proceso de valor de moneda en factura y en pagos manual y la moneda financiera.-->
+<!--                <xpath expr="//div[@id='main_currency']" position="after">-->
+<!--                    <div class="col-12 col-lg-6 o_setting_box">-->
+<!--                        <div class="o_setting_left_pane">-->
+<!--                            <field name="financial_currency" widget="upgrade_boolean"/>-->
+<!--                        </div>-->
+<!--                        <div class="o_setting_right_pane">-->
+<!--                            <label for="financial_currency"/>-->
+<!--                            <div class="text-muted">-->
+<!--                                Financial Currency Change-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="col-12 col-lg-6 o_setting_box">-->
+<!--                        <div class="o_setting_left_pane">-->
+<!--                            <field name="manual_change_currency" widget="upgrade_boolean"/>-->
+<!--                        </div>-->
+<!--                        <div class="o_setting_right_pane">-->
+<!--                            <label for="manual_change_currency"/>-->
+<!--                            <div class="text-muted">-->
+<!--                                Manual Currency Change for Invoice-->
+<!--                             </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </xpath>-->
+            </field>
+      </record>
+</odoo>

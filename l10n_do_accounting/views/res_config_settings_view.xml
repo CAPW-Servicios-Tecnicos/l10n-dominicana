@@ -23,17 +23,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-6 o_setting_box">
-                        <div class="o_setting_left_pane">
-                            <field name="l10n_do_fiscal_sequence_control"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="l10n_do_fiscal_sequence_control"/>
-                            <div class="text-muted">
-                                Habilitar la opcion de control de sequencia de comprobantes.
-                            </div>
-                        </div>
-                    </div>
+<!--                    <div class="col-12 col-lg-6 o_setting_box" groups="account.group_account_manager">-->
+<!--                        <div class="o_setting_left_pane">-->
+<!--                            <field name="l10n_do_fiscal_sequence_control"/>-->
+<!--                        </div>-->
+<!--                        <div class="o_setting_right_pane">-->
+<!--                            <label for="l10n_do_fiscal_sequence_control"/>-->
+<!--                            <div class="text-muted">-->
+<!--                                Habilitar la opcion de control de sequencia de comprobantes.-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane">
                             <field name="view_delivered_received" widget="upgrade_boolean"/>

@@ -3,12 +3,11 @@ from psycopg2 import sql
 from werkzeug import urls
 
 from odoo import models, fields, api, _
-<<<<<<< HEAD
 from odoo.exceptions import ValidationError, UserError, AccessError, RedirectWarning
-=======
+
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
+
 
 
 class AccountMove(models.Model):
@@ -216,20 +215,12 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
 
-<<<<<<< HEAD
-        itbis_tax_group = self.env.ref("l10n_do.group_itbis", False)
-
-        taxed_move_lines = self.line_ids.filtered("tax_line_id")
-        itbis_taxed_move_lines = taxed_move_lines.filtered(
-            lambda l: itbis_tax_group in l.tax_line_id.mapped("tax_group_id")
-                      and l.tax_line_id.amount > 0
-=======
         tax_lines = self.line_ids.filtered(
             lambda x: x.tax_group_id.id
-            in [
-                self.env.ref("l10n_do.group_itbis").id,
-                self.env.ref("l10n_do.group_isr").id,
-            ]
+                      in [
+                          self.env.ref("l10n_do.group_itbis").id,
+                          self.env.ref("l10n_do.group_isr").id,
+                      ]
         )
         itbis_tax_lines = tax_lines.filtered(
             lambda line: line.tax_group_id == self.env.ref("l10n_do.group_itbis")
@@ -245,12 +236,11 @@ class AccountMove(models.Model):
         )
         itbis_taxed_lines = taxed_lines.filtered(
             lambda line: self.env.ref("l10n_do.group_itbis")
-            in line.tax_ids.mapped("tax_group_id")
+                         in line.tax_ids.mapped("tax_group_id")
         )
         isr_taxed_lines = taxed_lines.filtered(
             lambda line: self.env.ref("l10n_do.group_isr")
-            in line.tax_ids.mapped("tax_group_id")
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
+                         in line.tax_ids.mapped("tax_group_id")
         )
 
         itbis_tax_amount_map = {
@@ -258,21 +248,6 @@ class AccountMove(models.Model):
             "16": (16, 1.6),
         }
 
-<<<<<<< HEAD
-        return {
-            "itbis_amount": sign * sum(itbis_taxed_move_lines.mapped(amount_field)),
-            "itbis_taxable_amount": sign
-                                    * sum(
-                line[amount_field]
-                for line in itbis_taxed_product_lines
-                if line.price_total != line.price_subtotal
-            ),
-            "itbis_exempt_amount": sign
-                                   * sum(
-                line[amount_field]
-                for line in itbis_taxed_product_lines
-                if any(True for tax in line.tax_ids if tax.amount == 0)
-=======
         result = {
             "base_amount": sum(taxed_lines.mapped("price_subtotal")),
             "exempt_amount": sum(exempt_lines.mapped("price_subtotal")),
@@ -327,15 +302,14 @@ class AccountMove(models.Model):
                 isr_taxed_lines.filtered(
                     lambda line: any(tax for tax in line.tax_ids if tax.amount < 0)
                 ).mapped("price_subtotal")
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
             ),
         }
 
         result["l10n_do_invoice_total"] = (
-            self.amount_untaxed
-            + result["itbis_18_tax_amount"]
-            + result["itbis_16_tax_amount"]
-            + result["itbis_0_tax_amount"]
+                self.amount_untaxed
+                + result["itbis_18_tax_amount"]
+                + result["itbis_16_tax_amount"]
+                + result["itbis_0_tax_amount"]
         )
 
         if self.currency_id != self.company_id.currency_id:
@@ -397,14 +371,14 @@ class AccountMove(models.Model):
 
         l10n_do_ecf_invoice = self.filtered(
             lambda i: i.is_ecf_invoice
-<<<<<<< HEAD
+
                       and not i.l10n_latam_manual_document_number
                       and i.l10n_do_ecf_security_code
-=======
+
             and not i.l10n_latam_manual_document_number
             and i.l10n_do_ecf_security_code
             and i.state == "posted"
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
+
         )
 
         for invoice in l10n_do_ecf_invoice:
@@ -437,18 +411,17 @@ class AccountMove(models.Model):
                         invoice.invoice_date or fields.Date.today()
                 ).strftime("%d-%m-%Y")
 
-<<<<<<< HEAD
+
             l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
             l10n_do_total = (
                     l10n_do_amounts["itbis_taxable_amount"]
                     + l10n_do_amounts["itbis_amount"]
             )
-=======
+
             total_field = "l10n_do_invoice_total"
             if invoice.currency_id != invoice.company_id.currency_id:
                 total_field += "_currency"
             l10n_do_total = invoice._get_l10n_do_amounts()[total_field]
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
 
             qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
                 "."
@@ -613,14 +586,13 @@ class AccountMove(models.Model):
     def _check_invoice_type_document_type(self):
         l10n_do_invoices = self.filtered(
             lambda inv: inv.country_code == "DO"
-<<<<<<< HEAD
+
                         and inv.l10n_latam_use_documents
                         and inv.l10n_latam_document_type_id
-=======
+
             and inv.l10n_latam_use_documents
             and inv.l10n_latam_document_type_id
             and inv.state == "posted"
->>>>>>> 22c7a74d4cbf14f7a1d30bf103054f23c8323799
         )
         for rec in l10n_do_invoices:
             has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))

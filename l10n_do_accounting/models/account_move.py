@@ -1039,15 +1039,15 @@ class AccountMove(models.Model):
             )
         return super(AccountMove, self).unlink()
 
-    def notification_warning_seq(self):
-        notification = {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Warning'),
-                'type': 'warning',
-                'message': 'Almost fiscal sequence are finish',
-                'sticky': True,
-            }
-        }
-        return notification
+    # def notification_warning_seq(self):
+    #     notification = {
+    #         'type': 'ir.actions.client',
+    #         'tag': 'display_notification',
+    #         'params': {
+    #             'title': _('Warning'),
+    #             'type': 'warning',
+    #             'message': 'Almost fiscal sequence are finish',
+    #             'sticky': True,
+    #         }
+    #     }
+    #     return notification

@@ -1,7 +1,7 @@
 import re
 from psycopg2 import sql
 from werkzeug import urls
-
+import json
 from odoo import models, fields, api, _
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
@@ -174,6 +174,11 @@ class AccountMove(models.Model):
                                 "The Dominican Localization Plan is Expired"
                             )
                         )
+        if self.partner_id:
+            invoice_totals = json.loads(self.tax_totals_json)
+            if invoice_totals['amount_total'] == 0.0:
+                raise ValidationError(
+                    "Para confirmar la factura debe ser mayor que %s" % invoice_totals['amount_total'])
         return result
 
     def get_received_delivered(self):
@@ -736,13 +741,13 @@ class AccountMove(models.Model):
             "in_invoice",
             "in_refund",
         ) and self.l10n_latam_document_type_id.l10n_do_ncf_type not in (
-                   "minor",
-                   "e-minor",
-                   "informal",
-                   "e-informal",
-                   "exterior",
-                   "e-exterior",
-               )
+            "minor",
+            "e-minor",
+            "informal",
+            "e-informal",
+            "exterior",
+            "e-exterior",
+        )
 
     def _get_debit_line_tax(self, debit_date):
         if self.move_type == "out_invoice":
@@ -1005,7 +1010,8 @@ class AccountMove(models.Model):
                 if new_seq == warning_seq:
                     inv.notification_warning_seq()
                 elif new_seq > limit_set:
-                    raise ValidationError(_("Fiscal invoices sequence is not available, please contact the Administrator"))
+                    raise ValidationError(
+                        _("Fiscal invoices sequence is not available, please contact the Administrator"))
 
         if (
                 self.env.context.get("prefetch_seq")

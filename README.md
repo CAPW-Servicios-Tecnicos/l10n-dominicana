@@ -46,9 +46,4 @@ Conviértase en sponsor de este proyecto [aquí](https://github.com/sponsors/ind
 
 
 ## Obtener ayuda
-
 Cree un [issue](https://github.com/indexa-git/l10n-dominicana/issues/new/choose) para obtener ayuda!
-<<<<<<< HEAD
-
-=======
->>>>>>> 4aa6328aece725b17f9a09469a8ace01a9e6e01b

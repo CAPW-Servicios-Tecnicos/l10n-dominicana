@@ -22,21 +22,12 @@ class AccountJournal(models.Model):
         string="Payment Form",
     )
 
-    hidden_payment_form = fields.Boolean(
-        string='Payment Form With Method Lines',
-        required=False)
-
     l10n_do_document_type_ids = fields.One2many(
         "l10n_do.account.journal.document_type",
         "journal_id",
         string="Document types",
         copy=False,
     )
-
-    @api.onchange('hidden_payment_form')
-    def clear_field_payment(self):
-        if self.l10n_do_payment_form:
-            self.l10n_do_payment_form = False
 
     def _get_all_ncf_types(self, types_list, invoice=False):
         """

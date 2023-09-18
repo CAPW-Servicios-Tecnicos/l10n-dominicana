@@ -1,11 +1,11 @@
 import re
+
 from psycopg2 import sql
 from werkzeug import urls
-import json
+
 from odoo import models, fields, api, _
-from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
-from datetime import datetime
+from odoo.osv import expression
 
 
 class AccountMove(models.Model):
@@ -119,82 +119,6 @@ class AccountMove(models.Model):
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
-    manual_currency_rate = fields.Float(string="Currency Rate")
-    is_currency_manual = fields.Boolean(string="is_currency_manual", )
-    total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
-    received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
-    label_report_one = fields.Char(
-        string='Label_report_one',
-        compute='get_received_delivered',
-        required=False)
-    label_report_two = fields.Char(
-        string='Label_report_two',
-        compute='get_received_delivered',
-        required=False)
-
-    fiscal_type_name = fields.Char(
-        string='Name_fiscal_type',
-        compute='call_name_type_fiscal',
-        required=False)
-
-    def call_name_type_fiscal(self):
-        for rec in self:
-            rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
-
-    def calculo_total_descontado(self):
-        total = 0
-        self.total_descontado = 0.00
-        params = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_dominicana.view_discount_in_account')])
-        if params:
-            for rec in self:
-                for order in rec.invoice_line_ids:
-                    total += order.price_unit
-                    amount = rec.amount_untaxed
-                    if total:
-                        rec.total_descontado = total - amount
-        else:
-            self.total_descontado = 0.00
-
-    def action_post(self):
-        result = super(AccountMove, self).action_post()
-        control = self.env['ir.config_parameter'].sudo().get_param('l10n_dominicana.with_localization_control')
-        if control != 'False':
-            limit_date = self.env['ir.config_parameter'].sudo().get_param(
-                'l10n_dominicana.expiration_date_localization')
-            for rec in self:
-                latam_use = rec.journal_id.l10n_latam_use_documents
-                if latam_use:
-                    actual_date = fields.Date.today()
-                    expiration_date = datetime.strptime(limit_date, '%Y-%m-%d').date()
-                    if actual_date > expiration_date:
-                        raise ValidationError(
-                            _(
-                                "Please Contact the Administrator, "
-                                "The Dominican Localization Plan is Expired"
-                            )
-                        )
-        if self.partner_id:
-            invoice_totals = json.loads(self.tax_totals_json)
-            if invoice_totals['amount_total'] == 0.0:
-                raise ValidationError(
-                    "Para confirmar la factura debe ser mayor que %s" % invoice_totals['amount_total'])
-        return result
-
-    def get_received_delivered(self):
-        self.received_delivered = False
-        self.label_report_one = ''
-        self.label_report_two = ''
-        params = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
-        params_label_one = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.label_one_report')])
-        params_label_two = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
-        if params:
-            self.received_delivered = True
-            self.label_report_one = params_label_one.value
-            self.label_report_two = params_label_two.value
 
     def init(self):
         super(AccountMove, self).init()
@@ -585,33 +509,24 @@ class AccountMove(models.Model):
 
     @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
     def _inverse_l10n_latam_document_number(self):
-        # Call method clear fiscal number
-        # name_fiscal_type = self.fiscal_type_name
-        for con in self:
-            if con.move_type != 'entry':
-                con.ref = con.l10n_latam_document_number
         for rec in self.filtered("l10n_latam_document_type_id"):
             if not rec.l10n_latam_document_number:
                 rec.l10n_do_fiscal_number = ""
             else:
                 document_type_id = rec.l10n_latam_document_type_id
-                if self.fiscal_type_name == str(document_type_id.id) or self.name == "/":
-                    if document_type_id.l10n_do_ncf_type:
-                        document_number = document_type_id._format_document_number(
-                            rec.l10n_latam_document_number
-                        )
-                    else:
-                        document_number = rec.l10n_latam_document_number
-
-                    if rec.l10n_latam_document_number != document_number:
-                        rec.l10n_latam_document_number = document_number
-                    rec.l10n_do_fiscal_number = document_number
+                if document_type_id.l10n_do_ncf_type:
+                    document_number = document_type_id._format_document_number(
+                        rec.l10n_latam_document_number
+                    )
                 else:
-                    self.l10n_latam_document_number = ""
-                self.fiscal_type_name = self.l10n_latam_document_type_id.id
-            super(
-                AccountMove, self.filtered(lambda m: m.country_code != "DO")
-            )._inverse_l10n_latam_document_number()
+                    document_number = rec.l10n_latam_document_number
+
+                if rec.l10n_latam_document_number != document_number:
+                    rec.l10n_latam_document_number = document_number
+                rec.l10n_do_fiscal_number = document_number
+        super(
+            AccountMove, self.filtered(lambda m: m.country_code != "DO")
+        )._inverse_l10n_latam_document_number()
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
@@ -741,13 +656,13 @@ class AccountMove(models.Model):
             "in_invoice",
             "in_refund",
         ) and self.l10n_latam_document_type_id.l10n_do_ncf_type not in (
-            "minor",
-            "e-minor",
-            "informal",
-            "e-informal",
-            "exterior",
-            "e-exterior",
-        )
+                   "minor",
+                   "e-minor",
+                   "informal",
+                   "e-informal",
+                   "exterior",
+                   "e-exterior",
+               )
 
     def _get_debit_line_tax(self, debit_date):
         if self.move_type == "out_invoice":
@@ -961,6 +876,7 @@ class AccountMove(models.Model):
         return (self.env.cr.fetchone() or [None])[0]
 
     def _get_sequence_format_param(self, previous):
+
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 
@@ -969,10 +885,6 @@ class AccountMove(models.Model):
         format_values = re.match(regex, previous).groupdict()
         format_values["seq_length"] = len(format_values["seq"])
         format_values["seq"] = int(format_values.get("seq") or 0)
-        if self.l10n_do_fiscal_number:
-            format_fiscal_number = re.match(regex, self.l10n_do_fiscal_number).groupdict()
-            if self.l10n_latam_document_type_id.doc_code_prefix != format_fiscal_number["prefix1"]:
-                raise ValidationError(_("You can't change the document type, please verify your selections"))
 
         placeholders = re.findall(r"(prefix\d|seq\d?)", regex)
         format = "".join(
@@ -1044,16 +956,3 @@ class AccountMove(models.Model):
                 _("You cannot delete fiscal invoice which have been posted before")
             )
         return super(AccountMove, self).unlink()
-
-    # def notification_warning_seq(self):
-    #     notification = {
-    #         'type': 'ir.actions.client',
-    #         'tag': 'display_notification',
-    #         'params': {
-    #             'title': _('Warning'),
-    #             'type': 'warning',
-    #             'message': 'Almost fiscal sequence are finish',
-    #             'sticky': True,
-    #         }
-    #     }
-    #     return notification

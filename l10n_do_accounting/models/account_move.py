@@ -910,21 +910,6 @@ class AccountMove(models.Model):
             format_values["seq"] = 0
         format_values["seq"] = format_values["seq"] + 1
 
-        if self.company_id.l10n_do_fiscal_sequence_control:
-            if self.state != "draft" and not self[self._l10n_do_sequence_field]:
-                for inv in self:
-                    new_seq = format_values["seq"]
-                    doc_type = self.env['account.fiscal.sequence'].search(
-                        [('document_type', '=', inv.l10n_latam_document_type_id.id)])
-
-                limit_set = int(doc_type.l10n_do_limit_vouchers)
-                warning_seq = int(doc_type.l10n_do_warning_vouchers)
-                if new_seq == warning_seq:
-                    inv.notification_warning_seq()
-                elif new_seq > limit_set:
-                    raise ValidationError(
-                        _("Fiscal invoices sequence is not available, please contact the Administrator"))
-
         if (
                 self.env.context.get("prefetch_seq")
                 or self.state != "draft"

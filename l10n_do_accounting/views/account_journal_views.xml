@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='type']" position="after">
                 <field name="l10n_do_payment_form" attrs="{
-                'invisible': ['|', '|', ('type','not in',('cash','bank')), ('country_code', '!=', 'DO'), ('hidden_payment_form', '=', True)],
+                'invisible': ['|', ('type','not in',('cash','bank')), ('country_code', '!=', 'DO')],
                 'required': [('type','in',('cash','bank')), ('country_code', '!=', 'DO')]
                 }"/>
             </xpath>

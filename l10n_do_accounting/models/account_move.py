@@ -138,22 +138,31 @@ class AccountMove(models.Model):
         compute='call_name_type_fiscal',
         required=False)
 
+    # todo cambiar el nombre por subtotal sin descuento en ingles
+
+    total_without_discount = fields.Float(
+        string='Total_without_discount',
+        required=False)
+
     def call_name_type_fiscal(self):
         for rec in self:
             rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
 
     def calculo_total_descontado(self):
         total = 0
+        total_imponible = 0
         self.total_descontado = 0.00
         params = self.env['ir.config_parameter'].sudo().search(
             [('key', '=', 'l10n_dominicana.view_discount_in_account')])
         if params:
-            for rec in self:
-                for order in rec.invoice_line_ids:
-                    total += order.price_unit
-                    amount = rec.amount_untaxed
-                    if total:
-                        rec.total_descontado = total - amount
+            for invoice in self:
+                for i in invoice.invoice_line_ids:
+                    total = i.quantity * i.price_unit
+                    to_discount = total * i.discount
+                    res = to_discount / 100.0
+                    invoice.total_descontado += res
+                    total_imponible += i.quantity * i.price_unit
+                invoice.total_without_discount = total_imponible
         else:
             self.total_descontado = 0.00
 

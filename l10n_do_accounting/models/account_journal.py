@@ -22,21 +22,12 @@ class AccountJournal(models.Model):
         string="Payment Form",
     )
 
-    hidden_payment_form = fields.Boolean(
-        string='Payment Form With Method Lines',
-        required=False)
-
     l10n_do_document_type_ids = fields.One2many(
         "l10n_do.account.journal.document_type",
         "journal_id",
         string="Document types",
         copy=False,
     )
-
-    @api.onchange('hidden_payment_form')
-    def clear_field_payment(self):
-        if self.l10n_do_payment_form:
-            self.l10n_do_payment_form = False
 
     def _get_all_ncf_types(self, types_list, invoice=False):
         """
@@ -263,32 +254,5 @@ class AccountPaymentMethod(models.Model):
         required=False, )
 
 
-class AccountFiscalSequence(models.Model):
-    _name = 'account.fiscal.sequence'
-    _description = "Account Fiscal Sequence"
 
-    l10n_do_warning_vouchers = fields.Char(
-        string='Warning Sequence',
-        required=False)
-
-    l10n_do_limit_vouchers = fields.Char(
-        string='Limit Sequence',
-        required=False)
-    
-    document_type = fields.Many2one(
-        comodel_name='l10n_latam.document.type',
-        string='Document Type',
-        required=False)
-
-    code = fields.Char(related='document_type.doc_code_prefix')
-
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company', required=True, readonly=True,
-        default=lambda self: self.env.company)
-
-    _sql_constraints = [
-        ('document_type', 'unique (code, company_id)',
-         'You only can use one document type per company')
-    ]
 

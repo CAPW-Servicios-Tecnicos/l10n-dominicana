@@ -231,6 +231,29 @@
 
         <t t-set="l10n_do_amounts" t-value="o._get_l10n_do_amounts()"/>
 
+
+        <t t-if="o.total_descontado > 0">
+            <tr class="border-black">
+                <td>
+                    <strong>Subtotal antes del descuento</strong>
+                </td>
+                 <td class="text-right">
+                    <span t-att-class="oe_subtotal_footer_separator" t-esc="o.total_without_discount"
+                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                </td>
+            </tr>
+        </t>
+        <t t-if="o.total_descontado > 0">
+            <tr class="border-black">
+                <td>
+                    <strong>Total Descontado</strong>
+                </td>
+                 <td class="text-right">
+                    <span t-att-class="oe_subtotal_footer_separator" t-esc="o.total_descontado"
+                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                </td>
+            </tr>
+        </t>
         <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
             <tr class="border-black o_subtotal">
                 <td>
@@ -253,7 +276,7 @@
             <tr t-if="tax_aml.tax_line_id.amount > 0" style="">
                 <t>
                     <td>
-                        <span class="text-nowrap"
+                        <strong class="text-nowrap"
                               t-esc="tax_aml.tax_line_id.description"/>
                     </td>
                     <td class="text-right o_price_total">
@@ -287,17 +310,6 @@
         </tr>
 
         <!-- Total = subtotal + impuestos + retenciones -->
-        <t t-if="o.total_descontado > 0">
-            <tr class="border-black">
-                <td>
-                    <strong>Total Descontado</strong>
-                </td>
-                 <td class="text-right">
-                    <span class="text-nowrap" t-esc="o.total_descontado"
-                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                </td>
-            </tr>
-        </t>
         <tr class="border-black o_total">
             <td>
                 <strong>Total</strong>

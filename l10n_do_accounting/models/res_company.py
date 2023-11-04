@@ -22,14 +22,6 @@ class ResCompany(models.Model):
         "sales with Handheld, enter others.",
     )
 
-    date_equal_to_invoice_retention = fields.Boolean(
-        string='Date Retention Equal to Date Invoice',
-        readonly=False,)
-
-    l10n_do_fiscal_sequence_control = fields.Boolean(
-        string='Activate Fiscal Sequence Control',
-        readonly=False,)
-
     def _localization_use_documents(self):
         """Dominican localization uses documents"""
         self.ensure_one()

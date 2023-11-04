@@ -2,7 +2,6 @@ import re
 
 from psycopg2 import sql
 from werkzeug import urls
-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.osv import expression
@@ -119,7 +118,7 @@ class AccountMove(models.Model):
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
-
+    
     def init(self):
         super(AccountMove, self).init()
         if not self._abstract and self._sequence_index:
@@ -341,6 +340,23 @@ class AccountMove(models.Model):
             raise ValidationError(
                 _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note: "
                   "%s") % self.l10n_latam_document_number)
+
+    # @api.model
+    # def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+    #     res = super(AccountMove, self).fields_view_get(view_id, view_type, toolbar=toolbar, submenu=False)
+    #     if view_type == 'form':
+    #         xml_arch = etree.XML(res['arch'])
+    #         line_fields = xml_arch.xpath("//field[@name='l10n_latam_document_number']")
+    #         move_fields = xml_arch.xpath("//field[@name='move_type']")[0]
+    #         print("view_id....", xml_arch.Element('move_type'))
+    #         for node in line_fields:
+    #             # modifiers = {
+    #             #     'invisible': ['|', '|', ('country_code', '=', 'DO'), ('state', '=', 'cancel'),
+    #             #                   ('move_type', 'in', ('out_invoice', 'out_refund'))], }
+    #             modifiers = {}
+    #             node.set("modifiers", json.dumps(modifiers))
+    #         res['arch'] = etree.tostring(xml_arch, encoding='unicode')
+    #     return res
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):

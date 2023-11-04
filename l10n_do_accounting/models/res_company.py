@@ -31,7 +31,7 @@ class ResCompany(models.Model):
         readonly=False,)
 
     def _localization_use_documents(self):
-        """ Dominican localization uses documents """
+        """Dominican localization uses documents"""
         self.ensure_one()
         return (
             True

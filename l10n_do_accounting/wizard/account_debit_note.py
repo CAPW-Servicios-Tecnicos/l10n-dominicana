@@ -19,7 +19,6 @@ class AccountDebitNote(models.TransientModel):
 
     @api.model
     def _get_l10n_do_debit_action_selection(self):
-
         return [
             ("draft_debit", _("Draft debit")),
             ("apply_debit", _("Apply debit")),
@@ -72,7 +71,6 @@ class AccountDebitNote(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-
         res = super(AccountDebitNote, self).default_get(fields)
 
         move_ids = (

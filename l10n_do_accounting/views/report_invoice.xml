@@ -2,7 +2,6 @@
 <odoo>
 
     <template id="custom_header">
-<<<<<<< HEAD
         <div class="row">
             <div name="left-upper-side" class="col-6">
                 <img t-if="o.company_id.logo"
@@ -13,17 +12,6 @@
                 <strong t-field="o.company_id.company_details"/>
                 <span>RNC:</span>
                 <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>
-=======
-        <div>
-            <div class="row">
-                <div name="left-upper-side" class="col-8">
-                    <img t-if="o.company_id.logo"
-                         t-att-src="image_data_uri(o.company_id.logo)"
-                         style="max-height: 100px;" alt="Logo"/>
-                    <br/>
-                    <br/>
-                </div>
->>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5
             </div>
         </div>
     </template>
@@ -231,8 +219,7 @@
 
         <t t-set="l10n_do_amounts" t-value="o._get_l10n_do_amounts()"/>
 
-
-        <t t-if="o.total_descontado > 0">
+         <t t-if="o.total_descontado > 0">
             <tr class="border-black">
                 <td>
                     <strong>Subtotal antes del descuento</strong>
@@ -254,6 +241,7 @@
                 </td>
             </tr>
         </t>
+
         <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
             <tr class="border-black o_subtotal">
                 <td>
@@ -473,5 +461,4 @@
                t-lang="lang"/>
         </xpath>
     </template>
-
 </odoo>

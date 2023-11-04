@@ -1,10 +1,11 @@
 import re
-
 from psycopg2 import sql
 from werkzeug import urls
+import json
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.osv import expression
+from odoo.exceptions import ValidationError, UserError, AccessError
+from datetime import datetime
 
 
 class AccountMove(models.Model):
@@ -14,7 +15,7 @@ class AccountMove(models.Model):
     _l10n_do_sequence_fixed_regex = r"^(?P<prefix1>.*?)(?P<seq>\d{0,8})$"
 
     def _get_l10n_do_cancellation_type(self):
-        """Return the list of cancellation types required by DGII."""
+        """ Return the list of cancellation types required by DGII. """
         return [
             ("01", _("01 - Pre-printed Invoice Impairment")),
             ("02", _("02 - Printing Errors (Pre-printed Invoice)")),
@@ -29,7 +30,7 @@ class AccountMove(models.Model):
         ]
 
     def _get_l10n_do_ecf_modification_code(self):
-        """Return the list of e-CF modification codes required by DGII."""
+        """ Return the list of e-CF modification codes required by DGII. """
         return [
             ("1", _("01 - Total Cancellation")),
             ("2", _("02 - Text Correction")),
@@ -39,7 +40,7 @@ class AccountMove(models.Model):
         ]
 
     def _get_l10n_do_income_type(self):
-        """Return the list of income types required by DGII."""
+        """ Return the list of income types required by DGII. """
         return [
             ("01", _("01 - Operational Incomes")),
             ("02", _("02 - Financial Incomes")),
@@ -118,7 +119,90 @@ class AccountMove(models.Model):
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
-    
+    manual_currency_rate = fields.Float(string="Currency Rate")
+    is_currency_manual = fields.Boolean(string="is_currency_manual", )
+    total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
+    received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
+    label_report_one = fields.Char(
+        string='Label_report_one',
+        compute='get_received_delivered',
+        required=False)
+    label_report_two = fields.Char(
+        string='Label_report_two',
+        compute='get_received_delivered',
+        required=False)
+
+    fiscal_type_name = fields.Char(
+        string='Name_fiscal_type',
+        compute='call_name_type_fiscal',
+        required=False)
+
+    total_without_discount = fields.Float(
+        string='Total_without_discount',
+        required=False)
+
+    def call_name_type_fiscal(self):
+        for rec in self:
+            rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
+
+    def calculo_total_descontado(self):
+        total = 0
+        total_imponible = 0
+        self.total_descontado = 0.00
+        params = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_dominicana.view_discount_in_account')])
+        if params:
+            for invoice in self:
+                for i in invoice.invoice_line_ids:
+                    total = i.quantity * i.price_unit
+                    to_discount = total * i.discount
+                    res = to_discount / 100.0
+                    invoice.total_descontado += res
+                    total_imponible += i.quantity * i.price_unit
+                invoice.total_without_discount = total_imponible
+        else:
+            self.total_descontado = 0.00
+
+    def action_post(self):
+        result = super(AccountMove, self).action_post()
+        control = self.env['ir.config_parameter'].sudo().get_param('l10n_dominicana.with_localization_control')
+        if control != 'False':
+            limit_date = self.env['ir.config_parameter'].sudo().get_param(
+                'l10n_dominicana.expiration_date_localization')
+            for rec in self:
+                latam_use = rec.journal_id.l10n_latam_use_documents
+                if latam_use:
+                    actual_date = fields.Date.today()
+                    expiration_date = datetime.strptime(limit_date, '%Y-%m-%d').date()
+                    if actual_date > expiration_date:
+                        raise ValidationError(
+                            _(
+                                "Please Contact the Administrator, "
+                                "The Dominican Localization Plan is Expired"
+                            )
+                        )
+        if self.partner_id:
+            invoice_totals = json.loads(self.tax_totals_json)
+            if invoice_totals['amount_total'] == 0.0:
+                raise ValidationError(
+                    "Para confirmar la factura debe ser mayor que %s" % invoice_totals['amount_total'])
+        return result
+
+    def get_received_delivered(self):
+        self.received_delivered = False
+        self.label_report_one = ''
+        self.label_report_two = ''
+        params = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        params_label_one = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.label_one_report')])
+        params_label_two = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
+        if params:
+            self.received_delivered = True
+            self.label_report_one = params_label_one.value
+            self.label_report_two = params_label_two.value
+
     def init(self):
         super(AccountMove, self).init()
         if not self._abstract and self._sequence_index:
@@ -341,23 +425,6 @@ class AccountMove(models.Model):
                 _("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note: "
                   "%s") % self.l10n_latam_document_number)
 
-    # @api.model
-    # def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-    #     res = super(AccountMove, self).fields_view_get(view_id, view_type, toolbar=toolbar, submenu=False)
-    #     if view_type == 'form':
-    #         xml_arch = etree.XML(res['arch'])
-    #         line_fields = xml_arch.xpath("//field[@name='l10n_latam_document_number']")
-    #         move_fields = xml_arch.xpath("//field[@name='move_type']")[0]
-    #         print("view_id....", xml_arch.Element('move_type'))
-    #         for node in line_fields:
-    #             # modifiers = {
-    #             #     'invisible': ['|', '|', ('country_code', '=', 'DO'), ('state', '=', 'cancel'),
-    #             #                   ('move_type', 'in', ('out_invoice', 'out_refund'))], }
-    #             modifiers = {}
-    #             node.set("modifiers", json.dumps(modifiers))
-    #         res['arch'] = etree.tostring(xml_arch, encoding='unicode')
-    #     return res
-
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):
         ecf_invoices = self.search(
@@ -378,6 +445,7 @@ class AccountMove(models.Model):
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
     def _compute_l10n_do_electronic_stamp(self):
+
         l10n_do_ecf_invoice = self.filtered(
             lambda i: i.is_ecf_invoice
                       and not i.l10n_latam_manual_document_number
@@ -386,6 +454,7 @@ class AccountMove(models.Model):
         )
 
         for invoice in l10n_do_ecf_invoice:
+
             if hasattr(invoice.company_id, "l10n_do_ecf_service_env"):
                 ecf_service_env = invoice.company_id.l10n_do_ecf_service_env
             else:
@@ -405,9 +474,8 @@ class AccountMove(models.Model):
             if not is_rfc:
                 qr_string += (
                     "RncComprador=%s&" % invoice.commercial_partner_id.vat
-                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:]
-                    not in ("43", "47")
-                    else ""
+                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:] != "43"
+                    else invoice.company_id.vat
                 )
             qr_string += "ENCF=%s&" % invoice.l10n_do_fiscal_number or ""
             if not is_rfc:
@@ -475,32 +543,6 @@ class AccountMove(models.Model):
 
         super(AccountMove, (self - l10n_do_invoices))._check_unique_sequence_number()
 
-    @api.constrains(
-        "l10n_do_fiscal_number", "partner_id", "company_id", "posted_before"
-    )
-    def _l10n_do_check_unique_vendor_number(self):
-        for rec in self.filtered(
-            lambda inv: inv.l10n_do_fiscal_number
-            and inv.country_code == "DO"
-            and inv.l10n_latam_use_documents
-            and inv.is_purchase_document()
-            and inv.commercial_partner_id
-        ):
-            domain = [
-                ("move_type", "=", rec.move_type),
-                ("l10n_do_fiscal_number", "=", rec.l10n_do_fiscal_number),
-                ("company_id", "=", rec.company_id.id),
-                ("id", "!=", rec.id),
-                ("commercial_partner_id", "=", rec.commercial_partner_id.id),
-                ("state", "!=", "cancel"),
-            ]
-            if rec.search_count(domain):
-                raise ValidationError(
-                    _(
-                        "Vendor bill Fiscal Number must be unique per vendor and company."
-                    )
-                )
-
     @api.depends("l10n_do_fiscal_number")
     def _compute_l10n_latam_document_number(self):
         l10n_do_recs = self.filtered(
@@ -513,52 +555,27 @@ class AccountMove(models.Model):
     def button_cancel(self):
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
-<<<<<<< HEAD
                         and self.move_type[-6:] in ("nvoice", "refund")
                         and inv.l10n_latam_use_documents
                         and not inv.is_ecf_invoice
-=======
-            and self.move_type[-6:] in ("nvoice", "refund")
-            and inv.l10n_latam_use_documents
->>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5
         )
-        not_ecf_fiscal_invoice = fiscal_invoice.filtered(lambda i: not i.is_ecf_invoice)
 
         if len(fiscal_invoice) > 1:
             raise ValidationError(
                 _("You cannot cancel multiple fiscal invoices at a time.")
             )
 
-<<<<<<< HEAD
         if fiscal_invoice and not self.env.user.has_group(
                 "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
-=======
-        if not_ecf_fiscal_invoice and not self.env.user.has_group(
-            "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
->>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5
         ):
             raise AccessError(_("You are not allowed to cancel Fiscal Invoices"))
 
-        if fiscal_invoice and not fiscal_invoice.posted_before:
-            raise ValidationError(
-                _(
-                    "You cannot cancel a fiscal document that has not been posted before."
-                )
-            )
-
-        if not_ecf_fiscal_invoice and not self.env.context.get(
-            "skip_cancel_wizard", False
-        ):
-            action = (
-                self.env.ref("l10n_do_accounting.action_account_move_cancel")
-                .sudo()
-                .read()[0]
-            )
+        if fiscal_invoice and not self.env.context.get("skip_cancel_wizard", False):
+            action = self.env.ref(
+                "l10n_do_accounting.action_account_move_cancel"
+            ).read()[0]
             action["context"] = {"default_move_id": fiscal_invoice.id}
             return action
-
-        if fiscal_invoice:
-            fiscal_invoice.button_draft()
 
         return super(AccountMove, self).button_cancel()
 
@@ -575,24 +592,33 @@ class AccountMove(models.Model):
 
     @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
     def _inverse_l10n_latam_document_number(self):
+        # Call method clear fiscal number
+        # name_fiscal_type = self.fiscal_type_name
+        for con in self:
+            if con.move_type != 'entry':
+                con.ref = con.l10n_latam_document_number
         for rec in self.filtered("l10n_latam_document_type_id"):
             if not rec.l10n_latam_document_number:
                 rec.l10n_do_fiscal_number = ""
             else:
                 document_type_id = rec.l10n_latam_document_type_id
-                if document_type_id.l10n_do_ncf_type:
-                    document_number = document_type_id._format_document_number(
-                        rec.l10n_latam_document_number
-                    )
-                else:
-                    document_number = rec.l10n_latam_document_number
+                if self.fiscal_type_name == str(document_type_id.id) or self.name == "/":
+                    if document_type_id.l10n_do_ncf_type:
+                        document_number = document_type_id._format_document_number(
+                            rec.l10n_latam_document_number
+                        )
+                    else:
+                        document_number = rec.l10n_latam_document_number
 
-                if rec.l10n_latam_document_number != document_number:
-                    rec.l10n_latam_document_number = document_number
-                rec.l10n_do_fiscal_number = document_number
-        super(
-            AccountMove, self.filtered(lambda m: m.country_code != "DO")
-        )._inverse_l10n_latam_document_number()
+                    if rec.l10n_latam_document_number != document_number:
+                        rec.l10n_latam_document_number = document_number
+                    rec.l10n_do_fiscal_number = document_number
+                else:
+                    self.l10n_latam_document_number = ""
+                self.fiscal_type_name = self.l10n_latam_document_type_id.id
+            super(
+                AccountMove, self.filtered(lambda m: m.country_code != "DO")
+            )._inverse_l10n_latam_document_number()
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
@@ -722,13 +748,13 @@ class AccountMove(models.Model):
             "in_invoice",
             "in_refund",
         ) and self.l10n_latam_document_type_id.l10n_do_ncf_type not in (
-                   "minor",
-                   "e-minor",
-                   "informal",
-                   "e-informal",
-                   "exterior",
-                   "e-exterior",
-               )
+            "minor",
+            "e-minor",
+            "informal",
+            "e-informal",
+            "exterior",
+            "e-exterior",
+        )
 
     def _get_debit_line_tax(self, debit_date):
         if self.move_type == "out_invoice":
@@ -791,6 +817,7 @@ class AccountMove(models.Model):
         )
 
     def _post(self, soft=True):
+
         res = super()._post(soft)
 
         l10n_do_invoices = self.filtered(
@@ -801,9 +828,6 @@ class AccountMove(models.Model):
         for invoice in l10n_do_invoices.filtered(
                 lambda inv: inv.l10n_latam_document_type_id
         ):
-            if not invoice.amount_total:
-                raise UserError(_("Fiscal invoice cannot be posted with amount zero."))
-
             invoice.l10n_do_ncf_expiration_date = (
                 invoice.journal_id.l10n_do_document_type_ids.filtered(
                     lambda doc: doc.l10n_latam_document_type_id == invoice.l10n_latam_document_type_id
@@ -896,6 +920,7 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None, lock=True):
+
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
                 relaxed=relaxed, with_prefix=with_prefix, lock=lock
@@ -943,7 +968,6 @@ class AccountMove(models.Model):
         return (self.env.cr.fetchone() or [None])[0]
 
     def _get_sequence_format_param(self, previous):
-
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 
@@ -952,6 +976,10 @@ class AccountMove(models.Model):
         format_values = re.match(regex, previous).groupdict()
         format_values["seq_length"] = len(format_values["seq"])
         format_values["seq"] = int(format_values.get("seq") or 0)
+        if self.l10n_do_fiscal_number:
+            format_fiscal_number = re.match(regex, self.l10n_do_fiscal_number).groupdict()
+            if self.l10n_latam_document_type_id.doc_code_prefix != format_fiscal_number["prefix1"]:
+                raise ValidationError(_("You can't change the document type, please verify your selections"))
 
         placeholders = re.findall(r"(prefix\d|seq\d?)", regex)
         format = "".join(
@@ -976,6 +1004,21 @@ class AccountMove(models.Model):
         if new:
             format_values["seq"] = 0
         format_values["seq"] = format_values["seq"] + 1
+
+        if self.company_id.l10n_do_fiscal_sequence_control:
+            if self.state != "draft" and not self[self._l10n_do_sequence_field]:
+                for inv in self:
+                    new_seq = format_values["seq"]
+                    doc_type = self.env['account.fiscal.sequence'].search(
+                        [('document_type', '=', inv.l10n_latam_document_type_id.id)])
+
+                limit_set = int(doc_type.l10n_do_limit_vouchers)
+                warning_seq = int(doc_type.l10n_do_warning_vouchers)
+                if new_seq == warning_seq:
+                    inv.notification_warning_seq()
+                elif new_seq > limit_set:
+                    raise ValidationError(
+                        _("Fiscal invoices sequence is not available, please contact the Administrator"))
 
         if (
                 self.env.context.get("prefetch_seq")
@@ -1008,3 +1051,16 @@ class AccountMove(models.Model):
                 _("You cannot delete fiscal invoice which have been posted before")
             )
         return super(AccountMove, self).unlink()
+
+    # def notification_warning_seq(self):
+    #     notification = {
+    #         'type': 'ir.actions.client',
+    #         'tag': 'display_notification',
+    #         'params': {
+    #             'title': _('Warning'),
+    #             'type': 'warning',
+    #             'message': 'Almost fiscal sequence are finish',
+    #             'sticky': True,
+    #         }
+    #     }
+    #     return notification

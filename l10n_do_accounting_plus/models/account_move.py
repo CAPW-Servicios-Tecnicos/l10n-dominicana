@@ -13,23 +13,22 @@ class AccountMove(models.Model):
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
     total_without_discount = fields.Float(string='Total_without_discount')
     received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
-    label_report_one = fields.Char(
-        string='Label_report_one',
-        compute='get_received_delivered',
-        required=False)
-    label_report_two = fields.Char(
-        string='Label_report_two',
-        compute='get_received_delivered',
-        required=False)
-
-    fiscal_type_name = fields.Char(
-        string='Name_fiscal_type',
-        compute='call_name_type_fiscal',
-        required=False)
+    label_report_one = fields.Char(string='Label_report_one', compute='get_received_delivered')
+    label_report_two = fields.Char(string='Label_report_two', compute='get_received_delivered')
+    fiscal_type_name = fields.Char(string='Name_fiscal_type', compute='call_name_type_fiscal')
 
     def call_name_type_fiscal(self):
         for rec in self:
             rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
+
+    def convert_to_fiscal_invoice(self):
+        for invoice in self:
+            if invoice.jounal_id.l10n_latam_use_documents:
+                print(invoice.state)
+            else:
+                raise ValidationError(
+                    "This invoice is associated with a fiscal journal %s," % invoice.journal_id.name /
+                    "you cannot convert it to fiscal again.")
 
     def calculo_total_descontado(self):
         total = 0

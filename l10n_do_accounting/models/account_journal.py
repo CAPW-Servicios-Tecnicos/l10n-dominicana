@@ -21,7 +21,6 @@ class AccountJournal(models.Model):
         selection="_get_l10n_do_payment_form",
         string="Payment Form",
     )
-
     l10n_do_document_type_ids = fields.One2many(
         "l10n_do.account.journal.document_type",
         "journal_id",
@@ -134,9 +133,9 @@ class AccountJournal(models.Model):
             ncf_types = ["credit_note"]
 
         if (
-                invoice
-                and invoice.debit_origin_id
-                or self.env.context.get("internal_type") == "debit_note"
+            invoice
+            and invoice.debit_origin_id
+            or self.env.context.get("internal_type") == "debit_note"
         ):
             return ["debit_note", "e-debit_note"]
 
@@ -154,8 +153,8 @@ class AccountJournal(models.Model):
         self.ensure_one()
 
         if (
-                not self.l10n_latam_use_documents
-                or self.company_id.country_id != self.env.ref("base.do")
+            not self.l10n_latam_use_documents
+            or self.company_id.country_id != self.env.ref("base.do")
         ):
             return
 
@@ -175,8 +174,8 @@ class AccountJournal(models.Model):
         ]
         documents = self.env["l10n_latam.document.type"].search(domain)
         for document in documents.filtered(
-                lambda doc: doc.l10n_do_ncf_type
-                            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
+            lambda doc: doc.l10n_do_ncf_type
+            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
         ):
             document_types |= (
                 self.env["l10n_do.account.journal.document_type"]
@@ -211,7 +210,6 @@ class AccountJournalDocumentType(models.Model):
     journal_id = fields.Many2one(
         "account.journal", "Journal", required=True, readonly=True
     )
-
     l10n_latam_document_type_id = fields.Many2one(
         "l10n_latam.document.type", "Document type", required=True, readonly=True
     )
@@ -223,28 +221,3 @@ class AccountJournalDocumentType(models.Model):
     company_id = fields.Many2one(
         string="Company", related="journal_id.company_id", readonly=True
     )
-
-
-class AccountPaymentMethod(models.Model):
-    _inherit = 'account.payment.method.line'
-
-    def _get_l10n_do_payment_form(self):
-        """ Return the list of payment forms allowed by DGII. """
-        return [
-            ("cash", _("Cash")),
-            ("bank", _("Check / Transfer")),
-            ("card", _("Credit Card")),
-            ("credit", _("Credit")),
-            ("swap", _("Swap")),
-            ("bond", _("Bonds or Gift Certificate")),
-            ("others", _("Other Sale Type")),
-        ]
-
-    l10n_do_payment_form = fields.Selection(
-        string='Payment Form',
-        selection='_get_l10n_do_payment_form',
-        required=False, )
-
-
-
-

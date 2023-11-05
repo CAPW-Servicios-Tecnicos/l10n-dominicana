@@ -159,6 +159,7 @@ class AccountDebitNote(models.TransientModel):
 
     def _prepare_default_values(self, move):
         res = super(AccountDebitNote, self)._prepare_default_values(move)
+
         # Include additional info when l10n_do debit note
         if self.l10n_latam_country_code == "DO" and move.l10n_latam_use_documents:
             res.update(
@@ -185,9 +186,11 @@ class AccountDebitNote(models.TransientModel):
                 percentage=self.l10n_do_percentage,
                 reason=self.reason,
             )
+
         action = super(AccountDebitNote, self).create_debit()
         if self.l10n_do_debit_action == "apply_debit":
             # Post Debit Note
             move_id = self.env["account.move"].browse(action.get("res_id", False))
             move_id._post()
+
         return action

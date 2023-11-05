@@ -25,4 +25,5 @@ class ReSequenceWizard(models.TransientModel):
 
             if l10n_do_move_ids:
                 raise UserError(_("Fiscal invoices resequence is not allowed."))
+
         return super(ReSequenceWizard, self).default_get(fields_list)

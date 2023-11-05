@@ -16,5 +16,3 @@ class AccountPayment(models.Model):
             self.is_currency_manual = False
         else:
             self.is_currency_manual = True
-
-    # def _synchronize_from_moves(self, changed_fields):

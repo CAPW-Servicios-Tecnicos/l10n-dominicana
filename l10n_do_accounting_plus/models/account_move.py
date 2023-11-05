@@ -1,7 +1,6 @@
 import json
 import re
 from datetime import datetime
-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
@@ -12,6 +11,7 @@ class AccountMove(models.Model):
     manual_currency_rate = fields.Float(string="Currency Rate")
     is_currency_manual = fields.Boolean(string="is_currency_manual", )
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
+    total_without_discount = fields.Float(string='Total_without_discount')
     received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
     label_report_one = fields.Char(
         string='Label_report_one',
@@ -33,16 +33,19 @@ class AccountMove(models.Model):
 
     def calculo_total_descontado(self):
         total = 0
+        total_imponible = 0
         self.total_descontado = 0.00
         params = self.env['ir.config_parameter'].sudo().search(
             [('key', '=', 'l10n_dominicana.view_discount_in_account')])
         if params:
-            for rec in self:
-                for order in rec.invoice_line_ids:
-                    total += order.price_unit
-                    amount = rec.amount_untaxed
-                    if total:
-                        rec.total_descontado = total - amount
+            for invoice in self:
+                for i in invoice.invoice_line_ids:
+                    total = i.quantity * i.price_unit
+                    to_discount = total * i.discount
+                    res = to_discount / 100.0
+                    invoice.total_descontado += res
+                    total_imponible += i.quantity * i.price_unit
+                invoice.total_without_discount = total_imponible
         else:
             self.total_descontado = 0.00
 

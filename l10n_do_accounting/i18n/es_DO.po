@@ -6,16 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-06 17:37+0000\n"
-"PO-Revision-Date: 2022-04-06 13:39-0400\n"
+"POT-Creation-Date: 2023-09-18 15:55+0000\n"
+"PO-Revision-Date: 2023-09-18 11:56-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: es_DO\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: \n"
-"X-Generator: Poedit 3.0.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/models/account_move.py:0
@@ -407,6 +407,7 @@ msgstr "Puede modificar campos fiscales de contactos"
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.account_move_cancel_view
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_move_form
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -684,6 +685,12 @@ msgstr "Número de Comprobante Fiscal"
 #, python-format
 msgid "Fiscal Tax Payer"
 msgstr "Contribuyente"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "Fiscal invoice cannot be posted with amount zero."
+msgstr "Las facturas fiscales no pueden ser Confirmadas con monto cero."
 
 #. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/models/account_move.py:0
@@ -1110,6 +1117,12 @@ msgid "Use Documents"
 msgstr "Es fiscal"
 
 #. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "There is already a sale invoice with fiscal number %s"
+msgstr "Ya existe una factura de ventas con el NCF %s"
+
+#. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_account_move_reversal_inherited
 msgid ""
 "Use this option if you want to fully apply a credit note.\n"
@@ -1149,6 +1162,13 @@ msgstr ""
 #: model:ir.ui.menu,name:l10n_do_accounting.menu_action_invoice_in_debit_note
 msgid "Vendor Debit Notes"
 msgstr "Notas de Débito de Proveedor"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "Vendor bill Fiscal Number must be unique per vendor and company."
+msgstr ""
+"El Comprobante Fiscal de la factura de proveedor debe ser único por proveedor y compañía."
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.report_invoice_document_inherited
@@ -1267,3 +1287,9 @@ msgstr ""
 #, python-format
 msgid "special from Tax Paying"
 msgstr "Exento"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "You cannot cancel a fiscal document that has not been posted before."
+msgstr "No puede cancelar un documento fiscal que no haya sido posteado anteriormente."

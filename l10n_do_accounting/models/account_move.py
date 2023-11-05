@@ -1,7 +1,7 @@
 import re
-
 from psycopg2 import sql
 from werkzeug import urls
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.osv import expression
@@ -14,7 +14,7 @@ class AccountMove(models.Model):
     _l10n_do_sequence_fixed_regex = r"^(?P<prefix1>.*?)(?P<seq>\d{0,8})$"
 
     def _get_l10n_do_cancellation_type(self):
-        """ Return the list of cancellation types required by DGII. """
+        """Return the list of cancellation types required by DGII."""
         return [
             ("01", _("01 - Pre-printed Invoice Impairment")),
             ("02", _("02 - Printing Errors (Pre-printed Invoice)")),
@@ -29,7 +29,7 @@ class AccountMove(models.Model):
         ]
 
     def _get_l10n_do_ecf_modification_code(self):
-        """ Return the list of e-CF modification codes required by DGII. """
+        """Return the list of e-CF modification codes required by DGII."""
         return [
             ("1", _("01 - Total Cancellation")),
             ("2", _("02 - Text Correction")),
@@ -39,7 +39,7 @@ class AccountMove(models.Model):
         ]
 
     def _get_l10n_do_income_type(self):
-        """ Return the list of income types required by DGII. """
+        """Return the list of income types required by DGII."""
         return [
             ("01", _("01 - Operational Incomes")),
             ("02", _("02 - Financial Incomes")),
@@ -118,7 +118,7 @@ class AccountMove(models.Model):
         "ECF XML File Name", copy=False, readonly=True
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
-    
+
     def init(self):
         super(AccountMove, self).init()
         if not self._abstract and self._sequence_index:
@@ -378,7 +378,6 @@ class AccountMove(models.Model):
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
     def _compute_l10n_do_electronic_stamp(self):
-
         l10n_do_ecf_invoice = self.filtered(
             lambda i: i.is_ecf_invoice
                       and not i.l10n_latam_manual_document_number
@@ -387,7 +386,6 @@ class AccountMove(models.Model):
         )
 
         for invoice in l10n_do_ecf_invoice:
-
             if hasattr(invoice.company_id, "l10n_do_ecf_service_env"):
                 ecf_service_env = invoice.company_id.l10n_do_ecf_service_env
             else:
@@ -407,8 +405,9 @@ class AccountMove(models.Model):
             if not is_rfc:
                 qr_string += (
                     "RncComprador=%s&" % invoice.commercial_partner_id.vat
-                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:] != "43"
-                    else invoice.company_id.vat
+                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:]
+                    not in ("43", "47")
+                    else ""
                 )
             qr_string += "ENCF=%s&" % invoice.l10n_do_fiscal_number or ""
             if not is_rfc:
@@ -476,6 +475,32 @@ class AccountMove(models.Model):
 
         super(AccountMove, (self - l10n_do_invoices))._check_unique_sequence_number()
 
+    @api.constrains(
+        "l10n_do_fiscal_number", "partner_id", "company_id", "posted_before"
+    )
+    def _l10n_do_check_unique_vendor_number(self):
+        for rec in self.filtered(
+            lambda inv: inv.l10n_do_fiscal_number
+            and inv.country_code == "DO"
+            and inv.l10n_latam_use_documents
+            and inv.is_purchase_document()
+            and inv.commercial_partner_id
+        ):
+            domain = [
+                ("move_type", "=", rec.move_type),
+                ("l10n_do_fiscal_number", "=", rec.l10n_do_fiscal_number),
+                ("company_id", "=", rec.company_id.id),
+                ("id", "!=", rec.id),
+                ("commercial_partner_id", "=", rec.commercial_partner_id.id),
+                ("state", "!=", "cancel"),
+            ]
+            if rec.search_count(domain):
+                raise ValidationError(
+                    _(
+                        "Vendor bill Fiscal Number must be unique per vendor and company."
+                    )
+                )
+
     @api.depends("l10n_do_fiscal_number")
     def _compute_l10n_latam_document_number(self):
         l10n_do_recs = self.filtered(
@@ -490,25 +515,39 @@ class AccountMove(models.Model):
             lambda inv: inv.country_code == "DO"
                         and self.move_type[-6:] in ("nvoice", "refund")
                         and inv.l10n_latam_use_documents
-                        and not inv.is_ecf_invoice
         )
+        not_ecf_fiscal_invoice = fiscal_invoice.filtered(lambda i: not i.is_ecf_invoice)
 
         if len(fiscal_invoice) > 1:
             raise ValidationError(
                 _("You cannot cancel multiple fiscal invoices at a time.")
             )
 
-        if fiscal_invoice and not self.env.user.has_group(
-                "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
+        if not_ecf_fiscal_invoice and not self.env.user.has_group(
+            "l10n_do_accounting.group_l10n_do_fiscal_invoice_cancel"
         ):
             raise AccessError(_("You are not allowed to cancel Fiscal Invoices"))
 
-        if fiscal_invoice and not self.env.context.get("skip_cancel_wizard", False):
-            action = self.env.ref(
-                "l10n_do_accounting.action_account_move_cancel"
-            ).read()[0]
+        if fiscal_invoice and not fiscal_invoice.posted_before:
+            raise ValidationError(
+                _(
+                    "You cannot cancel a fiscal document that has not been posted before."
+                )
+            )
+
+        if not_ecf_fiscal_invoice and not self.env.context.get(
+            "skip_cancel_wizard", False
+        ):
+            action = (
+                self.env.ref("l10n_do_accounting.action_account_move_cancel")
+                .sudo()
+                .read()[0]
+            )
             action["context"] = {"default_move_id": fiscal_invoice.id}
             return action
+
+        if fiscal_invoice:
+            fiscal_invoice.button_draft()
 
         return super(AccountMove, self).button_cancel()
 
@@ -741,7 +780,6 @@ class AccountMove(models.Model):
         )
 
     def _post(self, soft=True):
-
         res = super()._post(soft)
 
         l10n_do_invoices = self.filtered(
@@ -752,6 +790,9 @@ class AccountMove(models.Model):
         for invoice in l10n_do_invoices.filtered(
                 lambda inv: inv.l10n_latam_document_type_id
         ):
+            if not invoice.amount_total:
+                raise UserError(_("Fiscal invoice cannot be posted with amount zero."))
+
             invoice.l10n_do_ncf_expiration_date = (
                 invoice.journal_id.l10n_do_document_type_ids.filtered(
                     lambda doc: doc.l10n_latam_document_type_id == invoice.l10n_latam_document_type_id
@@ -844,7 +885,6 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None, lock=True):
-
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
                 relaxed=relaxed, with_prefix=with_prefix, lock=lock
@@ -892,7 +932,6 @@ class AccountMove(models.Model):
         return (self.env.cr.fetchone() or [None])[0]
 
     def _get_sequence_format_param(self, previous):
-
         if not self._context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 

@@ -32,6 +32,11 @@
                     ('country_code', '=', 'DO')]
                     }
                 </attribute>
+            <xpath expr="//button[@name='button_cancel']" position="after">
+                <button name="button_cancel" type="object" string="Cancel"
+                        attrs="{'invisible': ['|',
+                        ('state', 'in', ('draft', 'cancel')),
+                        ('country_code', '!=', 'DO')]}"/>
             </xpath>
             <xpath expr="//button[@name='button_draft']" position="attributes">
                 <attribute name="attrs">{

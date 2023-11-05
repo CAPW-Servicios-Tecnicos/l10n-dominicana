@@ -120,7 +120,8 @@ class AccountMove(models.Model):
     )
     l10n_latam_manual_document_number = fields.Boolean(store=True)
     manual_currency_rate = fields.Float(string="Currency Rate")
-    is_currency_manual = fields.Boolean(string="is_currency_manual", )
+    is_currency_manual = fields.Boolean(string="is_currency_manual")
+    total_without_discount = fields.Float(string='Total_without_discount')
     total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
     received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
     label_report_one = fields.Char(
@@ -135,10 +136,6 @@ class AccountMove(models.Model):
     fiscal_type_name = fields.Char(
         string='Name_fiscal_type',
         compute='call_name_type_fiscal',
-        required=False)
-
-    total_without_discount = fields.Float(
-        string='Total_without_discount',
         required=False)
 
     def call_name_type_fiscal(self):

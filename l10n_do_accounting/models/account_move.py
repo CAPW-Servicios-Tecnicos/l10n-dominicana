@@ -1,13 +1,13 @@
 import re
 from psycopg2 import sql
 from werkzeug import urls
+import json
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError, RedirectWarning
 
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
-
 
 
 class AccountMove(models.Model):
@@ -124,6 +124,15 @@ class AccountMove(models.Model):
     manual_currency_rate = fields.Float(string="Currency Rate")
     is_currency_manual = fields.Boolean(string="is_currency_manual", )
 
+    def action_post(self):
+        result = super(AccountMove, self).action_post()
+        if self.partner_id:
+            invoice_totals = self.amount_total
+            if invoice_totals == 0.0:
+                raise ValidationError(
+                    "Para confirmar la factura debe ser mayor que %s" % invoice_totals)
+        return result
+
     def init(self):
 
         super(AccountMove, self).init()
@@ -158,7 +167,7 @@ class AccountMove(models.Model):
 
     @api.model
     def _name_search(
-        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
+            self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         args = args or []
         domain = []
@@ -375,9 +384,9 @@ class AccountMove(models.Model):
                       and not i.l10n_latam_manual_document_number
                       and i.l10n_do_ecf_security_code
 
-            and not i.l10n_latam_manual_document_number
-            and i.l10n_do_ecf_security_code
-            and i.state == "posted"
+                      and not i.l10n_latam_manual_document_number
+                      and i.l10n_do_ecf_security_code
+                      and i.state == "posted"
 
         )
 
@@ -410,7 +419,6 @@ class AccountMove(models.Model):
                 qr_string += "FechaEmision=%s&" % (
                         invoice.invoice_date or fields.Date.today()
                 ).strftime("%d-%m-%Y")
-
 
             l10n_do_amounts = invoice._get_l10n_do_amounts(company_currency=True)
             l10n_do_total = (
@@ -590,9 +598,9 @@ class AccountMove(models.Model):
                         and inv.l10n_latam_use_documents
                         and inv.l10n_latam_document_type_id
 
-            and inv.l10n_latam_use_documents
-            and inv.l10n_latam_document_type_id
-            and inv.state == "posted"
+                        and inv.l10n_latam_use_documents
+                        and inv.l10n_latam_document_type_id
+                        and inv.state == "posted"
         )
         for rec in l10n_do_invoices:
             has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))
@@ -687,13 +695,13 @@ class AccountMove(models.Model):
             "in_invoice",
             "in_refund",
         ) and self.l10n_latam_document_type_id.l10n_do_ncf_type not in (
-                   "minor",
-                   "e-minor",
-                   "informal",
-                   "e-informal",
-                   "exterior",
-                   "e-exterior",
-               )
+            "minor",
+            "e-minor",
+            "informal",
+            "e-informal",
+            "exterior",
+            "e-exterior",
+        )
 
     def _get_debit_line_tax(self, debit_date):
 
@@ -945,9 +953,9 @@ class AccountMove(models.Model):
         format_values["seq"] = format_values["seq"] + 1
 
         if (
-            self.env.context.get("prefetch_seq")
-            or self.state != "draft"
-            and not self[self._l10n_do_sequence_field]
+                self.env.context.get("prefetch_seq")
+                or self.state != "draft"
+                and not self[self._l10n_do_sequence_field]
         ):
             self[
                 self._l10n_do_sequence_field

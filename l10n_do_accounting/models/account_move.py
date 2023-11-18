@@ -10,6 +10,7 @@ from datetime import datetime
 
 class AccountMove(models.Model):
     _inherit = "account.move"
+    _rec_names_search = ["l10n_do_fiscal_number"]
 
     _l10n_do_sequence_field = "l10n_do_fiscal_number"
     _l10n_do_sequence_fixed_regex = r"^(?P<prefix1>.*?)(?P<seq>\d{0,8})$"
@@ -109,7 +110,7 @@ class AccountMove(models.Model):
     )
     l10n_do_fiscal_number = fields.Char(
         "Fiscal Number",
-        index=True,
+        index="trigram",
         tracking=True,
         copy=False,
         help="Stored field equivalent of l10n_latam_document number",
@@ -284,11 +285,12 @@ class AccountMove(models.Model):
 
     def _get_l10n_do_amounts(self):
         """
-        Method used to to prepare dominican fiscal invoices amounts data. Widely used
+        Method used to prepare dominican fiscal invoices amounts data. Widely used
         on reports and electronic invoicing.
         """
         self.ensure_one()
 
+<<<<<<< HEAD
         tax_lines = self.line_ids.filtered(
             lambda x: x.tax_group_id.id
                       in [
@@ -396,6 +398,9 @@ class AccountMove(models.Model):
             result.update(currency_vals)
 
         return result
+=======
+        return self.line_ids._get_l10n_do_line_amounts()
+>>>>>>> 6a674d1fd1087914e2484a4992c1e7b63b55ddb4
 
     @api.depends(
         "company_id",
@@ -515,7 +520,7 @@ class AccountMove(models.Model):
                         and inv.state == "posted"
         )
         if l10n_do_invoices:
-            self.flush(
+            self.flush_model(
                 ["name", "journal_id", "move_type", "state", "l10n_do_fiscal_number"]
             )
             self._cr.execute(
@@ -767,6 +772,7 @@ class AccountMove(models.Model):
                 "l10n_do.%s_tax_0_purch" % self.company_id.id
             )
 
+<<<<<<< HEAD
     def _move_autocomplete_invoice_lines_create(self, vals_list):
         ctx = self.env.context
         refund_type = ctx.get("refund_type")
@@ -813,6 +819,8 @@ class AccountMove(models.Model):
             vals_list
         )
 
+=======
+>>>>>>> 6a674d1fd1087914e2484a4992c1e7b63b55ddb4
     def _post(self, soft=True):
 
         res = super()._post(soft)
@@ -954,7 +962,7 @@ class AccountMove(models.Model):
             field=self._l10n_do_sequence_field,
         )
 
-        self.flush(
+        self.flush_model(
             [
                 self._l10n_do_sequence_field,
                 "l10n_do_sequence_number",

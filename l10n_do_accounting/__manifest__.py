@@ -7,7 +7,11 @@
     "author": "iterativo LLC, " "Indexa, " "CAPW Servicios Tecnicos",
     "category": "Localization",
     "website": "https://github.com/odoo-dominicana",
+<<<<<<< HEAD
     "version": "15.0.0.12.0",
+=======
+    "version": "16.0.1.3.0",
+>>>>>>> 6a674d1fd1087914e2484a4992c1e7b63b55ddb4
     # any module necessary for this one to work correctly
     "depends": ["l10n_latam_invoice_document", "l10n_do"],
     # always loaded

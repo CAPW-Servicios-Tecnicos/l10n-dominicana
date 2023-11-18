@@ -1,9 +1,7 @@
-from odoo.tests import tagged
 from odoo.tests.common import Form
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
-@tagged("external_l10n", "post_install", "-at_install", "-standard", "external")
 class L10nDOTestsCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls, chart_template_ref="l10n_do.do_chart_template"):
@@ -131,17 +129,20 @@ class L10nDOTestsCommon(AccountTestInvoicingCommon):
                     if ncf_type and ncf_type[-7:] == "special":
                         invoice_line_form.tax_ids.clear()
                     elif ncf_type and ncf_type[-8:] == "informal":
+                        company_tax_prefix = "l10n_do.%s_" % invoice_form.company_id.id
                         invoice_line_form.tax_ids.clear()
-                        taxes = self.env["account.tax"].search(
+                        taxes = self.env["account.tax"].browse(
                             [
-                                ("company_id", "=", invoice_form.journal_id.id),
-                                ("type_tax_use", "=", "purchase"),
-                                ("amount", "in", (18, -18, -10)),
-                            ],
-                            limit=3,
+                                self.env.ref(company_tax_prefix + "tax_18_purch").id,
+                                self.env.ref(
+                                    company_tax_prefix + "ret_100_tax_person"
+                                ).id,
+                                self.env.ref(
+                                    company_tax_prefix + "ret_10_income_person"
+                                ).id,
+                            ]
                         )
                         for tax in taxes:
                             invoice_line_form.tax_ids.add(tax)
-            invoice_form.invoice_date = invoice_form.date
         invoice = invoice_form.save()
         return invoice

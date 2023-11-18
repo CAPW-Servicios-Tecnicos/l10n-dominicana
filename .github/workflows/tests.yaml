@@ -13,9 +13,10 @@ on:
   pull_request:
     branches:
       - '[0-9]+.0'
-    types: [ labeled ]
+    types: [ opened, synchronize, reopened, labeled ]
 
 env:
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   REQUIRED_MODULES: 'l10n_generic_coa' # list of addional addons to install separated by comma
@@ -25,6 +26,9 @@ env:
 =======
   REQUIRED_MODULES: # list of addional addons to install separated by comma
 >>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5
+=======
+  REQUIRED_MODULES: 'l10n_do' # list of addional addons to install separated by comma
+>>>>>>> 6a674d1fd1087914e2484a4992c1e7b63b55ddb4
   TEST_TAGS: '0'
 
 jobs:
@@ -35,7 +39,7 @@ jobs:
       get_modules: ${{ steps.get_modules.outputs.modules }}
     services:
       db:
-        image: postgres:13-alpine
+        image: postgres:13
         env:
           POSTGRES_DB: postgres
           POSTGRES_USER: odoo

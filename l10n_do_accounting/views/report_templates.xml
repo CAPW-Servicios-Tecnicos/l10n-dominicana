@@ -4,43 +4,29 @@
     <template id="web_address_layout_inherited" inherit_id="web.address_layout">
         <!-- do not show company address on document header  -->
         <xpath expr="//t[@t-if='address']/div" position="attributes">
-            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move")</attribute>
-        </xpath>
-    </template>
-    <!-- do not show partner address on document header when l10n do invoice -->
-    <!--<template id="external_layout_clean_inherited" inherit_id="web.external_layout_clean">
-        <xpath expr="//div[hasclass('o_clean_header')]/div/div[@name='company_address']" position="attributes">
             <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move" and o.country_code != "DO")</attribute>
         </xpath>
-    </template>-->
-    <template id="external_layout_standard_inherited" inherit_id="web.external_layout_standard">
-        <xpath expr="//div[@name='company_address']" position="attributes">
-            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move")</attribute>
-        </xpath>
     </template>
-    <!--<template id="external_layout_background_inherited" inherit_id="web.external_layout_background">
+
+    <template id="external_layout_striped_inherited" inherit_id="web.external_layout_striped">
         <xpath expr="//div[hasclass('company_address')]" position="attributes">
             <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move" and o.country_code != "DO")</attribute>
         </xpath>
-    </template>-->
+    </template>
     <template id="external_layout_boxed_inherited" inherit_id="web.external_layout_boxed">
         <xpath expr="//div[@name='company_address']" position="attributes">
-            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move")</attribute>
+            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move" and o.country_code != "DO")</attribute>
         </xpath>
-        <xpath expr="//div[@t-attf-class='footer o_boxed_footer o_company_#{company.id}_layout']/div" position="replace">
-                <div class="text-center">
-                    <ul class="list-inline">
-                        <strong><li t-if="company.name" class="list-inline-item"><span t-field="company.name"/></li></strong>
-                        <li t-if="company.phone" class="list-inline-item">Tel: <span class="o_force_ltr" t-field="company.phone"/></li>
-                        <li t-if="company.email" class="list-inline-item">Email: <span t-field="company.email"/></li>
-                        <li t-if="company.website" class="list-inline-item"> Website: <span t-field="company.website"/></li>
-                    </ul>
-                    <div t-field="company.report_footer"/>
-                    <div t-if="report_type == 'pdf'">
-                        Page: <span class="page"/> / <span class="topage"/>
-                    </div>
-                </div>
-            </xpath>
+    </template>
+    <template id="external_layout_bold_inherited" inherit_id="web.external_layout_bold">
+        <xpath expr="//div[@name='company_address']" position="attributes">
+            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move" and o.country_code != "DO")</attribute>
+        </xpath>
+    </template>
+    <template id="external_layout_standard_inherited" inherit_id="web.external_layout_standard">
+        <xpath expr="//div[@name='company_address']" position="attributes">
+            <attribute name="t-if">doc_model != "account.move" or (doc_model == "account.move" and o.country_code != "DO")</attribute>
+        </xpath>
     </template>
 
 </odoo>

@@ -18,6 +18,7 @@ class ResConfigSettings(models.TransientModel):
 
     l10n_do_fiscal_sequence_control = fields.Boolean(
         string='Activate Fiscal Sequence Control',
+        readonly=False,
         related='company_id.l10n_do_fiscal_sequence_control')
 
     view_discount_in_account = fields.Boolean(
@@ -35,3 +36,11 @@ class ResConfigSettings(models.TransientModel):
     label_one_report_2 = fields.Char(
         string='Show name in report label right',
         config_parameter='l10n_do_accounting.label_one_report_2')
+    
+    fiscal_journal_sale = fields.Many2one(
+        comodel_name='account.journal',
+        domain=([('type', '=', 'sale'),
+                ('l10n_latam_use_documents', '=', True)]),
+        readonly=False,
+        related='company_id.fiscal_journal_sale',
+        string='Fiscal_journal_sale')

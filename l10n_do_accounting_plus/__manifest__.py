@@ -12,7 +12,7 @@
     "data": [
         "views/account_fiscal_sequence.xml",
         "views/account_journal_views.xml",
-        # "views/account_move_views.xml",
+        "views/account_move_views.xml",
         "views/account_payment.xml",
         # "views/res_company_views.xml",
         "views/res_config_settings_view.xml",

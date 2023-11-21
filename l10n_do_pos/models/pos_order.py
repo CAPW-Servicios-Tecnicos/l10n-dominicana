@@ -291,8 +291,7 @@ class PosOrder(models.Model):
 
     def _is_pos_order_paid(self):
         if self.filtered(
-                lambda order: order.l10n_latam_use_documents
-                              and order.l10n_do_is_return_order
+                lambda order: order.l10n_latam_use_documents and order.l10n_do_is_return_order
         ):
             return True
         return super(PosOrder, self)._is_pos_order_paid()

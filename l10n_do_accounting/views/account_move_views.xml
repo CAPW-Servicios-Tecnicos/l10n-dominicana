@@ -48,7 +48,7 @@
                 <attribute name="attrs">{
                     'required': ['|', ('l10n_do_enable_first_sequence', '=', True), ('l10n_latam_manual_document_number', '=', True), '&amp;', ('l10n_latam_use_documents', '=', True), ('country_code', '=', 'DO')],
                     'invisible': ['|', '|', '&amp;', ('l10n_latam_use_documents', '=', False), ('country_code', '=', 'DO'), '&amp;', ('l10n_do_enable_first_sequence', '=', False), '&amp;', ('l10n_latam_manual_document_number', '=', False), ('state', '=', 'draft'), '&amp;', ('l10n_do_enable_first_sequence', '=', False), '&amp;', ('l10n_latam_manual_document_number', '=', True), '&amp;', ('state', '=', 'draft'), '&amp;', ('move_type', 'in', ('out_invoice', 'out_refund', 'in_refund')), ('country_code', '=', 'DO')],
-                    'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('country_code', '=', 'DO'), '&amp;', ('posted_before', '=', True), ('country_code', '=', 'DO')]}
+                    'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('country_code', '=', 'DO'), '&amp;', ('posted_before', '=', True), ('country_code', '=', 'DO'), '&amp;', ('move_type', 'in', ('out_invoice', 'out_refund'))]}
                 </attribute>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">

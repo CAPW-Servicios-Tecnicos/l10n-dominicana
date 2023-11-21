@@ -53,8 +53,9 @@ class AccountFiscalSequence(models.Model):
         comodel_name='res.company',
         string='Company', required=True, readonly=True,
         default=lambda self: self.env.company)
-
-    _sql_constraints = [
-        ('document_type', 'unique (code, company_id)',
-         'You only can use one document type per company')
-    ]
+    # TODO unable to add constraint 'account_fiscal_sequence_document_type' as unique (code, company_id)
+    #   mensaje a verificar
+    # _sql_constraints = [
+    #     ('document_type', 'unique (code, company_id)',
+    #      'You only can use one document type per company')
+    # ]

@@ -30,7 +30,8 @@ class AccountMove(models.Model):
             payments = []
             if invoice.journal_id.l10n_latam_use_documents:
                 raise ValidationError(
-                    "This invoice is associated with a fiscal journal %s you cannot convert it to fiscal again." % invoice.journal_id.name)
+                    "This invoice is associated with a fiscal journal %s you cannot convert it to fiscal again."
+                    % invoice.journal_id.name)
             else:
                 if invoice.get_invoice_payment_widget(invoice):
                     for payment in invoice.get_invoice_payment_widget(invoice):

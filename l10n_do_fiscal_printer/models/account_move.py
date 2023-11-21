@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import fields, models
 import requests
 
 
@@ -35,9 +35,9 @@ class AccountMove(models.Model):
     pos = fields.Char(string="Caja", required=False)
     nif = fields.Char(string="NIF", required=False)
 
-    def _prepare_vals_for_fiscal_invoices(self):
-        for rec in self:
-            rnc = rec.partner_id.nif
-            sucursal = rec.subsidiary
-            caja = rec.pos
-            nif = rec.l10n_do_fiscal_number
+    # def _prepare_vals_for_fiscal_invoices(self):
+    #     for rec in self:
+    #         rnc = rec.partner_id.nif
+    #         sucursal = rec.subsidiary
+    #         caja = rec.pos
+    #         nif = rec.l10n_do_fiscal_number

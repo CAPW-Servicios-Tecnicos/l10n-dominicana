@@ -26,13 +26,13 @@
 <!--                           -->
 <!--                        </div>-->
                         <div class="o_setting_right_pane">
-                            <label for="fiscal_journal_sale"/>
+<!--                            <label for="fiscal_journal_sale"/>-->
 
                             <div class="text-muted">
                                 Diario de Venta para Generacion de Factura con Valor Fiscal.
                             </div>
                             <div class="text-muted">
-                                <field name="fiscal_journal_sale"/>
+<!--                                <field name="fiscal_journal_sale"/>-->
                             </div>
                         </div>
                     </div>

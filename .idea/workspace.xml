@@ -3,6 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="612d22fb-4422-4fe1-a67d-984f1a86a148" name="Changes" comment="[MIG] Request new version 16.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/res_config_settings.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_fiscal_sequence.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,7 +22,6 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -109,6 +114,14 @@
       <option name="presentableId" value="Default" />
       <updated>1688244006390</updated>
     </task>
+    <task id="LOCAL-00001" summary="[IMP] Performing the division of the l10n_do_accounting_plus module">
+      <created>1700613185923</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1700613185923</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -121,5 +134,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="[IMP] Performing the division of the l10n_do_accounting_plus module" />
+    <option name="LAST_COMMIT_MESSAGE" value="[IMP] Performing the division of the l10n_do_accounting_plus module" />
   </component>
 </project>

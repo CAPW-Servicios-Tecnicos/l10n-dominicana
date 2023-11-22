@@ -11,6 +11,7 @@
                        attrs="{'invisible': [('country_code', '!=', 'DO')]}"/>
                 <field name="l10n_do_default_client" attrs="{'invisible': [('country_code', '!=', 'DO')]}"/>
                 <field name="l10n_do_dgii_start_date" attrs="{'invisible': [('country_code', '!=', 'DO')]}"/>
+                <field name="l10n_do_fiscal_sequence_control" attrs="{'invisible': [('country_code', '!=', 'DO')]}"/>
             </field>
         </field>
     </record>

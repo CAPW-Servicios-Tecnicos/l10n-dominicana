@@ -36,7 +36,7 @@ class ResConfigSettings(models.TransientModel):
     label_one_report_2 = fields.Char(
         string='Show name in report label right',
         config_parameter='l10n_do_accounting.label_one_report_2')
-    
+
     fiscal_journal_sale = fields.Many2one(
         comodel_name='account.journal',
         domain=([('type', '=', 'sale'),

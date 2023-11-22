@@ -16,15 +16,7 @@ on:
     types: [ labeled ]
 
 env:
-<<<<<<< HEAD
-<<<<<<< HEAD
-  REQUIRED_MODULES: 'l10n_generic_coa' # list of addional addons to install separated by comma
-=======
   REQUIRED_MODULES: # list of addional addons to install separated by comma
->>>>>>> b4c16696959742a06c4b68e143226fca3a0d205f
-=======
-  REQUIRED_MODULES: # list of addional addons to install separated by comma
->>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5
   TEST_TAGS: '0'
 
 jobs:

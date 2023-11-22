@@ -23,4 +23,3 @@ class Pos(http.Controller):
         if pos_order_id:
             if pos_order_id.account_move:
                 pos_order_id.write({'l10n_latam_document_number': pos_order_id.account_move.l10n_latam_document_number})
-

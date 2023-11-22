@@ -11,55 +11,9 @@
                     <h2>Dominican Localization</h2>
                 </div>
                 <div id="l10n_do_section" class="row mt16 o_settings_container"
-                     groups="account.group_account_manager">
-                    <div class="col-12 col-lg-6 o_setting_box" id="account_options">
-                        <div class="o_setting_left_pane">
-                            <field name="view_discount_in_account"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="view_discount_in_account"/>
-                            <div class="text-muted">
-                                Poder vizualizar los descuentos aplicados a la factura en el reporte
-                            </div>
-                        </div>
-                    </div>
-<!--                    <div class="col-12 col-lg-6 o_setting_box" groups="account.group_account_manager">-->
-<!--                        <div class="o_setting_left_pane">-->
-<!--                            <field name="l10n_do_fiscal_sequence_control"/>-->
-<!--                        </div>-->
-<!--                        <div class="o_setting_right_pane">-->
-<!--                            <label for="l10n_do_fiscal_sequence_control"/>-->
-<!--                            <div class="text-muted">-->
-<!--                                Habilitar la opcion de control de sequencia de comprobantes.-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-                    <div class="col-12 col-lg-6 o_setting_box">
-                        <div class="o_setting_left_pane">
-                            <field name="view_delivered_received" widget="upgrade_boolean"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="view_delivered_received"/>
-                            <div class="text-muted">
-                                Ability to add manual signatures to the report
-                            </div>
-                        </div>
-                        <br/>
-                        <div class="o_setting_right_pane" attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
-                            <span class="o_form_label">Show name in report left</span>
-                            <div class="text-muted">
-                                <field name="label_one_report"/>
-                            </div>
-                        </div>
-                        <div class="o_setting_right_pane" attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
-                            <span class="o_form_label">Show name in report right</span>
-                            <div class="text-muted">
-                                <field name="label_one_report_2"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                     groups="account.group_account_manager"/>
             </xpath>
         </field>
     </record>
+
 </odoo>

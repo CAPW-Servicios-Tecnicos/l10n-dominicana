@@ -24,26 +24,6 @@ msgid "%s is not a stored field"
 msgstr "%s no es un campo almacenado"
 
 #. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.res_config_settings_view_form
-msgid "Ability to add manual signatures to the report"
-msgstr "Posibilidad de añadir firmas manuales al informe"
-
-#. module: l10n_do_accounting
-#: model:ir.model.fields,field_description:l10n_do_accounting.field_res_config_settings__view_delivered_received
-msgid "Delivered/Received"
-msgstr "Entregado/Recibido"
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Show name in report left</span>"
-msgstr "<span class=\"o_form_label\">Mostrar nombre en informe en la parte izquierda"
-
-#. module: l10n_do_accounting
-#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Show name in report right</span>"
-msgstr "<span class=\"o_form_label\">Mostrar nombre en informe a la derecha</span>"
-
-#. module: l10n_do_accounting
 #: code:addons/l10n_do_accounting/models/account_move.py:0
 #, python-format
 msgid "01 - Operational Incomes"
@@ -1286,9 +1266,6 @@ msgstr ""
 #: code:addons/l10n_do_accounting/models/res_partner.py:0
 #, python-format
 msgid "special from Tax Paying"
-<<<<<<< HEAD
-msgstr "Exento"
-=======
 msgstr "Exento"
 
 #. module: l10n_do_accounting
@@ -1296,4 +1273,3 @@ msgstr "Exento"
 #, python-format
 msgid "You cannot cancel a fiscal document that has not been posted before."
 msgstr "No puede cancelar un documento fiscal que no haya sido posteado anteriormente."
->>>>>>> 996e4b32a2c582a1b6cebc1348689df6b0bd0fb5

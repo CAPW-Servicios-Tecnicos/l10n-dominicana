@@ -6,4 +6,5 @@ class PosSession(models.Model):
 
     def action_pos_session_close(self, balancing_account, amount_to_balance, bank_payment_method_diffs):
         self.config_id._check_company_journal()
-        return super(PosSession, self).action_pos_session_close(balancing_account, amount_to_balance, bank_payment_method_diffs)
+        return super(PosSession, self).action_pos_session_close(balancing_account, amount_to_balance,
+                                                                bank_payment_method_diffs)

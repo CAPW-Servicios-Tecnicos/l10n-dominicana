@@ -1,7 +1,7 @@
 {
     "name": "Fiscal POS (Rep. Dominicana)",
     "summary": """Incorpora funcionalidades de facturación con NCF al POS.""",
-    "author": "Easicoders",
+    "author": "CAPW Servicios Tecnicos, Easicoders",
     "website": "https://github.com/odoo-dominicana",
     "category": "Localization",
     "version": "15.1.3",

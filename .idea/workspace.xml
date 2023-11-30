@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="612d22fb-4422-4fe1-a67d-984f1a86a148" name="Changes" comment="[MIG] Request new version 16.0">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/res_config_settings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_fiscal_sequence.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" afterDir="false" />
-    </list>
+    <list default="true" id="612d22fb-4422-4fe1-a67d-984f1a86a148" name="Changes" comment="[MIG] Request new version 16.0" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,19 +18,23 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 4
+}]]></component>
   <component name="ProjectId" id="2RzDRLJsVm6amJnMEJCsL72qc49" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/acape/OneDrive&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "15.0",
+    "last_opened_file_path": "C:/Proyectos/custom_modules"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="l10n-dominicana" />

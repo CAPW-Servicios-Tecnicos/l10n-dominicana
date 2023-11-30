@@ -39,9 +39,9 @@ class L10nLatamDocumentType(models.Model):
         selection="_get_l10n_do_ncf_types",
         string="NCF types",
         help="NCF types defined by the DGII that can be used to identify the"
-             " documents presented to the government and that depends on the"
-             " operation type, the responsibility of both the issuer and the"
-             " receptor of the document",
+        " documents presented to the government and that depends on the"
+        " operation type, the responsibility of both the issuer and the"
+        " receptor of the document",
     )
     l10n_do_ncf_expiration_date = fields.Date(  # Deprecated. Do not forward port.
         string="NCF Expiration date",
@@ -63,7 +63,6 @@ class L10nLatamDocumentType(models.Model):
     is_vat_required = fields.Boolean(
         default=False,
     )
-
 
     def _format_document_number(self, document_number):
         """Make validation of Import Dispatch Number

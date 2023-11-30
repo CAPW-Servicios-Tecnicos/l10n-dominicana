@@ -6,7 +6,7 @@ class AccountJournal(models.Model):
     _inherit = "account.journal"
 
     def _get_l10n_do_payment_form(self):
-        """ Return the list of payment forms allowed by DGII. """
+        """Return the list of payment forms allowed by DGII."""
         return [
             ("cash", _("Cash")),
             ("bank", _("Check / Transfer")),
@@ -21,22 +21,12 @@ class AccountJournal(models.Model):
         selection="_get_l10n_do_payment_form",
         string="Payment Form",
     )
-
-    hidden_payment_form = fields.Boolean(
-        string='Payment Form With Method Lines',
-        required=False)
-
     l10n_do_document_type_ids = fields.One2many(
         "l10n_do.account.journal.document_type",
         "journal_id",
         string="Document types",
         copy=False,
     )
-
-    @api.onchange('hidden_payment_form')
-    def clear_field_payment(self):
-        if self.l10n_do_payment_form:
-            self.l10n_do_payment_form = False
 
     def _get_all_ncf_types(self, types_list, invoice=False):
         """
@@ -52,11 +42,8 @@ class AccountJournal(models.Model):
             # create fiscal sequences
             return types_list + ecf_types
 
-        if (
-                invoice.is_purchase_document()
-                and invoice.partner_id.l10n_do_dgii_tax_payer_type
-                and invoice.partner_id.l10n_do_dgii_tax_payer_type
-                in ("non_payer", "foreigner")
+        if invoice.is_purchase_document() and any(
+            t in types_list for t in ("minor", "informal", "exterior")
         ):
             # Return ncf/ecf types depending on company ECF issuing status
             return ecf_types if self.company_id.l10n_do_ecf_issuer else types_list
@@ -77,7 +64,7 @@ class AccountJournal(models.Model):
             "received": {
                 "taxpayer": ["fiscal"],
                 "non_payer": ["informal", "minor"],
-                "nonprofit": ["fiscal", "special", "governmental"],
+                "nonprofit": ["special", "governmental"],
                 "special": ["fiscal", "special", "governmental"],
                 "governmental": ["fiscal", "special", "governmental"],
                 "foreigner": ["import", "exterior"],
@@ -108,8 +95,8 @@ class AccountJournal(models.Model):
                 [
                     value
                     for dic in ncf_types_data[
-                    "issued" if self.type == "sale" else "received"
-                ].values()
+                        "issued" if self.type == "sale" else "received"
+                    ].values()
                     for value in dic
                 ]
             )
@@ -127,10 +114,13 @@ class AccountJournal(models.Model):
             )
             return self._get_all_ncf_types(res)
         if counterpart_partner.l10n_do_dgii_tax_payer_type:
-            counterpart_ncf_types = ncf_types_data[
-                "issued" if self.type == "sale" else "received"
-            ][counterpart_partner.l10n_do_dgii_tax_payer_type]
-            ncf_types = list(set(ncf_types) & set(counterpart_ncf_types))
+            if counterpart_partner == self.company_id.partner_id:
+                ncf_types = ["minor"]
+            else:
+                counterpart_ncf_types = ncf_types_data[
+                    "issued" if self.type == "sale" else "received"
+                ][counterpart_partner.l10n_do_dgii_tax_payer_type]
+                ncf_types = list(set(ncf_types) & set(counterpart_ncf_types))
         else:
             raise ValidationError(
                 _("Partner (%s) %s is needed to issue a fiscal invoice")
@@ -143,9 +133,9 @@ class AccountJournal(models.Model):
             ncf_types = ["credit_note"]
 
         if (
-                invoice
-                and invoice.debit_origin_id
-                or self.env.context.get("internal_type") == "debit_note"
+            invoice
+            and invoice.debit_origin_id
+            or self.env.context.get("internal_type") == "debit_note"
         ):
             return ["debit_note", "e-debit_note"]
 
@@ -163,8 +153,8 @@ class AccountJournal(models.Model):
         self.ensure_one()
 
         if (
-                not self.l10n_latam_use_documents
-                or self.company_id.country_id != self.env.ref("base.do")
+            not self.l10n_latam_use_documents
+            or self.company_id.country_id != self.env.ref("base.do")
         ):
             return
 
@@ -184,8 +174,8 @@ class AccountJournal(models.Model):
         ]
         documents = self.env["l10n_latam.document.type"].search(domain)
         for document in documents.filtered(
-                lambda doc: doc.l10n_do_ncf_type
-                            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
+            lambda doc: doc.l10n_do_ncf_type
+            not in document_types.l10n_latam_document_type_id.mapped("l10n_do_ncf_type")
         ):
             document_types |= (
                 self.env["l10n_do.account.journal.document_type"]
@@ -223,7 +213,6 @@ class AccountJournalDocumentType(models.Model):
     journal_id = fields.Many2one(
         "account.journal", "Journal", required=True, readonly=True
     )
-
     l10n_latam_document_type_id = fields.Many2one(
         "l10n_latam.document.type", "Document type", required=True, readonly=True
     )
@@ -235,55 +224,3 @@ class AccountJournalDocumentType(models.Model):
     company_id = fields.Many2one(
         string="Company", related="journal_id.company_id", readonly=True
     )
-
-
-class AccountPaymentMethod(models.Model):
-    _inherit = 'account.payment.method.line'
-
-    def _get_l10n_do_payment_form(self):
-        """ Return the list of payment forms allowed by DGII. """
-        return [
-            ("cash", _("Cash")),
-            ("bank", _("Check / Transfer")),
-            ("card", _("Credit Card")),
-            ("credit", _("Credit")),
-            ("swap", _("Swap")),
-            ("bond", _("Bonds or Gift Certificate")),
-            ("others", _("Other Sale Type")),
-        ]
-
-    l10n_do_payment_form = fields.Selection(
-        string='Payment Form',
-        selection='_get_l10n_do_payment_form',
-        required=False, )
-
-
-class AccountFiscalSequence(models.Model):
-    _name = 'account.fiscal.sequence'
-    _description = "Account Fiscal Sequence"
-
-    l10n_do_warning_vouchers = fields.Char(
-        string='Warning Sequence',
-        required=False)
-
-    l10n_do_limit_vouchers = fields.Char(
-        string='Limit Sequence',
-        required=False)
-
-    document_type = fields.Many2one(
-        comodel_name='l10n_latam.document.type',
-        string='Document Type',
-        required=False)
-
-    code = fields.Char(related='document_type.doc_code_prefix')
-
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company', required=True, readonly=True,
-        default=lambda self: self.env.company)
-
-    _sql_constraints = [
-        ('document_type', 'unique (code, company_id)',
-         'You only can use one document type per company')
-    ]
-

@@ -10,15 +10,6 @@
                 <field name="l10n_do_company_in_contingency" invisible="1"/>
                 <field name="l10n_do_enable_first_sequence" invisible="1" force_save="1"/>
             </field>
-            <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="fiscal_type_name" invisible="1"/>
-                <field name="total_descontado" invisible="1"/>
-                <field name="total_without_discount" invisible="1"/>
-                <field name="received_delivered" invisible="1"/>
-                <field name="label_report_one" invisible="1"/>
-                <field name="label_report_two" invisible="1"/>
-
-            </xpath>
             <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
                 <div class="alert alert-warning"
                      role="alert" style="margin-bottom:0px;"
@@ -27,20 +18,14 @@
                      ('country_code', '!=', 'DO'),
                      ('l10n_do_company_in_contingency', '=', False),
                      ('state', '!=', 'draft')]}">
-                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF
-                    issuing has been enabled.
+                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF issuing has been enabled.
                 </div>
             </xpath>
-            <xpath expr="//button[@name='button_cancel']" position="attributes">
-                <attribute name="attrs">{
-                    'invisible': ['|', '|',
-                    ('id', '=', False),
-                    '&amp;', ('state', '!=', 'draft'),
-                    ('country_code', '!=', 'DO'),
-                    '&amp;', ('state', 'in', ('draft', 'cancel')),
-                    ('country_code', '=', 'DO')]
-                    }
-                </attribute>
+            <xpath expr="//button[@name='button_cancel']" position="after">
+                <button name="button_cancel" type="object" string="Cancel" 
+                        attrs="{'invisible': ['|',
+                        ('state', 'in', ('draft', 'cancel')),
+                        ('country_code', '!=', 'DO')]}"/>
             </xpath>
             <xpath expr="//button[@name='button_draft']" position="attributes">
                 <attribute name="attrs">{
@@ -50,8 +35,7 @@
                     ('country_code', '!=', 'DO'),
                     '&amp;', ('state', '!=', 'cancel'),
                     ('country_code', '=', 'DO')]
-                    }
-                </attribute>
+                }</attribute>
             </xpath>
             <xpath expr="//h1/span/.." position="after">
                 <h4 attrs="{'invisible':['|',('state','!=','cancel'),('country_code', '!=', 'DO')]}">
@@ -62,17 +46,9 @@
             </xpath>
             <xpath expr="//field[@name='l10n_latam_document_number']" position="attributes">
                 <attribute name="attrs">{
-                    'required': ['|', ('l10n_do_enable_first_sequence', '=', True),
-                    ('l10n_latam_manual_document_number', '=', True), '&amp;', ('l10n_latam_use_documents', '=', True),
-                    ('country_code', '=', 'DO')],
-                    'invisible': ['|', '|', '&amp;', ('l10n_latam_use_documents', '=', False), ('country_code', '=',
-                    'DO'), '&amp;', ('l10n_do_enable_first_sequence', '=', False), '&amp;',
-                    ('l10n_latam_manual_document_number', '=', False), ('state', '=', 'draft'), '&amp;',
-                    ('l10n_do_enable_first_sequence', '=', False), '&amp;', ('l10n_latam_manual_document_number', '=',
-                    True), '&amp;', ('state', '=', 'draft'), '&amp;', ('move_type', 'in', ('out_invoice', 'out_refund',
-                    'in_refund')), ('country_code', '=', 'DO')],
-                    'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('country_code', '=', 'DO'), '&amp;',
-                    ('posted_before', '=', True), ('country_code', '=', 'DO')]}
+                    'required': ['|', ('l10n_do_enable_first_sequence', '=', True), ('l10n_latam_manual_document_number', '=', True), '&amp;', ('l10n_latam_use_documents', '=', True), ('country_code', '=', 'DO')],
+                    'invisible': ['|', '|', '&amp;', ('l10n_latam_use_documents', '=', False), ('country_code', '=', 'DO'), '&amp;', ('l10n_do_enable_first_sequence', '=', False), '&amp;', ('l10n_latam_manual_document_number', '=', False), ('state', '=', 'draft'), '&amp;', ('l10n_do_enable_first_sequence', '=', False), '&amp;', ('l10n_latam_manual_document_number', '=', True), '&amp;', ('state', '=', 'draft'), '&amp;', ('move_type', 'in', ('out_invoice', 'out_refund', 'in_refund')), ('country_code', '=', 'DO')],
+                    'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('country_code', '=', 'DO'), '&amp;', ('posted_before', '=', True), ('country_code', '=', 'DO')]}
                 </attribute>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
@@ -101,13 +77,11 @@
                 }"/>
             </xpath>
             <xpath expr="//div[@name='journal_div']" position="after">
-                <field name="l10n_do_ecf_security_code"
-                       attrs="{'invisible': ['|', '|', '|', ('partner_id', '=', False), ('country_code', '!=', 'DO'), ('l10n_latam_manual_document_number', '=', False), ('is_ecf_invoice', '=', False)]}"/>
+                <field name="l10n_do_ecf_security_code" attrs="{'invisible': ['|', '|', '|', ('partner_id', '=', False), ('country_code', '!=', 'DO'), ('l10n_latam_manual_document_number', '=', False), ('is_ecf_invoice', '=', False)]}"/>
             </xpath>
 
             <!-- only computed when l10n_do ecf invoice -->
-            <xpath expr="//page[@id='invoice_tab']/field[@name='invoice_line_ids']/tree/field[@name='tax_ids']"
-                   position="after">
+            <xpath expr="//page[@id='invoice_tab']/field[@name='invoice_line_ids']/tree/field[@name='tax_ids']" position="after">
                 <field name="l10n_do_itbis_amount" invisible="1" force_save="1"/>
             </xpath>
             <xpath expr="//page[@id='aml_tab']/field[@name='line_ids']/tree/field[@name='account_type']" position="after">
@@ -139,8 +113,7 @@
             'move_type': 'out_invoice',
             'journal_type': 'sale',
             'internal_type': 'debit_note',
-            }
-        </field>
+            }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -171,24 +144,12 @@
             'journal_type': 'purchase',
             'journal_type': 'purchase',
             'internal_type': 'debit_note',
-            }
-        </field>
+            }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Record a new vendor debit note
             </p>
-        </field>
-    </record>
-
-    <record id="view_account_invoice_filter_inherit" model="ir.ui.view">
-        <field name="name">account.invoice.select.inherit</field>
-        <field name="model">account.move</field>
-        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="l10n_do_fiscal_number"/>
-            </xpath>
         </field>
     </record>
 
@@ -221,8 +182,7 @@
                     ('ref', 'ilike', self),
                     ('partner_id', 'ilike', self),
                     ('l10n_do_fiscal_number', 'ilike', self)
-                    ]
-                </attribute>
+                ]</attribute>
             </field>
         </field>
     </record>

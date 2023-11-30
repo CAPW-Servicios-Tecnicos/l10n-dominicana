@@ -5,17 +5,19 @@
     "author": "CAPW Servicios Tecnicos",
     "category": "Localization",
     "website": "https://capw.com.do",
-    "version": "15.0.2",
+    "version": "15.0.4",
     # any module necessary for this one to work correctly
-    "depends": ["l10n_latam_invoice_document", "l10n_do"],
+    "depends": ["l10n_do_accounting"],
     # always loaded
     "data": [
+        "security/ir.model.access.csv",
         "views/account_fiscal_sequence.xml",
         "views/account_journal_views.xml",
         "views/account_move_views.xml",
         "views/account_payment.xml",
-        "views/res_company_views.xml",
+        "views/report_invoice.xml",
         "views/res_config_settings_view.xml",
+        # "views/res_company_views.xml",
     ],
     "installable": True,
     "license": "LGPL-3",

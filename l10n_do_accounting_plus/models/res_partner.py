@@ -8,8 +8,8 @@ from odoo.exceptions import ValidationError
 class Partner(models.Model):
     _inherit = "res.partner"
 
-    search_successful = fields.Boolean(string='Search Successful', default=False)
-    search_result = fields.Char(string='Search Result')
+    # search_successful = fields.Boolean(string='Search Successful', default=False)
+    # search_result = fields.Char(string='Search Result')
 
     @api.onchange('vat')
     def get_contribuyentes(self):
@@ -58,10 +58,16 @@ class Partner(models.Model):
                 if data_dict:
                     # Print the text content of the element
                     print(result_element.text)
-                    self.name = data_dict["RGE_NOMBRE"]
-                    self.search_result = "DATOS ENCONTRADOS"
+                    if data_dict['ESTATUS'] == "0":
+                        warning_message = 'Este contribuyente se escuentra inativo. \n\nCédula/RNC: %s\nNombre/Razón Social: %s\nEstado: SUSPENDIDO' % (
+                            rnc, data_dict["RGE_NOMBRE"])
+                        return {'warning': {'title': _('Warning'), 'message': warning_message}}
+                    elif data_dict['ESTATUS'] == "2":
+                        self.name = data_dict['RGE_NOMBRE']
+                    # warning_message = 'Cédula/RNC: %s\nNombre/Razón Social: %s\nNombre Comercial: %s\n' % (
+                    # rnc, data_dict["RGE_NOMBRE"], data_dict['NOMBRE_COMERCIAL'])
+                    # return {'warning': {'title': _('Resultados de la busqueda'), 'message': warning_message}}
                 else:
-                    self.search_result = False
                     warning_message = 'No se encontraron datos registrados de este contribuyente (%s)' % rnc
                     return {'warning': {'title': _('Warning'), 'message': warning_message}}
 

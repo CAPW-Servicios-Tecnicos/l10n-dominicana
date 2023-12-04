@@ -7,7 +7,7 @@
     "website": "https://capw.com.do",
     "version": "15.0.4",
     # any module necessary for this one to work correctly
-    "depends": ["l10n_do_accounting"],
+    "depends": ["l10n_do_accounting", "l10n_it_withholding_tax"],
     # always loaded
     "data": [
         "security/ir.model.access.csv",
@@ -17,6 +17,7 @@
         "views/account_payment.xml",
         "views/report_invoice.xml",
         "views/res_config_settings_view.xml",
+        "views/res_partner.xml",
         # "views/res_company_views.xml",
     ],
     "installable": True,

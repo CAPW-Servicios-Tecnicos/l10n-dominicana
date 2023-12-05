@@ -7,7 +7,7 @@
     "website": "https://capw.com.do",
     "version": "15.0.4",
     # any module necessary for this one to work correctly
-    "depends": ["l10n_do_accounting", "l10n_it_withholding_tax"],
+    "depends": ["l10n_do_accounting"],
     # always loaded
     "data": [
         "security/ir.model.access.csv",

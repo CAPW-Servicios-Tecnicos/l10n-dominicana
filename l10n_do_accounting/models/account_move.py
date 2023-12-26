@@ -1017,3 +1017,45 @@ class AccountMove(models.Model):
                             print("Validate")
                         else:
                             raise RedirectWarning(msg, action_error, "Add ID/RNC")
+
+    def get_invoice_payment_widget(self, invoice_id):
+        j = json.loads(invoice_id.invoice_payments_widget)
+        return j['content'] if j else []
+
+    def convert_to_fiscal_invoice(self):
+        for invoice in self:
+            payments = []
+            if invoice.journal_id.l10n_latam_use_documents:
+                raise ValidationError(
+                    "This invoice is associated with a fiscal journal %s you cannot convert it to fiscal again."
+                    % invoice.journal_id.name)
+            else:
+                if invoice.get_invoice_payment_widget(invoice):
+                    payment_id = 0
+                    payment_ids = []
+                    for payment in invoice.get_invoice_payment_widget(invoice):
+                        payment_id = payment['payment_id']
+                        payment_ids.append(payment_id)
+                        partial_id = payment['partial_id']
+                        invoice.js_remove_outstanding_partial(partial_id)
+                        print(payment)
+                    invoice.button_cancel()
+                    new_invoice = invoice.copy()
+                    new_invoice.invoice_date = invoice.invoice_date
+                    new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.action_post()
+                    for pay in payment_ids:
+                        new_invoice.js_assign_outstanding_line(pay)
+                    action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
+                    action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+                    action['res_id'] = new_invoice.id
+                else:
+                    invoice.button_cancel()
+                    new_invoice = invoice.copy()
+                    new_invoice.invoice_date = invoice.invoice_date
+                    new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.action_post()
+                    action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
+                    action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+                    action['res_id'] = new_invoice.id
+                return action

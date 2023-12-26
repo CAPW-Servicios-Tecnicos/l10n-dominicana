@@ -25,6 +25,7 @@ class ResCompany(models.Model):
         string='Financial Currency',)
     manual_change_currency = fields.Boolean(
         string='Manual Change Currency',)
+    fiscal_journal_sale = fields.Many2one('account.journal', string='Fiscal_journal_sale')
 
     def _localization_use_documents(self):
         """ Dominican localization uses documents """

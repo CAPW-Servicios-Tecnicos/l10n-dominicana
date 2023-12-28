@@ -1071,11 +1071,11 @@ class AccountMove(models.Model):
                         payment_ids.append(payment_id)
                         partial_id = payment['partial_id']
                         invoice.js_remove_outstanding_partial(partial_id)
-                        print(payment)
                     invoice.button_cancel()
                     new_invoice = invoice.copy()
                     new_invoice.invoice_date = invoice.invoice_date
                     new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.partner_id = invoice.partner_id
                     new_invoice.action_post()
                     for pay in payment_ids:
                         new_invoice.js_assign_outstanding_line(pay)
@@ -1087,6 +1087,7 @@ class AccountMove(models.Model):
                     new_invoice = invoice.copy()
                     new_invoice.invoice_date = invoice.invoice_date
                     new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.partner_id = invoice.partner_id
                     new_invoice.action_post()
                     action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
                     action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]

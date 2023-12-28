@@ -100,6 +100,13 @@
                     'readonly': [('state', '!=', 'draft')]}"/>
                 </div>
             </xpath>
+            <xpath expr="//button[@name='button_draft']" position="after">
+                <button name="convert_to_fiscal_invoice" type="object" string="Convert To Fiscal"
+                        attrs="{'invisible': ['|', '|',
+                        ('state', 'in', ('draft', 'cancel')),
+                        ('move_type', '!=', 'out_invoice'),
+                        ('l10n_latam_use_documents', '=', True)]}"/>
+            </xpath>
         </field>
     </record>
 

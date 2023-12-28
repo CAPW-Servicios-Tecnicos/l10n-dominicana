@@ -28,7 +28,7 @@ class ResCompany(models.Model):
     fiscal_journal_sale = fields.Many2one('account.journal', string='Fiscal_journal_sale')
 
     def _localization_use_documents(self):
-        """ Dominican localization uses documents """
+        """Dominican localization uses documents"""
         self.ensure_one()
         return (
             True

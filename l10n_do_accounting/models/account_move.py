@@ -5,9 +5,7 @@ import json
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError, RedirectWarning
-
 from odoo.osv import expression
-from odoo.exceptions import ValidationError, UserError, AccessError
 
 
 class AccountMove(models.Model):
@@ -522,16 +520,19 @@ class AccountMove(models.Model):
             action["context"] = {"default_move_id": fiscal_invoice.id}
             return action
 
+        if fiscal_invoice:
+            fiscal_invoice.button_draft()
+
         return super(AccountMove, self).button_cancel()
 
     def action_reverse(self):
 
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
-                        and self.move_type[-6:] in ("nvoice", "refund")
+            and self.move_type[-6:] in ("nvoice", "refund")
         )
         if fiscal_invoice and not self.env.user.has_group(
-                "l10n_do_accounting.group_l10n_do_fiscal_credit_note"
+            "l10n_do_accounting.group_l10n_do_fiscal_credit_note"
         ):
             raise AccessError(_("You are not allowed to issue Fiscal Credit Notes"))
 
@@ -994,7 +995,8 @@ class AccountMove(models.Model):
         else:
             self.is_currency_manual = True
 
-    # funcion para validar  que al seleccionar un proveedor identifique si es cliente de consumo y si tiene datos en el campo NIF
+    # funcion para validar  que al seleccionar un proveedor identifique si es cliente de consumo y si tiene datos en
+    # el campo NIF
 
     @api.onchange('partner_id')
     def validate_nif(self):

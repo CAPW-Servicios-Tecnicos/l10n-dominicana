@@ -6,7 +6,7 @@
         <field name="model">res.company</field>
         <field name="arch" type="xml">
             <field name="vat" position="after">
-<!--                <field name="fiscal_journal_sale" invisible="True"/>-->
+                <field name="fiscal_journal_sale" invisible="True"/>
             </field>
         </field>
     </record>

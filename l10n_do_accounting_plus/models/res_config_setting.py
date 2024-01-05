@@ -37,10 +37,7 @@ class ResConfigSettings(models.TransientModel):
         string='Show name in report label right',
         config_parameter='l10n_do_accounting.label_one_report_2')
 
-    fiscal_journal_sale = fields.Many2one(
-        comodel_name='account.journal',
-        domain=([('type', '=', 'sale'),
-                ('l10n_latam_use_documents', '=', True)]),
-        readonly=False,
-        related='company_id.fiscal_journal_sale',
-        string='Fiscal_journal_sale')
+    fiscal_journal_sale = fields.Many2one('account.journal',
+                                          related='company_id.fiscal_journal_sale',
+                                          string='Fiscal_journal_sale',
+                                          readonly=False)

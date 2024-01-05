@@ -16,6 +16,10 @@ class AccountMove(models.Model):
     label_report_one = fields.Char(string='Label_report_one', compute='get_received_delivered')
     label_report_two = fields.Char(string='Label_report_two', compute='get_received_delivered')
     fiscal_type_name = fields.Char(string='Name_fiscal_type', compute='call_name_type_fiscal')
+    l10n_latam_document_type_id_char = fields.Char(
+        string='L10n_latam_document_type_id_char',
+        related='l10n_latam_document_type_id.doc_code_prefix',
+        required=False)
 
     def call_name_type_fiscal(self):
         for rec in self:
@@ -34,14 +38,21 @@ class AccountMove(models.Model):
                     % invoice.journal_id.name)
             else:
                 if invoice.get_invoice_payment_widget(invoice):
+                    payment_id = 0
+                    payment_ids = []
                     for payment in invoice.get_invoice_payment_widget(invoice):
-                        payments.append(payment['payment_id'])
-                        print(payment)
+                        payment_id = payment['payment_id']
+                        payment_ids.append(payment_id)
+                        partial_id = payment['partial_id']
+                        invoice.js_remove_outstanding_partial(partial_id)
                     invoice.button_cancel()
                     new_invoice = invoice.copy()
                     new_invoice.invoice_date = invoice.invoice_date
                     new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.partner_id = invoice.partner_id
                     new_invoice.action_post()
+                    for pay in payment_ids:
+                        new_invoice.js_assign_outstanding_line(pay)
                     action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
                     action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
                     action['res_id'] = new_invoice.id
@@ -50,6 +61,7 @@ class AccountMove(models.Model):
                     new_invoice = invoice.copy()
                     new_invoice.invoice_date = invoice.invoice_date
                     new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+                    new_invoice.partner_id = invoice.partner_id
                     new_invoice.action_post()
                     action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
                     action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]

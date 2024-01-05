@@ -211,7 +211,7 @@ class AccountMoveTest(common.L10nDOTestsCommon):
 
         # TODO: revisar estos test.
         #  Está provocando error en
-        #  odoo//addons/l10n_latam_invoice_document/models/account_move.py#L224
+        #  odoo//addons/l10n_latam_invoice_document/models/pos_payment.py#L224
 
         # Debit Note
         # fiscal_purchase_debit_note_wizard = (
@@ -464,7 +464,7 @@ class AccountMoveTest(common.L10nDOTestsCommon):
 
         # TODO: revisar estos test.
         #  Está provocando error en
-        #  odoo//addons/l10n_latam_invoice_document/models/account_move.py#L224
+        #  odoo//addons/l10n_latam_invoice_document/models/pos_payment.py#L224
 
         # Debit Note
         # fiscal_purchase_debit_note_wizard = (

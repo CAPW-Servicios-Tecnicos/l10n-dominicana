@@ -4,6 +4,7 @@
         Este módulo implementa una extencion de nuevas opciones para la localizacion dominicana.""",
     "author": "CAPW Servicios Tecnicos",
     "category": "Localization",
+    "license": "LGPL-3",
     "website": "https://capw.com.do",
     "version": "15.0.4",
     # any module necessary for this one to work correctly
@@ -21,5 +22,6 @@
         # "views/res_company_views.xml",
     ],
     "installable": True,
-    "license": "LGPL-3",
+    "auto_install": False,
+    "application": False,
 }

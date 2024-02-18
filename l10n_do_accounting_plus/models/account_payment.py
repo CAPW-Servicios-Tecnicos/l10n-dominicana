@@ -5,7 +5,7 @@ class AccountPayment(models.Model):
     _inherit = ['account.payment']
 
     manual_currency_rate = fields.Float(string="Currency Rate",)
-    is_currency_manual = fields.Boolean(string="is_currency_manual",)
+    is_currency_manual = fields.Boolean(string="is_currency_manual", default=False)
 
     # @api.onchange('currency_id')
     # def compute_manual_currency_rate(self):

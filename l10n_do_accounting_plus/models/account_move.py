@@ -1,6 +1,4 @@
 import json
-import re
-from datetime import datetime
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
@@ -10,8 +8,8 @@ class AccountMove(models.Model):
 
     manual_currency_rate = fields.Float(string="Currency Rate")
     is_currency_manual = fields.Boolean(string="is_currency_manual", )
-    total_descontado = fields.Monetary(string="Total Descontado", compute='calculo_total_descontado')
-    total_without_discount = fields.Float(string='Total_without_discount')
+    total_descontado = fields.Monetary(string="Total Discounted", compute='discounted_total_calculation')
+    total_without_discount = fields.Float(string='Total Without Discount')
     received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
     label_report_one = fields.Char(string='Label_report_one', compute='get_received_delivered')
     label_report_two = fields.Char(string='Label_report_two', compute='get_received_delivered')
@@ -20,6 +18,15 @@ class AccountMove(models.Model):
         string='L10n_latam_document_type_id_char',
         related='l10n_latam_document_type_id.doc_code_prefix',
         required=False)
+    total_down_payments = fields.Float(string="Total Down Payments")
+    amount_total_without_down_payments = fields.Float(string="Amount Total With Down Payments",
+                                                      readonly=True,
+                                                      compute="_compute_sale_advance_payment",
+                                                      store=True)
+    amount_residual_without_down_payments = fields.Float(string="Amount Residual After Down Payments",
+                                                         readonly=True,
+                                                         compute="_compute_sale_advance_payment",
+                                                         store=True)
 
     def call_name_type_fiscal(self):
         for rec in self:
@@ -68,7 +75,7 @@ class AccountMove(models.Model):
                     action['res_id'] = new_invoice.id
                 return action
 
-    def calculo_total_descontado(self):
+    def discounted_total_calculation(self):
         total = 0
         total_imponible = 0
         self.total_descontado = 0.00
@@ -85,6 +92,40 @@ class AccountMove(models.Model):
                 invoice.total_without_discount = total_imponible
         else:
             self.total_descontado = 0.00
+
+    @api.depends('amount_residual', 'amount_total')
+    def _compute_sale_advance_payment(self):
+        amount_base_total = 0
+        total_down_payments = 0
+        for rec in self:
+            downpayment_lines = False if rec._is_downpayment() else rec.line_ids.filtered(
+                lambda l: l._get_downpayment_lines())
+            if downpayment_lines:
+                for down_line in downpayment_lines:
+                    total_down_payments += down_line.amount_currency
+                    rec.total_down_payments = total_down_payments
+                    down_line.exclude_from_report = True
+            for line in rec.line_ids:
+                if line.display_type == 'line_section' and line.name == 'Pagos anticipados':
+                    line.exclude_from_report = True
+                amount_base_total += line.price_subtotal
+            rec.amount_total_without_down_payments = rec.amount_total + total_down_payments
+            rec.amount_residual_without_down_payments = rec.amount_residual + total_down_payments
+
+    def get_received_delivered(self):
+        self.received_delivered = False
+        self.label_report_one = ''
+        self.label_report_two = ''
+        params = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
+        params_label_one = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.label_one_report')])
+        params_label_two = self.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
+        if params:
+            self.received_delivered = True
+            self.label_report_one = params_label_one.value
+            self.label_report_two = params_label_two.value
 
     # def action_post(self):
     # result = super(AccountMove, self).action_post()
@@ -110,21 +151,6 @@ class AccountMove(models.Model):
     #         raise ValidationError(
     #             "Para confirmar la factura debe ser mayor que %s" % invoice_totals['amount_total'])
     # return result
-
-    def get_received_delivered(self):
-        self.received_delivered = False
-        self.label_report_one = ''
-        self.label_report_two = ''
-        params = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
-        params_label_one = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.label_one_report')])
-        params_label_two = self.env['ir.config_parameter'].sudo().search(
-            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
-        if params:
-            self.received_delivered = True
-            self.label_report_one = params_label_one.value
-            self.label_report_two = params_label_two.value
 
     # def _get_sequence_format_param(self, previous):
     #
@@ -219,3 +245,11 @@ class AccountMove(models.Model):
     #         super(
     #             AccountMove, self.filtered(lambda m: m.country_code != "DO")
     #         )._inverse_l10n_latam_document_number()
+
+
+class AccountMoveLine(models.Model):
+    _inherit = 'account.move.line'
+
+    exclude_from_report = fields.Boolean(
+        string='Exclude_from_report',
+        required=False)

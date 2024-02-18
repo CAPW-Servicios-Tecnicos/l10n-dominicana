@@ -11,8 +11,9 @@
                 <xpath expr="//field[@name='partner_bank_id']" position="after">
                     <field name="is_currency_manual" invisible="1"/>
                     <field name="manual_currency_rate" attrs="{
-                    'invisible': [('is_currency_manual', '=', True)],
+                    'invisible': [('is_currency_manual', '=', False)],
                     'readonly': [('state', '!=', 'draft')]}"/>
+
                 </xpath>
             </field>
         </record>

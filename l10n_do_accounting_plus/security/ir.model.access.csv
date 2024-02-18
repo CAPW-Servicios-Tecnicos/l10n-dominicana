@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-l10n_do_accounting_plus.access_account_fiscal_sequence,access_account_fiscal_sequence,l10n_do_accounting_plus.model_account_fiscal_sequence,base.group_user,1,0,0,0
+l10n_do_accounting_plus.access_account_fiscal_sequence,access_account_fiscal_sequence,l10n_do_accounting_plus.model_account_fiscal_sequence,base.group_user,1,1,1,1

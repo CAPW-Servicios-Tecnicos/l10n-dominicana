@@ -7,6 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0+e\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2024-01-10 05:00+0000\n"
 "PO-Revision-Date: 2024-01-10 05:00+0000\n"
 "Last-Translator: \n"
@@ -15,6 +16,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+=======
+"POT-Creation-Date: 2024-02-06 14:49+0000\n"
+"PO-Revision-Date: 2024-02-06 10:53-0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_DO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.informations
@@ -262,6 +275,11 @@ msgid "Company"
 msgstr "Compañía"
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_l10n_do_account_journal_document_type__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_company_in_contingency
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_company_in_contingency
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_company_in_contingency
@@ -271,6 +289,7 @@ msgstr "Empresa en contingencia"
 #. module: l10n_do_accounting
 #: model:ir.model.fields,help:l10n_do_accounting.field_l10n_do_account_journal_document_type__company_id
 msgid "Company related to this journal"
+<<<<<<< HEAD
 msgstr "Empresa relacionada con esta revista"
 
 #. module: l10n_do_accounting_plus
@@ -280,6 +299,12 @@ msgstr "Opciones de configuración"
 
 #. module: l10n_do_accounting_plus
 #: model:ir.model,name:l10n_do_accounting_plus.model_res_partner
+=======
+msgstr "Empresa relacionada con este diario"
+
+#. module: l10n_do_accounting
+#: model:ir.model,name:l10n_do_accounting.model_res_partner
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 msgid "Contact"
 msgstr "Contacto"
 
@@ -768,12 +793,48 @@ msgstr ""
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_move_form
 msgid ""
+<<<<<<< HEAD
 "Notice. This company is in a transient state of contingency for Electronic "
 "Invoice issuing. NCF issuing has been enabled."
+=======
+"Notice. Document Number field enabled because a new Fiscal Number Expiration date was "
+"set on journal"
+msgstr ""
+"Aviso. Se ha activado el campo Número de Comprobante porque se ha establecido una nueva "
+"fecha de expiración del NCF en el diario"
+
+#. module: l10n_do_accounting
+#: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_move_form
+msgid ""
+"Notice. This company is in a transient state of contingency for Electronic Invoice "
+"issuing. NCF issuing has been enabled."
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 msgstr ""
 
+<<<<<<< HEAD
 #. modules: l10n_do_accounting_plus, l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_import_journal_creation__l10n_do_payment_form
+=======
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_journal.py:0
+#, python-format
+msgid "Other Sale Type"
+msgstr "Otras Formas de Venta"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/wizard/account_move_reversal.py:0
+#, python-format
+msgid "Partial Refund"
+msgstr "Reembolso Parcial"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_journal.py:0
+#, python-format
+msgid "Partner (%s) %s is needed to issue a fiscal invoice"
+msgstr "El contacto (%s) requiere un %s para emitir una factura fiscal"
+
+#. module: l10n_do_accounting
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_journal__l10n_do_payment_form
 #: model:ir.model.fields,field_description:l10n_do_accounting_plus.field_account_payment_method_line__l10n_do_payment_form
 msgid "Payment Form"
@@ -857,6 +918,13 @@ msgid "Show name in report label right"
 msgstr ""
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_bank_statement_line__l10n_do_show_expiration_date_msg
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_move__l10n_do_show_expiration_date_msg
+#: model:ir.model.fields,field_description:l10n_do_accounting.field_account_payment__l10n_do_show_expiration_date_msg
+msgid "Show Expiration Date Message"
+msgstr "Mostrar Mensaje Fecha Expiración"
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_bank_statement_line__l10n_do_fiscal_number
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_move__l10n_do_fiscal_number
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_payment__l10n_do_fiscal_number
@@ -894,6 +962,18 @@ msgid ""
 msgstr ""
 
 #. module: l10n_do_accounting
+#: model:ir.model.fields,help:l10n_do_accounting.field_account_bank_statement_line__l10n_do_show_expiration_date_msg
+#: model:ir.model.fields,help:l10n_do_accounting.field_account_move__l10n_do_show_expiration_date_msg
+#: model:ir.model.fields,help:l10n_do_accounting.field_account_payment__l10n_do_show_expiration_date_msg
+msgid ""
+"Technical field to hide/show message on invoice header that indicate fiscal number must "
+"be input manually because a new expiration date was set on journal"
+msgstr ""
+"Campo técnico para ocultar/mostrar un mensaje en el encabezado de las facturas para "
+"indicar que el NCF debe ser digital manualmente porque se colocó una nueva fecha de "
+"expiración en el diario"
+
+#. module: l10n_do_accounting
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_debit_note__l10n_latam_country_code
 #: model:ir.model.fields,help:l10n_do_accounting.field_account_move_reversal__country_code
 msgid "Technical field used to hide/show fields regarding the localization"
@@ -916,7 +996,11 @@ msgstr ""
 #. module: l10n_do_accounting
 #: model:ir.model.fields,field_description:l10n_do_accounting.field_account_debit_note__l10n_latam_use_documents
 msgid "Use Documents"
+<<<<<<< HEAD
 msgstr ""
+=======
+msgstr "Es fiscal"
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_account_move_reversal_inherited
@@ -972,6 +1056,52 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_do_accounting.field_res_company__l10n_do_ecf_issuer
 msgid "When activating this field, NCF issuance is disabled."
 msgstr ""
+<<<<<<< HEAD
+=======
+"No tiene permiso de modificar los campos %s luego de la emisión de un documento fiscal "
+"de este contacto"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/wizard/account_move_reversal.py:0
+#, python-format
+msgid ""
+"You can only reverse documents with legal invoicing documents from Latin America one at "
+"a time.\n"
+"Problematic documents: %s"
+msgstr ""
+"Solo puede aplicar Notas de Crédito a una factura a la vez.\n"
+"Documentos señalados: %s"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "You cannot cancel multiple fiscal invoices at a time."
+msgstr "No puede cancelar múltiples facturas fiscales a la vez."
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/wizard/account_move_reversal.py:0
+#, python-format
+msgid "You cannot create Credit Notes from multiple documents at a time."
+msgstr "No puede crear Notas de Crédito desde múltiples documentos a la vez."
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/wizard/account_debit_note.py:0
+#, python-format
+msgid "You cannot create Debit Notes from multiple documents at a time."
+msgstr "No puede crear Notas de Débito desde múltiples facturas a la vez."
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/models/account_move.py:0
+#, python-format
+msgid "You cannot delete fiscal invoice which have been posted before"
+msgstr "No puede eliminar una factura fiscal que ha sido validada anteriormente"
+
+#. module: l10n_do_accounting
+#: code:addons/l10n_do_accounting/wizard/account_debit_note.py:0
+#, python-format
+msgid "You cannot issue Credit/Debit Notes for %s document type"
+msgstr "No puede emitir Notas de Crédito/Débito para comprobantes de %s"
+>>>>>>> c3a74e2bcbf76ea6262712137f6b8ef57cae6bea
 
 #. module: l10n_do_accounting
 #: model_terms:ir.ui.view,arch_db:l10n_do_accounting.view_account_debit_note_inherited

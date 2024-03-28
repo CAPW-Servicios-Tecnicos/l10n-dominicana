@@ -860,8 +860,7 @@ class AccountMove(models.Model):
 
     def unlink(self):
         if self.filtered(
-            lambda inv: inv.is_purchase_document()
-            and inv.country_code == "DO"
+            lambda inv: inv.country_code == "DO"
             and inv.l10n_latam_use_documents
             and inv.posted_before
         ):

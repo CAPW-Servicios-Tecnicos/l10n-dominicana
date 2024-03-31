@@ -19,7 +19,7 @@
                                     <span class="currency" t-esc="env.pos.currency.symbol" />
                                 </div>
                             </div>
-                            <textarea name="reason" t-model="state.inputReason" placeholder="Reason"></textarea>
+                            <textarea name="reason" t-model="state.inputReason" placeholder="Reason"/>
                             <span t-if="state.inputHasError" class="error-message">
                                 <t t-esc="errorMessage" />
                             </span>

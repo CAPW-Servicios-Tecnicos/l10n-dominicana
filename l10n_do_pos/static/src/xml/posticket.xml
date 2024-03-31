@@ -35,28 +35,12 @@
                         <div class="pos-receipt-center-align dotted_ticket_title">
                             <strong>Factura de
                                 <t t-esc="order.get_latam_document_type().name"/>
-
                             </strong>
                             <br/>
-
-
                             <strong>NCF:
                                 <span id="ncf"/>
                                 <span style="display: none !important;"> <t t-esc="order.get_ncf()"/></span>
                             </strong>
-<!--                            <script>-->
-<!--                                $(document).ready(function () {-->
-<!--                                console.log("ESTA CORRECTO");-->
-<!--                                $("span.next_text").on('click', function(event) {-->
-<!--                                    console.log("CLICK EN BOTON");-->
-<!--                                    setTimeout(() => {-->
-<!--                                        let ncf = localStorage.getItem('ncf');-->
-<!--                                        console.log(ncf);-->
-<!--                                        $("#ncf").text(ncf.replace(/['"]+/g, ''));-->
-<!--                                    }, 1500);-->
-<!--                                });-->
-<!--                            });-->
-<!--                            </script>-->
                             <t t-if="order.l10n_do_is_return_order">
                                 <br/>
                                 <strong>NCF Modificado:

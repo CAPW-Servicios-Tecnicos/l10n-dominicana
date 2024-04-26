@@ -1,28 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-
-<!--   <t t-extend="PaymentScreen">-->
-
-<!--        <t t-jquery="div.js_invoice" t-operation="before">-->
-<!--            <button><t t-esc="env.pos.invoice_journal.l10n_latam_use_documents"/></button>-->
-<!--            <t t-if="env.pos.invoice_journal.l10n_latam_use_documents">-->
-<!--                <div class='button js_set_latam_document_type'>-->
-<!--                    <i class='fa fa-edit' aria-label="Document type"-->
-<!--                       title="Document type"/>-->
-<!--                    <span class='js_latam_document_type_name' style="color:red">-->
-<!--                        <t t-if="env.pos.get_order()">-->
-<!--                            <t t-if="env.pos.get_order().l10n_latam_document_type">-->
-<!--                                <t t-esc="env.pos.get_order().l10n_latam_document_type.name"/>-->
-<!--                            </t>-->
-<!--                            <t t-if="!env.pos.get_order().l10n_latam_document_type">-->
-<!--                                Select document type-->
-<!--                            </t>-->
-<!--                        </t>-->
-<!--                    </span>-->
-<!--                </div>-->
-<!--            </t>-->
-<!--        </t>-->
-<!--   </t>-->
    <t t-name="ActionpadWidget" owl="1">
         <div class="actionpad">
             <button class="button set-customer" t-att-class="{'decentered': isLongName}"
@@ -455,47 +432,6 @@
             </div>
         </div>
     </t>
-
-<!--    <t t-extend="PaymentScreenWidget">-->
-<!--&lt;!&ndash;        <t t-jquery=".payment-screen .screen-content" t-operation="append">&ndash;&gt;-->
-<!--&lt;!&ndash;            <div class="refund-confirm-content touch-scrollable scrollable-y">&ndash;&gt;-->
-<!--&lt;!&ndash;            </div>&ndash;&gt;-->
-<!--&lt;!&ndash;        </t>&ndash;&gt;-->
-<!--        <t t-jquery=".payment-screen .top-content" t-operation="append">-->
-<!--&lt;!&ndash;            <span class="button cancel oe_hidden">&ndash;&gt;-->
-<!--&lt;!&ndash;                <i class="fa fa-times"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                Cancel&ndash;&gt;-->
-<!--&lt;!&ndash;            </span>&ndash;&gt;-->
-<!--&lt;!&ndash;            <span class="button confirm oe_hidden">&ndash;&gt;-->
-<!--&lt;!&ndash;                <i class="fa fa-check"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                Confirm&ndash;&gt;-->
-<!--&lt;!&ndash;            </span>&ndash;&gt;-->
-<!--        </t>-->
-<!--        <t t-jquery=".button.js_set_customer" t-operation="replace">-->
-<!--&lt;!&ndash;            <t t-set="client" t-value="widget.pos.get_client()"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <button class='button js_set_customer'&ndash;&gt;-->
-<!--&lt;!&ndash;                    style="padding: 4px 5px 4px 58px; height: 75px; line-height: 18px; font-weight: bold; width: 100%;">&ndash;&gt;-->
-<!--&lt;!&ndash;                <i class='fa fa-user'/>&ndash;&gt;-->
-<!--&lt;!&ndash;                <span class="sale_fiscal_type_label">&ndash;&gt;-->
-<!--&lt;!&ndash;                    <t t-esc="(client and client.sale_fiscal_type ?&ndash;&gt;-->
-<!--&lt;!&ndash;                                widget.pos.get_sale_fiscal_type(client.sale_fiscal_type).name: '')"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                </span>&ndash;&gt;-->
-<!--&lt;!&ndash;                <br/>&ndash;&gt;-->
-<!--&lt;!&ndash;                <span class='js_customer_name'>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <t t-esc="(client ? client.name: 'Customer')"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                </span>&ndash;&gt;-->
-<!--&lt;!&ndash;            </button>&ndash;&gt;-->
-<!--        </t>-->
-<!--    </t>-->
-
-<!--    <t t-extend="PaymentScreen-Paymentmethods">-->
-<!--        <t t-jquery=".paymentmethod" t-operation="replace">-->
-<!--            <div t-attf-class="button paymentmethod {{ payment_method.css_class || '' }}"-->
-<!--                 t-att-data-id="payment_method.id">-->
-<!--                <t t-esc="payment_method.name"/>-->
-<!--            </div>-->
-<!--        </t>-->
-<!--    </t>-->
 
     <t t-extend="PaymentScreen-Paymentlines">
         <t t-jquery=".col-name" t-operation="replace">

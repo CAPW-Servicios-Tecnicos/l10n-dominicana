@@ -3,6 +3,11 @@
   <t t-name="OrderReceipt" t-inherit="point_of_sale.ClientDetailsEdit" t-inherit-mode="extension" owl="1">
     <xpath expr="//div[hasclass('client-details-right')]" position="replace">
       <div class="client-detail">
+          <t t-if="widget and widget.loading">
+            <div class="o_spinner">
+                <div class="o_spinner_spin"></div>
+            </div>
+          </t>
           <span class="label">Language</span>
           <select class="detail client-lang needsclick" name="lang"
                   t-on-change="captureChange">
@@ -38,21 +43,14 @@
         </div>
          <div class="client-detail">
              <span class='label'>Taxpayer Type</span>
-                 <select class='detail tax_payer_type needsclick' name='l10n_do_dgii_tax_payer_type' t-on-change="captureChange">
-                     <option t-att-value="0"/>
-                     <t t-foreach='env.pos.tax_payer_type_list' t-as='item' t-key="item">
-                         <t t-if="props.partner.l10n_do_dgii_tax_payer_type and item[0] === props.partner.l10n_do_dgii_tax_payer_type">
-                             <option t-att-value='item[0]' t-att-selected="true">
-                                 <t t-esc='item[1]'/>
-                             </option>
-                         </t>
-                         <t t-else="" t-att-selected="true">
-                             <option t-att-value='item[0]'>
-                                 <t t-esc='item[1]'/>
-                             </option>
-                         </t>
-                     </t>
-                 </select>
+                <select class='detail tax_payer_type needsclick' name='l10n_do_dgii_tax_payer_type' t-on-change="captureChange">
+                    <option t-att-value="0"></option>
+                    <t t-foreach='env.pos.tax_payer_type_list' t-as='item'>
+                        <option t-att-value='item[0]' t-att-selected="props.partner.l10n_do_dgii_tax_payer_type === item[0]">
+                            <t t-esc='item[1]'/>
+                        </option>
+                    </t>
+                </select>
         </div>
         <div t-if="env.pos.pricelists.length gt 1" class="client-detail">
             <span class="label">Pricelist</span>

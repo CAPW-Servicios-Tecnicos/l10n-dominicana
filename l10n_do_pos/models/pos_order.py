@@ -94,8 +94,6 @@ class PosOrder(models.Model):
         if ui_order["to_invoice"]:
             res.update(
                 {
-                    # "account_move": ui_order['account_move'],
-                    # "l10n_latam_sequence_id": ui_order["l10n_latam_sequence_id"],
                     "l10n_latam_document_number": ui_order[
                         "l10n_latam_document_number"
                     ],
@@ -105,7 +103,7 @@ class PosOrder(models.Model):
                     "l10n_latam_use_documents": True,
                     "l10n_do_origin_ncf": ui_order["l10n_do_origin_ncf"],
                     "l10n_do_return_status": ui_order["l10n_do_return_status"],
-                    # "l10n_do_is_return_order": ui_order["l10n_do_is_return_order"],
+                    "l10n_do_is_return_order": ui_order["l10n_do_is_return_order"],
                     "l10n_do_return_order_id": ui_order["l10n_do_return_order_id"],
                     # "l10n_do_ncf_expiration_date": ui_order[
                     #     "l10n_do_ncf_expiration_date"
@@ -194,7 +192,7 @@ class PosOrder(models.Model):
             # invoice_vals["is_l10n_do_internal_sequence"] = True
 
             if self.l10n_do_is_return_order:
-                invoice_vals["type"] = "out_refund"
+                invoice_vals["move_type"] = "out_refund"
 
         return invoice_vals
 
@@ -225,7 +223,7 @@ class PosOrder(models.Model):
 
     @api.model
     def order_search_from_ui(self, day_limit=0, config_id=0, session_id=0):
-        invoice_domain = [("type", "=", "out_invoice")]
+        invoice_domain = [("move_type", "=", "out_invoice")]
         pos_order_domain = []
 
         if day_limit:

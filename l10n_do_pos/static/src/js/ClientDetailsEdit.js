@@ -1,4 +1,4 @@
-odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
+odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
     'use strict';
 
     const { _t } = require('web.core');
@@ -9,12 +9,15 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
     class ClientDetailsEdit extends PosComponent {
         constructor() {
             super(...arguments);
-            this.intFields = ['country_id', 'state_id', 'property_product_pricelist', 'l10n_do_dgii_tax_payer_type'];
-            const partner = this.props.partner;
+            this.loading = false;
+            this.widget = {};
+            this.intFields = ['country_id', 'state_id', 'property_product_pricelist'];
+            const partner = this.props.partner || {};
             this.changes = {
                 'country_id': partner.country_id && partner.country_id[0],
                 'state_id': partner.state_id && partner.state_id[0],
-                'l10n_do_dgii_tax_payer_type': this.props.partner.l10n_do_dgii_tax_payer_type || "non_payer"
+                'l10n_do_dgii_tax_payer_type': partner.l10n_do_dgii_tax_payer_type || "non_payer",
+                'vat': partner.vat
             };
             if (!partner.property_product_pricelist)
                 this.changes['property_product_pricelist'] = this.env.pos.default_pricelist.id;
@@ -26,8 +29,6 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
             this.env.bus.off('save-customer', this);
         }
         get partnerImageUrl() {
-            // We prioritize image_1920 in the `changes` field because we want
-            // to show the uploaded image without fetching new data from the server.
             const partner = this.props.partner;
             if (this.changes.image_1920) {
                 return this.changes.image_1920;
@@ -37,39 +38,162 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
                 return false;
             }
         }
-        /**
-         * Save to field `changes` all input changes from the form fields.
-         */
-        captureChange(event) {
-            this.changes[event.target.name] = event.target.value;
+
+        async hasInvoices(partnerId) {
+            try {
+                const response = await this.rpc({
+                    route: '/check_invoices',
+                    params: { partner_id: partnerId },
+                });
+                return response.has_invoices;
+            } catch (error) {
+                console.error(error);
+                await this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error'),
+                    body: this.env._t('An error occurred while checking invoices.'),
+                });
+                return false;
+            }
         }
-        saveChanges() {
+
+        /**
+        * Save to field `changes` all input changes from the form fields.
+        */
+        captureChange(event) {
+            const name = event.target.name;
+            const value = event.target.value;
+
+            this.changes[name] = value;
+
+            if (name === 'vat') {
+                this.widget.loading = true;
+                this.checkVat(value).finally(() => {
+                    this.widget.loading = false;
+                });
+            }
+        }
+
+        async checkVat(vatValue) {
+            try {
+                this.loading = true; // Activar indicador de carga
+
+                const response = await this.rpc({
+                    route: '/dgii/get_contribuyentes',
+                    params: { vat: vatValue },
+                });
+
+                console.log("DGII Response:", response); // Imprimir la respuesta para depurar
+
+                // Verificar el formato de la respuesta antes de continuar
+                if (typeof response !== 'object' || response === null || response.error) {
+                    await this.showPopup('ErrorPopup', {
+                        title: this.env._t('Error'),
+                        body: this.env._t(response && response.error ? response.error : 'Invalid response from DGII.'),
+                    });
+                    return;
+                }
+
+                if (response.warning) {
+                    await this.showPopup('ErrorPopup', {
+                        title: this.env._t('Warning'),
+                        body: this.env._t(response.warning.message),
+                    });
+                } else if (response.name) {
+                    this.changes['name'] = response.name;
+                    console.log('Assigned name from DGII:', response.name);  // Registro de consola
+                    this.render();
+                }
+            } catch (error) {
+                console.error(error);
+                await this.showPopup('ErrorPopup', {
+                    title: this.env._t('Network Error'),
+                    body: this.env._t('Unable to connect. Please check your network connection.'),
+                });
+            } finally {
+                this.loading = false; // Desactivar indicador de carga al finalizar
+            }
+        }
+
+        async saveChanges() {
             let processedChanges = {};
+            const partner = this.props.partner || {};
+
             for (let [key, value] of Object.entries(this.changes)) {
                 if (this.intFields.includes(key)) {
-                    console.log("VAT", this.props.partner.vat)
-                    processedChanges[key] = value || false;
+                    processedChanges[key] = parseInt(value, 10) || false;
                 } else {
                     processedChanges[key] = value;
                 }
             }
-            if ((!this.props.partner.name && !processedChanges.name) ||
-                processedChanges.name === '' ){
+
+            // Comprobar si el contacto tiene facturas registradas y publicadas
+            const hasInvoices = await this.hasInvoices(partner.id);
+
+            if (hasInvoices) {
                 return this.showPopup('ErrorPopup', {
-                  title: _t('A Customer Name Is Required'),
+                    title: this.env._t('Error'),
+                    body: this.env._t('Cannot change the RNC for a contact with registered and published invoices.'),
                 });
             }
-            processedChanges.id = this.props.partner.id || false;
+
+            if ((!partner.name && !processedChanges.name) || processedChanges.name === '') {
+                return this.showPopup('ErrorPopup', {
+                    title: _t('A Customer Name Is Required'),
+                });
+            }
+
+            // Antes de la validación
+            console.log("Partner:", partner);
+            console.log("Processed Changes:", processedChanges);
+            const newTaxPayerType = processedChanges.l10n_do_dgii_tax_payer_type;
+            const newVat = processedChanges.vat;
+            console.log("newTaxPayerType:", newTaxPayerType);
+            console.log("newVat:", newVat);
+
+            // 1. Si l10n_do_dgii_tax_payer_type es diferente de 'non_payer', el vat es obligatorio
+            if (newTaxPayerType !== 'non_payer' && newVat === '') {
+                return this.showPopup('ErrorPopup', {
+                    title: _t('VAT Required for Tax Payers'),
+                    body: _t('A VAT number is required for tax payers.')
+                });
+            }
+
+            // 2. Si l10n_do_dgii_tax_payer_type es igual a 'non_payer', el vat no es obligatorio
+//            if (newTaxPayerType === 'non_payer' && newVat !== '') {
+//                return this.showPopup('ErrorPopup', {
+//                    title: _t('VAT Not Required for Non-Payers'),
+//                    body: _t('VAT should not be present for non-payers.')
+//                });
+//            }
+
+            // 3. Si ambos valores cambian, se valida primero l10n_do_dgii_tax_payer_type
+            if (processedChanges.l10n_do_dgii_tax_payer_type && processedChanges.vat) {
+                if (newTaxPayerType !== 'non_payer' && newVat === '') {
+                    return this.showPopup('ErrorPopup', {
+                        title: _t('VAT Required for Tax Payers'),
+                        body: _t('A VAT number is required for tax payers.')
+                    });
+                }
+            }
+
+            // 4. Si l10n_do_dgii_tax_payer_type es igual a 'taxpayer', el vat es obligatorio
+            if (newTaxPayerType === 'taxpayer' && newVat === '') {
+                return this.showPopup('ErrorPopup', {
+                    title: _t('VAT Required for Tax Payers'),
+                    body: _t('A VAT number is required for tax payers.')
+                });
+            }
+
+            processedChanges.id = partner.id || false;
             this.trigger('save-changes', { processedChanges });
         }
+
         async uploadImage(event) {
             const file = event.target.files[0];
             if (!file.type.match(/image.*/)) {
                 await this.showPopup('ErrorPopup', {
                     title: this.env._t('Unsupported File Format'),
-                    body: this.env._t(
-                        'Only web-compatible Image formats such as .png or .jpeg are supported.'
-                    ),
+                    body: this.env._t('Only web-compatible Image formats such as .png or .jpeg are supported.'),
                 });
             } else {
                 const imageUrl = await getDataURLFromFile(file);
@@ -77,11 +201,11 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
                 if (loadedImage) {
                     const resizedImage = await this._resizeImage(loadedImage, 800, 600);
                     this.changes.image_1920 = resizedImage.toDataURL();
-                    // Rerender to reflect the changes in the screen
                     this.render();
                 }
             }
         }
+
         _resizeImage(img, maxwidth, maxheight) {
             var canvas = document.createElement('canvas');
             var ctx = canvas.getContext('2d');
@@ -115,9 +239,7 @@ odoo.define('l10n_do_pos.ClientDetailsEditL10n', function(require) {
                 img.addEventListener('error', () => {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Loading Image Error'),
-                        body: this.env._t(
-                            'Encountered error when loading image. Please try again.'
-                        ),
+                        body: this.env._t('Encountered error when loading image. Please try again.')
                     });
                     resolve(false);
                 });

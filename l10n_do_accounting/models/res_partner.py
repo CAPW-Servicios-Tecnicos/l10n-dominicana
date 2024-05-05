@@ -41,7 +41,6 @@ class Partner(models.Model):
         string="Taxpayer Type",
         index=True,
         store=True,
-        required=True,
     )
     l10n_do_expense_type = fields.Selection(
         selection="_get_l10n_do_expense_type",

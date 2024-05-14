@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import timedelta
 
 from odoo import models, fields, api, _
@@ -357,6 +358,41 @@ class PosOrder(models.Model):
         if document_type_id:
             return document_type_id.l10n_do_ncf_expiration_date
         return ""
+
+    # def action_pos_order_paid(self):
+    #     res = super(PosOrder, self).action_pos_order_paid()
+    #     if self.l10n_latam_use_documents and self.account_move:
+    #         fiscal_number = self.account_move.l10n_do_fiscal_number
+    #         if fiscal_number:
+    #             fiscal_sequence = self.env['account.fiscal.sequence'].search([
+    #                 ('document_type', '=', self.account_move.l10n_latam_document_type_id.id),
+    #                 ('company_id', '=', self.company_id.id)
+    #             ], limit=1)
+    #             if fiscal_sequence:
+    #                 prefix = self.account_move.l10n_latam_document_type_id.doc_code_prefix or ''
+    #                 if prefix and fiscal_number.startswith(prefix):
+    #                     numeric_part = fiscal_number[len(prefix):]
+    #                     matches = re.findall(r'\d+', numeric_part)
+    #                     if matches:
+    #                         fiscal_number = int(matches[-1])
+    #                         warning_number = int(
+    #                             fiscal_sequence.l10n_do_warning_vouchers) if fiscal_sequence.l10n_do_warning_vouchers else None
+    #                         limit_number = int(
+    #                             fiscal_sequence.l10n_do_limit_vouchers) if fiscal_sequence.l10n_do_limit_vouchers else None
+    #
+    #                         if limit_number and fiscal_number >= limit_number:
+    #                             raise UserError(
+    #                                 _('You have reached or exceeded the fiscal sequence limit for %s. Please check '
+    #                                   'the sequence settings.' %
+    #                                   self.account_move.l10n_latam_document_type_id.display_name))
+    #                         elif warning_number and fiscal_number >= warning_number:
+    #                             self.message_post(body=_(
+    #                                 'You are approaching the fiscal sequence limit for %s. Please consider updating '
+    #                                 'the sequence.' % self.account_move.l10n_latam_document_type_id.display_name))
+    #                 else:
+    #                     self.message_post(
+    #                         body=_('The fiscal number format is incorrect. Missing expected prefix: %s' % prefix))
+    #     return res
 
 
 class PosOrderLine(models.Model):

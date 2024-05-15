@@ -4,7 +4,7 @@
     "author": "CAPW Servicios Tecnicos, Easicoders",
     "website": "https://github.com/odoo-dominicana",
     "category": "Localization",
-    "version": "15.1.3",
+    "version": "15.1.4",
     "depends": [
         "point_of_sale",
         "l10n_do_accounting",

@@ -81,19 +81,6 @@ class AccountMoveReversal(models.TransientModel):
             AccountMoveReversal, self - l10n_do_recs
         )._compute_l10n_latam_manual_document_number()
 
-<<<<<<< HEAD
-    @api.onchange("refund_type")
-    def onchange_refund_type(self):
-        if self.refund_type != "full_refund":
-            self.refund_method = "refund"
-
-    @api.onchange("l10n_do_refund_action")
-    def onchange_refund_action(self):
-        if self.l10n_do_refund_action == "apply_refund":
-            self.refund_method = "cancel"
-        else:
-            self.refund_method = "refund"
-=======
     # @api.onchange("l10n_do_refund_type")
     # def onchange_l10n_do_refund_type(self):
     #     if self.l10n_do_refund_type != "full_refund":
@@ -105,7 +92,6 @@ class AccountMoveReversal(models.TransientModel):
     #         self.refund_method = "cancel"
     #     else:
     #         self.refund_method = "refund"
->>>>>>> 94bec61b7b67a86cb93f2d74afcef9e29110c0ed
 
     def _prepare_default_reversal(self, move):
         result = super(AccountMoveReversal, self)._prepare_default_reversal(move)

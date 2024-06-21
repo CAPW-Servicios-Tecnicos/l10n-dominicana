@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fcc20371-ec59-4716-8b39-b8e1dec1eb92" name="Changes" comment="Eliminando POS y Fiscal Printer">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/l10n-dominicana.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_6_2024_3_15_p__m___Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_6_2024_3_15_p_ m__[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/__manifest__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/data/l10n_latam.document.type.csv" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/data/l10n_latam.document.type.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/i18n/es_DO.po" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/i18n/es_DO.po" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/account_journal.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/account_journal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/account_move.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/account_move.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/account_move_line.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/account_move_line.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/monkey_patch.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/monkey_patch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/res_company.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/res_company.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/models/res_partner.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/models/res_partner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/tests/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/tests/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/tests/test_account_move.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/tests/test_account_move.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/account_journal_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/account_move_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/account_move_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/report_invoice.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/report_invoice.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/report_templates.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/report_templates.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_company_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_config_settings_view.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/views/res_partner_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/views/res_partner_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_debit_note.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_debit_note.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_debit_note_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_debit_note_views.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_move_reversal.py" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_move_reversal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_move_reversal_views.xml" beforeDir="false" afterPath="$PROJECT_DIR$/l10n_do_accounting/wizard/account_move_reversal_views.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="15.0" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="projectConfigVersion" value="5" />
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="17.0" />
+                    <option name="lastUsedInstant" value="1718998200" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="indexa-git-17.0" />
+                    <option name="lastUsedInstant" value="1718997995" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="15.0" />
+                    <option name="lastUsedInstant" value="1711272870" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="16.0" />
+                    <option name="lastUsedInstant" value="1711256652" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="14.0" />
+                    <option name="lastUsedInstant" value="1711256645" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2e7BpA8tT5JsERRrZlJoSHAaHXO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Merging 17.0"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-eebebe6c2be4-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.15325.20" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fcc20371-ec59-4716-8b39-b8e1dec1eb92" name="Changes" comment="" />
+      <created>1711245916891</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1711245916891</updated>
+    </task>
+    <task id="LOCAL-00001" summary="git pull request 15.0">
+      <option name="closed" value="true" />
+      <created>1711246862888</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1711246862888</updated>
+    </task>
+    <task id="LOCAL-00002" summary="git pull request 15.0">
+      <option name="closed" value="true" />
+      <created>1711252283826</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1711252283826</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Actualizando localizacion dominicana">
+      <option name="closed" value="true" />
+      <created>1711271668269</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1711271668269</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Eliminando POS y Fiscal Printer">
+      <option name="closed" value="true" />
+      <created>1711272288225</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1711272288225</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="git pull request 15.0" />
+    <MESSAGE value="Actualizando localizacion dominicana" />
+    <MESSAGE value="Eliminando POS y Fiscal Printer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Eliminando POS y Fiscal Printer" />
+  </component>
+</project>

@@ -1,0 +1,1112 @@
+Index: l10n_do_accounting_plus/data/ir_config_parameter_data.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/data/ir_config_parameter_data.xml b/l10n_do_accounting_plus/data/ir_config_parameter_data.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/data/ir_config_parameter_data.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,13 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<odoo noupdate="1">
+-    <record id="l10n_dominicana_localization_expiration" model="ir.config_parameter">
+-        <field name="key">l10n_dominicana.expiration_date_localization</field>
+-        <field name="value">2030-12-31</field>
+-    </record>
+-
+-    <record id="l10n_dominicana_localization_control" model="ir.config_parameter">
+-        <field name="key">l10n_dominicana.with_localization_control</field>
+-        <field name="value">False</field>
+-    </record>
+-
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/models/res_config_setting.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/res_config_setting.py b/l10n_do_accounting_plus/models/res_config_setting.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/res_config_setting.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,43 +0,0 @@
+-from odoo import fields, models
+-
+-
+-class ResConfigSettings(models.TransientModel):
+-    _inherit = ['res.config.settings']
+-
+-    financial_currency = fields.Boolean(
+-        string='Financial Currency',
+-        related='company_id.financial_currency')
+-
+-    manual_change_currency = fields.Boolean(
+-        string='Manual Change Currency',
+-        related='company_id.manual_change_currency')
+-
+-    date_equal_to_invoice_retention = fields.Boolean(
+-        string='Date Retention Equal to Date Invoice',
+-        related='company_id.date_equal_to_invoice_retention')
+-
+-    l10n_do_fiscal_sequence_control = fields.Boolean(
+-        string='Activate Fiscal Sequence Control',
+-        readonly=False,
+-        related='company_id.l10n_do_fiscal_sequence_control')
+-
+-    view_discount_in_account = fields.Boolean(
+-        string='Visualizar descuentos',
+-        config_parameter='l10n_dominicana.view_discount_in_account')
+-
+-    view_delivered_received = fields.Boolean(
+-        string='Delivered/Received',
+-        config_parameter='l10n_do_accounting.view_delivered_received')
+-
+-    label_one_report = fields.Char(
+-        string='Show name in report label left',
+-        config_parameter='l10n_do_accounting.label_one_report')
+-
+-    label_one_report_2 = fields.Char(
+-        string='Show name in report label right',
+-        config_parameter='l10n_do_accounting.label_one_report_2')
+-
+-    fiscal_journal_sale = fields.Many2one('account.journal',
+-                                          related='company_id.fiscal_journal_sale',
+-                                          string='Fiscal_journal_sale',
+-                                          readonly=False)
+Index: l10n_do_accounting_plus/models/wsmovildgii.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/wsmovildgii.py b/l10n_do_accounting_plus/models/wsmovildgii.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/wsmovildgii.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,69 +0,0 @@
+-from odoo import models, fields, api, _
+-import requests
+-import xml.etree.ElementTree as ET
+-import json
+-
+-
+-def get_contribuyentes(self):
+-    rnc = self.vat
+-    data_dict = {}
+-    if rnc:
+-        if len(rnc) not in (9, 11):
+-            warning_message = (f'No es una secuencia valida de Cedula o RNC, puede continuar si no estas validando este '
+-                               f'dato de lo contrario verificar {rnc}')
+-            return {'warning': {'title': _('Warning'), 'message': warning_message}}
+-        else:
+-            soap_request = f"""<?xml version="1.0" encoding="utf-8"?>
+-                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+-                    xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+-                    <soap12:Body>
+-                        <GetContribuyentes xmlns="http://dgii.gov.do/">
+-                            <value>{rnc}</value>
+-                            <patronBusqueda>0</patronBusqueda>
+-                            <inicioFilas>0</inicioFilas>
+-                            <filaFilas>1</filaFilas>
+-                            <IMEI></IMEI>
+-                        </GetContribuyentes>
+-                    </soap12:Body>
+-                </soap12:Envelope>"""
+-
+-            url = "https://dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?WSDL"
+-            headers = {
+-                "Content-Type": "application/soap+xml; charset=utf-8",
+-            }
+-
+-            response = requests.post(url, data=soap_request, headers=headers)
+-
+-            if response.status_code == 200:
+-                response_xml = response.content.decode('utf-8')
+-                root = ET.fromstring(response_xml)
+-                result_element = root.find('.//{http://dgii.gov.do/}GetContribuyentesResult')
+-
+-                if result_element is not None:
+-                    try:
+-                        data_dict = json.loads(result_element.text)
+-                    except json.JSONDecodeError:
+-                        warning_message = 'Error en la conexion con la DGII trate un poco mas tarde' % rnc
+-                        return {'warning': {'title': _('Warning'), 'message': warning_message}}
+-                else:
+-                    print("The desired element was not found in the XML response")
+-
+-                if data_dict:
+-                    if data_dict['ESTATUS'] == "0":
+-                        warning_message = ('Este contribuyente se escuentra inativo. \n\nCédula/RNC: %s\nNombre/Razón '
+-                                           'Social: %s\nEstado: SUSPENDIDO') % (
+-                            rnc, data_dict["RGE_NOMBRE"])
+-                        return {'warning': {'title': _('Warning'), 'message': warning_message}}
+-                    elif data_dict['ESTATUS'] == "2":
+-                        self.name = data_dict['RGE_NOMBRE']
+-                    elif data_dict['ESTATUS'] == "3":
+-                        warning_message = ('Este contribuyente se escuentra Dado de Baja. \n\nCédula/RNC: %s\nNombre/Razón '
+-                                           'Social: %s\nEstado: DADO DE BAJA') % (
+-                            rnc, data_dict["RGE_NOMBRE"])
+-                        return {'warning': {'title': _('Warning'), 'message': warning_message}}
+-                else:
+-                    warning_message = 'No se encontraron datos registrados de este contribuyente (%s)' % rnc
+-                    return {'warning': {'title': _('Warning'), 'message': warning_message}}
+-            else:
+-                print(f"Request failed with status code {response.status_code}")
+Index: l10n_do_accounting_plus/views/report_invoice_without_deposits.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/report_invoice_without_deposits.xml b/l10n_do_accounting_plus/views/report_invoice_without_deposits.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/report_invoice_without_deposits.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,13 +0,0 @@
+-<odoo>
+-    <record id="report_invoice_document_without_deposits_id" model="ir.actions.report">
+-        <field name="name">New Report Name</field>
+-        <field name="model">account.move</field>
+-        <field name="report_type">qweb-pdf</field>
+-        <field name="report_name">account.report_invoice_document</field>
+-        <field name="report_file">l10n_do_accounting.report_invoice_document_without_deposits_id</field>
+-<!--            <field name="print_report_name">(object._get_report_base_filename())</field>-->
+-    </record>
+-    <template id="report_invoice_document_without_deposits_id" inherit_id="account.report_invoice_document">
+-        <!-- Your custom QWeb elements go here -->
+-    </template>
+-</odoo>
+Index: l10n_do_accounting_plus/models/account_move.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/account_move.py b/l10n_do_accounting_plus/models/account_move.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/account_move.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,255 +0,0 @@
+-import json
+-from odoo import models, fields, api, _
+-from odoo.exceptions import ValidationError
+-
+-
+-class AccountMove(models.Model):
+-    _inherit = 'account.move'
+-
+-    manual_currency_rate = fields.Float(string="Currency Rate")
+-    is_currency_manual = fields.Boolean(string="is_currency_manual", )
+-    total_descontado = fields.Monetary(string="Total Discounted", compute='discounted_total_calculation')
+-    total_without_discount = fields.Float(string='Total Without Discount')
+-    received_delivered = fields.Boolean(string="received/delivered", compute='get_received_delivered')
+-    label_report_one = fields.Char(string='Label_report_one', compute='get_received_delivered')
+-    label_report_two = fields.Char(string='Label_report_two', compute='get_received_delivered')
+-    fiscal_type_name = fields.Char(string='Name_fiscal_type', compute='call_name_type_fiscal')
+-    l10n_latam_document_type_id_char = fields.Char(
+-        string='L10n_latam_document_type_id_char',
+-        related='l10n_latam_document_type_id.doc_code_prefix',
+-        required=False)
+-    total_down_payments = fields.Float(string="Total Down Payments")
+-    amount_total_without_down_payments = fields.Float(string="Amount Total With Down Payments",
+-                                                      readonly=True,
+-                                                      compute="_compute_sale_advance_payment",
+-                                                      store=True)
+-    amount_residual_without_down_payments = fields.Float(string="Amount Residual After Down Payments",
+-                                                         readonly=True,
+-                                                         compute="_compute_sale_advance_payment",
+-                                                         store=True)
+-
+-    def call_name_type_fiscal(self):
+-        for rec in self:
+-            rec.fiscal_type_name = rec.l10n_latam_document_type_id.id
+-
+-    def get_invoice_payment_widget(self, invoice_id):
+-        j = json.loads(invoice_id.invoice_payments_widget)
+-        return j['content'] if j else []
+-
+-    def convert_to_fiscal_invoice(self):
+-        for invoice in self:
+-            payments = []
+-            if invoice.journal_id.l10n_latam_use_documents:
+-                raise ValidationError(
+-                    "This invoice is associated with a fiscal journal %s you cannot convert it to fiscal again."
+-                    % invoice.journal_id.name)
+-            else:
+-                if invoice.get_invoice_payment_widget(invoice):
+-                    payment_id = 0
+-                    payment_ids = []
+-                    for payment in invoice.get_invoice_payment_widget(invoice):
+-                        payment_id = payment['payment_id']
+-                        payment_ids.append(payment_id)
+-                        partial_id = payment['partial_id']
+-                        invoice.js_remove_outstanding_partial(partial_id)
+-                    invoice.button_cancel()
+-                    new_invoice = invoice.copy()
+-                    new_invoice.invoice_date = invoice.invoice_date
+-                    new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+-                    new_invoice.partner_id = invoice.partner_id
+-                    new_invoice.action_post()
+-                    for pay in payment_ids:
+-                        new_invoice.js_assign_outstanding_line(pay)
+-                    action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
+-                    action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+-                    action['res_id'] = new_invoice.id
+-                else:
+-                    invoice.button_cancel()
+-                    new_invoice = invoice.copy()
+-                    new_invoice.invoice_date = invoice.invoice_date
+-                    new_invoice.journal_id = invoice.company_id.fiscal_journal_sale
+-                    new_invoice.partner_id = invoice.partner_id
+-                    new_invoice.action_post()
+-                    action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
+-                    action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+-                    action['res_id'] = new_invoice.id
+-                return action
+-
+-    def discounted_total_calculation(self):
+-        total = 0
+-        total_imponible = 0
+-        self.total_descontado = 0.00
+-        params = self.env['ir.config_parameter'].sudo().search(
+-            [('key', '=', 'l10n_dominicana.view_discount_in_account')])
+-        if params:
+-            for invoice in self:
+-                for i in invoice.invoice_line_ids:
+-                    total = i.quantity * i.price_unit
+-                    to_discount = total * i.discount
+-                    res = to_discount / 100.0
+-                    invoice.total_descontado += res
+-                    total_imponible += i.quantity * i.price_unit
+-                invoice.total_without_discount = total_imponible
+-        else:
+-            self.total_descontado = 0.00
+-
+-    @api.depends('amount_residual', 'amount_total')
+-    def _compute_sale_advance_payment(self):
+-        amount_base_total = 0
+-        total_down_payments = 0
+-        for rec in self:
+-            downpayment_lines = False if rec._is_downpayment() else rec.line_ids.filtered(
+-                lambda l: l._get_downpayment_lines())
+-            if downpayment_lines:
+-                for down_line in downpayment_lines:
+-                    total_down_payments += down_line.amount_currency
+-                    rec.total_down_payments = total_down_payments
+-                    down_line.exclude_from_report = True
+-            for line in rec.line_ids:
+-                if line.display_type == 'line_section' and line.name == 'Pagos anticipados':
+-                    line.exclude_from_report = True
+-                amount_base_total += line.price_subtotal
+-            rec.amount_total_without_down_payments = rec.amount_total + total_down_payments
+-            rec.amount_residual_without_down_payments = rec.amount_residual + total_down_payments
+-
+-    def get_received_delivered(self):
+-        self.received_delivered = False
+-        self.label_report_one = ''
+-        self.label_report_two = ''
+-        params = self.env['ir.config_parameter'].sudo().search(
+-            [('key', '=', 'l10n_do_accounting.view_delivered_received')])
+-        params_label_one = self.env['ir.config_parameter'].sudo().search(
+-            [('key', '=', 'l10n_do_accounting.label_one_report')])
+-        params_label_two = self.env['ir.config_parameter'].sudo().search(
+-            [('key', '=', 'l10n_do_accounting.label_one_report_2')])
+-        if params:
+-            self.received_delivered = True
+-            self.label_report_one = params_label_one.value
+-            self.label_report_two = params_label_two.value
+-
+-    # def action_post(self):
+-    # result = super(AccountMove, self).action_post()
+-    # control = self.env['ir.config_parameter'].sudo().get_param('l10n_dominicana.with_localization_control')
+-    # if control != 'False':
+-    #     limit_date = self.env['ir.config_parameter'].sudo().get_param(
+-    #         'l10n_dominicana.expiration_date_localization')
+-    #     for rec in self:
+-    #         latam_use = rec.journal_id.l10n_latam_use_documents
+-    #         if latam_use:
+-    #             actual_date = fields.Date.today()
+-    #             expiration_date = datetime.strptime(limit_date, '%Y-%m-%d').date()
+-    #             if actual_date > expiration_date:
+-    #                 raise ValidationError(
+-    #                     _(
+-    #                         "Please Contact the Administrator, "
+-    #                         "The Dominican Localization Plan is Expired"
+-    #                     )
+-    #                 )
+-    # if self.partner_id:
+-    #     invoice_totals = json.loads(self.tax_totals_json)
+-    #     if invoice_totals['amount_total'] == 0.0:
+-    #         raise ValidationError(
+-    #             "Para confirmar la factura debe ser mayor que %s" % invoice_totals['amount_total'])
+-    # return result
+-
+-    # def _get_sequence_format_param(self, previous):
+-    #
+-    #     if not self._context.get("is_l10n_do_seq", False):
+-    #         return super(AccountMove, self)._get_sequence_format_param(previous)
+-    #
+-    #     regex = self._l10n_do_sequence_fixed_regex
+-    #
+-    #     format_values = re.match(regex, previous).groupdict()
+-    #     format_values["seq_length"] = len(format_values["seq"])
+-    #     format_values["seq"] = int(format_values.get("seq") or 0)
+-    #     if self.l10n_do_fiscal_number:
+-    #         format_fiscal_number = re.match(regex, self.l10n_do_fiscal_number).groupdict()
+-    #         if self.l10n_latam_document_type_id.doc_code_prefix != format_fiscal_number["prefix1"]:
+-    #             raise ValidationError(_("You can't change the document type, please verify your selections"))
+-    #
+-    #     placeholders = re.findall(r"(prefix\d|seq\d?)", regex)
+-    #     format = "".join(
+-    #         "{seq:0{seq_length}d}" if s == "seq" else "{%s}" % s for s in placeholders
+-    #     )
+-    #     return format, format_values
+-    #
+-    # def _set_next_sequence(self):
+-    #     self.ensure_one()
+-    #
+-    #     if not self._context.get("is_l10n_do_seq", False):
+-    #         return super(AccountMove, self)._set_next_sequence()
+-    #
+-    #     last_sequence = self._get_last_sequence()
+-    #     new = not last_sequence
+-    #     if new:
+-    #         last_sequence = (
+-    #                 self._get_last_sequence(relaxed=True) or self._get_starting_sequence()
+-    #         )
+-    #
+-    #     format, format_values = self._get_sequence_format_param(last_sequence)
+-    #     if new:
+-    #         format_values["seq"] = 0
+-    #     format_values["seq"] = format_values["seq"] + 1
+-    #
+-    #     if self.company_id.l10n_do_fiscal_sequence_control:
+-    #         if self.state != "draft" and not self[self._l10n_do_sequence_field]:
+-    #             for inv in self:
+-    #                 new_seq = format_values["seq"]
+-    #                 doc_type = self.env['account.fiscal.sequence'].search(
+-    #                     [('document_type', '=', inv.l10n_latam_document_type_id.id)])
+-    #
+-    #             limit_set = int(doc_type.l10n_do_limit_vouchers)
+-    #             warning_seq = int(doc_type.l10n_do_warning_vouchers)
+-    #             if new_seq == warning_seq:
+-    #                 inv.notification_warning_seq()
+-    #             elif new_seq > limit_set:
+-    #                 raise ValidationError(
+-    #                     _("Fiscal invoices sequence is not available, please contact the Administrator"))
+-    #
+-    #     if (
+-    #             self.env.context.get("prefetch_seq")
+-    #             or self.state != "draft"
+-    #             and not self[self._l10n_do_sequence_field]
+-    #     ):
+-    #         self[
+-    #             self._l10n_do_sequence_field
+-    #         ] = self.l10n_latam_document_type_id._format_document_number(
+-    #             format.format(**format_values)
+-    #         )
+-    #     self._compute_split_sequence()
+-    #
+-    # @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
+-    # def _inverse_l10n_latam_document_number(self):
+-    #     for con in self:
+-    #         if con.move_type != 'entry':
+-    #             con.ref = con.l10n_latam_document_number
+-    #     for rec in self.filtered("l10n_latam_document_type_id"):
+-    #         if not rec.l10n_latam_document_number:
+-    #             rec.l10n_do_fiscal_number = ""
+-    #         else:
+-    #             document_type_id = rec.l10n_latam_document_type_id
+-    #             if self.fiscal_type_name == str(document_type_id.id) or self.name == "/":
+-    #                 if document_type_id.l10n_do_ncf_type:
+-    #                     document_number = document_type_id._format_document_number(
+-    #                         rec.l10n_latam_document_number
+-    #                     )
+-    #                 else:
+-    #                     document_number = rec.l10n_latam_document_number
+-    #
+-    #                 if rec.l10n_latam_document_number != document_number:
+-    #                     rec.l10n_latam_document_number = document_number
+-    #                 rec.l10n_do_fiscal_number = document_number
+-    #             else:
+-    #                 self.l10n_latam_document_number = ""
+-    #             self.fiscal_type_name = self.l10n_latam_document_type_id.id
+-    #         super(
+-    #             AccountMove, self.filtered(lambda m: m.country_code != "DO")
+-    #         )._inverse_l10n_latam_document_number()
+-
+-
+-class AccountMoveLine(models.Model):
+-    _inherit = 'account.move.line'
+-
+-    exclude_from_report = fields.Boolean(
+-        string='Exclude_from_report',
+-        required=False)
+Index: l10n_do_accounting_plus/views/account_payment.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/account_payment.xml b/l10n_do_accounting_plus/views/account_payment.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/account_payment.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,22 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-
+-    <data>
+-        <record id="account_payment_form_inherit_currency" model="ir.ui.view">
+-            <field name="name">account_payment_form_currency</field>
+-            <field name="model">account.payment</field>
+-            <field name="inherit_id" ref="account.view_account_payment_form"/>
+-            <field name="priority" eval="8"/>
+-            <field name="arch" type="xml">
+-                <xpath expr="//field[@name='partner_bank_id']" position="after">
+-                    <field name="is_currency_manual" invisible="1"/>
+-                    <field name="manual_currency_rate" attrs="{
+-                    'invisible': [('is_currency_manual', '=', False)],
+-                    'readonly': [('state', '!=', 'draft')]}"/>
+-
+-                </xpath>
+-            </field>
+-        </record>
+-    </data>
+-
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/views/account_journal_views.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/account_journal_views.xml b/l10n_do_accounting_plus/views/account_journal_views.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/account_journal_views.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,25 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <record id="view_account_journal_form" model="ir.ui.view">
+-        <field name="model">account.journal</field>
+-        <field name="name">account.journal.form</field>
+-        <field name="inherit_id" ref="l10n_do_accounting.view_account_journal_form"/>
+-        <field name="arch" type="xml">
+-            <xpath expr="//field[@name='type']" position="after">
+-                <field name="hidden_payment_form" attrs="{'invisible': [('type','not in',('cash','bank'))]}"/>
+-            </xpath>
+-            <xpath expr="//field[@name='l10n_do_payment_form']" position="attributes">
+-                <attribute name="attrs">{
+-                'invisible': ['|', '|', ('type','not in',('cash','bank')), ('country_code', '!=', 'DO'), ('hidden_payment_form', '=', True)],
+-                'required': [('type','in',('cash','bank')), ('country_code', '!=', 'DO')]
+-                }</attribute>
+-            </xpath>
+-            <xpath expr="//page[@id='outbound_payment_settings']/field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']" position="after">
+-                <field name="l10n_do_payment_form" attrs="{'column_invisible': [('parent.hidden_payment_form', '=', False)]}"/>
+-            </xpath>
+-             <xpath expr="//page[@id='inbound_payment_settings']/field[@name='inbound_payment_method_line_ids']/tree/field[@name='name']" position="after">
+-                <field name="l10n_do_payment_form" attrs="{'column_invisible': [('parent.hidden_payment_form', '=', False)]}"/>
+-            </xpath>
+-        </field>
+-    </record>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/views/res_company_views.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/res_company_views.xml b/l10n_do_accounting_plus/views/res_company_views.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/res_company_views.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,13 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <record model="ir.ui.view" id="view_company_form_plus">
+-        <field name="name">res.company.form.inherit.plus</field>
+-        <field name="inherit_id" ref="base.view_company_form"/>
+-        <field name="model">res.company</field>
+-        <field name="arch" type="xml">
+-            <field name="vat" position="after">
+-                <field name="fiscal_journal_sale" invisible="True"/>
+-            </field>
+-        </field>
+-    </record>
+-</odoo>
+Index: l10n_do_accounting_plus/__init__.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/__init__.py b/l10n_do_accounting_plus/__init__.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/__init__.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,1 +0,0 @@
+-from . import models
+Index: l10n_do_accounting_plus/views/account_move_views.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/account_move_views.xml b/l10n_do_accounting_plus/views/account_move_views.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/account_move_views.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,53 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <record id="view_account_invoice_filter_inherit" model="ir.ui.view">
+-        <field name="name">account.invoice.select.inherit.plus</field>
+-        <field name="model">account.move</field>
+-        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+-        <field name="arch" type="xml">
+-            <xpath expr="//field[@name='name']" position="after">
+-                <field name="l10n_do_fiscal_number"/>
+-            </xpath>
+-        </field>
+-    </record>
+-    <record id="view_move_form_plus" model="ir.ui.view">
+-        <field name="name">account.move.form.plus</field>
+-        <field name="model">account.move</field>
+-        <field name="inherit_id" ref="account.view_move_form"/>
+-        <field name="arch" type="xml">
+-            <xpath expr="//field[@name='partner_id']" position="after">
+-                <field name="fiscal_type_name" invisible="1"/>
+-                <field name="total_descontado" invisible="1"/>
+-                <field name="total_without_discount" invisible="1"/>
+-                <field name="received_delivered" invisible="1"/>
+-                <field name="label_report_one" invisible="1"/>
+-                <field name="label_report_two" invisible="1"/>
+-                <field name="total_down_payments" invisible="1"/>
+-            </xpath>
+-            <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
+-                <div class="alert alert-warning"
+-                     role="alert" style="margin-bottom:0px;"
+-                     attrs="{'invisible': ['|', '|', '|',
+-                     ('move_type', '=', 'entry'),
+-                     ('country_code', '!=', 'DO'),
+-                     ('l10n_do_company_in_contingency', '=', False),
+-                     ('state', '!=', 'draft')]}">
+-                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF
+-                    issuing has been enabled.
+-                </div>
+-            </xpath>
+-<!--            TODO no esta aplicando bien los atributos de invisible-->
+-            <xpath expr="//button[@name='button_draft']" position="after">
+-                <button name="convert_to_fiscal_invoice" type="object" string="Convert To Fiscal"
+-                        attrs="{'invisible': ['|', '|',
+-                        ('state', 'in', ('draft', 'cancel')),
+-                        ('move_type', '!=', 'out_invoice'),
+-                        ('l10n_latam_use_documents', '=', True)]}"/>
+-            </xpath>
+-            <xpath expr="//field[@name='narration']" position="after">
+-                 <field name="amount_total_without_down_payments" force-save="1" attrs="{'invisible':[('total_down_payments', '=', 0)]}"/>
+-                 <field name="amount_residual_without_down_payments" force-save="1" attrs="{'invisible':[('total_down_payments', '=', 0)]}"/>
+-            </xpath>
+-        </field>
+-    </record>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/static/js/script.js
+===================================================================
+diff --git a/l10n_do_accounting_plus/static/js/script.js b/l10n_do_accounting_plus/static/js/script.js
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/static/js/script.js	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,10 +0,0 @@
+-$(function () {
+-    var search_result = $("#search_result").val();
+-    console.log('Search result:', search_result);
+-
+-    if (search_result) {
+-        setTimeout(function () {
+-            $(".alert-success").fadeOut(1000);
+-        }, 10000);
+-    }
+-});
+Index: l10n_do_accounting_plus/views/report_invoice.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/report_invoice.xml b/l10n_do_accounting_plus/views/report_invoice.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/report_invoice.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,97 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <data>
+-
+-        <template id="report_invoice_document_inherited_plus" inherit_id="l10n_do_accounting.document_tax_totals">
+-            <xpath expr="//t[@t-set='l10n_do_amounts']" position="after">
+-
+-                <t t-if="o.total_descontado > 0">
+-                    <tr class="border-black">
+-                        <td>
+-                            <strong>Subtotal antes del descuento</strong>
+-                        </td>
+-                        <td class="text-right">
+-                            <span t-att-class="oe_subtotal_footer_separator" t-esc="o.total_without_discount"
+-                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+-                        </td>
+-                    </tr>
+-                </t>
+-                <t t-if="o.total_descontado > 0">
+-                    <tr class="border-black">
+-                        <td>
+-                            <strong>Total Descontado</strong>
+-                        </td>
+-                        <td class="text-right">
+-                            <span t-att-class="oe_subtotal_footer_separator" t-esc="o.total_descontado"
+-                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+-                        </td>
+-                    </tr>
+-                </t>
+-            </xpath>
+-        </template>
+-
+-        <template id="report_invoice_document_inherited_plus"
+-                  inherit_id="l10n_do_accounting.report_invoice_document_inherited">
+-            <xpath expr="//div[@id='qrcode']" position="after">
+-                <div class="sign_custom">
+-                    <t t-if="o.received_delivered">
+-                        <br/>
+-                        <br/>
+-                        <div class="row text-center">
+-                            <div class="col-6">
+-                                <p>____________________________________________</p>
+-                            </div>
+-                            <div class="col-6 text-center">
+-                                <p>____________________________________________</p>
+-                            </div>
+-                        </div>
+-                        <div class="row text-center">
+-                            <div class="col-6">
+-                                <p t-field="o.label_report_one"/>
+-                            </div>
+-                            <div class="col-6 text-center">
+-                                <p t-field="o.label_report_two"/>
+-                            </div>
+-                        </div>
+-                    </t>
+-                </div>
+-            </xpath>
+-
+-        </template>
+-
+-        <template id="report_invoice_document_inherited_down_payments_id"
+-                  inherit_id="account.report_invoice_document">
+-            <!--            <xpath expr="//table[@name='invoice_line_table']/tbody/t[3]/tr/t[@name='account_invoice_line_accountable']" position="replace">-->
+-            <!--                 <t t-if="not line.display_type and not line.exclude_from_report" name="account_invoice_line_accountable">-->
+-            <!--                     <td name="account_invoice_line_name"><span t-field="line.name" t-options="{'widget': 'text'}"/></td>-->
+-            <!--                        <td class="text-right">-->
+-            <!--                            <span t-field="line.quantity"/>-->
+-            <!--                            <span t-field="line.product_uom_id" groups="uom.group_uom"/>-->
+-            <!--                        </td>-->
+-            <!--                     <td t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">-->
+-            <!--                         <span class="text-nowrap" t-field="line.price_unit"/>-->
+-            <!--                     </td>-->
+-            <!--                     <td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">-->
+-            <!--                         <span class="text-nowrap" t-field="line.discount"/>-->
+-            <!--                     </td>-->
+-            <!--                     <td t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">-->
+-            <!--                         <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))" id="line_tax_ids"/>-->
+-            <!--                     </td>-->
+-            <!--                     <td class="text-right o_price_total">-->
+-            <!--                         <span class="text-nowrap" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>-->
+-            <!--                         <span class="text-nowrap" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>-->
+-            <!--                     </td>-->
+-            <!--                 </t>-->
+-            <!--            </xpath>-->
+-            <!--           <xpath expr="//table[@name='invoice_line_table']/tbody/t[3]/t[3]/tr/t[2]" position="replace">-->
+-            <!--               <t t-if="line.display_type == 'line_section' and not line.exclude_from_report">-->
+-            <!--                   <td colspan="99">-->
+-            <!--                       <span t-field="line.name" t-options="{'widget': 'text'}"/>-->
+-            <!--                   </td>-->
+-            <!--                   <t t-set="current_section" t-value="line"/>-->
+-            <!--                   <t t-set="current_subtotal" t-value="0"/>-->
+-            <!--               </t>-->
+-            <!--           </xpath>-->
+-        </template>
+-    </data>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/views/account_fiscal_sequence.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/account_fiscal_sequence.xml b/l10n_do_accounting_plus/views/account_fiscal_sequence.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/account_fiscal_sequence.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,53 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <data>
+-
+-        <record id="account_fiscal_sequence_form_view" model="ir.ui.view">
+-            <field name="name">account.fiscal.sequence.form</field>
+-            <field name="model">account.fiscal.sequence</field>
+-            <field name="arch" type="xml">
+-                <form string="Fiscal Sequence Form">
+-                    <sheet>
+-                        <group>
+-                            <group>
+-                                <field name="document_type"/>
+-                            </group>
+-                            <group>
+-                                <field name="l10n_do_warning_vouchers"/>
+-                                <field name="l10n_do_limit_vouchers"/>
+-                                <field name="company_id"/>
+-                            </group>
+-                        </group>
+-                    </sheet>
+-                </form>
+-            </field>
+-        </record>
+-
+-        <record id="account_fiscal_sequence_tree_view" model="ir.ui.view">
+-            <field name="name">account.fiscal.sequence.tree</field>
+-            <field name="model">account.fiscal.sequence</field>
+-            <field name="arch" type="xml">
+-                <tree string="Fiscal Sequence">
+-                    <field name="document_type"/>
+-                    <field name="l10n_do_warning_vouchers"/>
+-                    <field name="l10n_do_limit_vouchers"/>
+-                    <field name="company_id"/>
+-                </tree>
+-            </field>
+-        </record>
+-
+-        <record id="account_fiscal_seq_act_window" model="ir.actions.act_window">
+-            <field name="name">Fiscal Sequence</field>
+-            <field name="res_model">account.fiscal.sequence</field>
+-            <field name="view_id" ref="account_fiscal_sequence_tree_view"/>
+-        </record>
+-
+-        <menuitem id="account_fiscal_sequence_menu"
+-                  name="Fiscal Sequence"
+-                  action="account_fiscal_seq_act_window"
+-                  parent="account.account_account_menu"
+-                  groups="account.group_account_manager"
+-                  sequence="0"/>
+-
+-    </data>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/views/res_partner.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/res_partner.xml b/l10n_do_accounting_plus/views/res_partner.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/res_partner.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,41 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <data>
+-        <record id="res_partner_form_inherit" model="ir.ui.view">
+-            <field name="name">res.partner.form.inherit</field>
+-            <field name="model">res.partner</field>
+-            <field name="inherit_id" ref="base.view_partner_form"/>
+-            <field name="priority" eval="8"/>
+-            <field name="arch" type="xml">
+-                <!--                <xpath expr="." position="inside">-->
+-                <!--                    -->
+-                <!--                    <field name="search_result" id="search_result" force-save="1"/>-->
+-                <!--                </xpath>-->
+-                <xpath expr="//sheet" position="before">
+-                    <header invisible="1">
+-                        <button name="get_contribuyentes" type="object" string="Buscar RNC/CEDULA"
+-                                class="oe_highlight"/>
+-                    </header>
+-                </xpath>
+-                <xpath expr="//field[@name='vat']" position="attributes">
+-                    <attribute name="attrs">{
+-                        'required': [('l10n_do_dgii_tax_payer_type', 'in', ('taxpayer'))],
+-                        }
+-                    </attribute>
+-                </xpath>
+-                <!--                TODO PARA PONER UN DIV DONDE MOSTRAR LOS DATOS BUSCADOS QUE RETORNA LA API DE LA DGII POR AHORA VAMOS A MOSTRARLO EN UN WIZARD-->
+-                <!--                <xpath expr="//notebook" position="before">-->
+-                <!--                    <script type="text/javascript" src="l10n_do_accounting_plus/static/js/script.js"/>-->
+-                <!--                    <field name="search_result" id="search_result" force-save="1" invisible="1"/>-->
+-                <!--                    <div class="col-8" invisible="1">-->
+-                <!--                        <div class="alert alert-success" role="alert">-->
+-                <!--                            <field name="search_result" force-save="1"/>-->
+-                <!--                        </div>-->
+-                <!--                    </div>-->
+-                <!--                </xpath>-->
+-            </field>
+-
+-        </record>
+-
+-    </data>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/views/res_config_settings_view.xml
+===================================================================
+diff --git a/l10n_do_accounting_plus/views/res_config_settings_view.xml b/l10n_do_accounting_plus/views/res_config_settings_view.xml
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/views/res_config_settings_view.xml	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,103 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<odoo>
+-    <record id="res_config_settings_view_form" model="ir.ui.view">
+-        <field name="name">res.config.settings.view.form.inherit.plus</field>
+-        <field name="model">res.config.settings</field>
+-        <field name="inherit_id" ref="l10n_do_accounting.res_config_settings_view_form"/>
+-        <field name="arch" type="xml">
+-            <xpath expr="//div[@id='l10n_do_title']" position="replace">
+-                <div id="l10n_do_title" attrs="{'invisible': False}">
+-                    <h2>Dominican Localization</h2>
+-                </div>
+-                <div id="l10n_do_section" class="row mt16 o_settings_container" groups="account.group_account_manager">
+-                    <div class="col-12 col-lg-6 o_setting_box" id="account_options">
+-                        <div class="o_setting_left_pane">
+-                            <field name="view_discount_in_account"/>
+-                        </div>
+-                        <div class="o_setting_right_pane">
+-                            <label for="view_discount_in_account"/>
+-                            <div class="text-muted">
+-                                Poder vizualizar los descuentos aplicados a la factura en el reporte
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="col-12 col-lg-6 o_setting_box">
+-<!--                        <div class="o_setting_left_pane">-->
+-<!--                           -->
+-<!--                        </div>-->
+-                        <div class="o_setting_right_pane">
+-                            <div class="text-muted">
+-                                Diario de Venta para Generacion de Factura con Valor Fiscal.
+-                            </div>
+-                            <div class="text-muted">
+-                                <field name="fiscal_journal_sale"/>
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="col-12 col-lg-6 o_setting_box" groups="account.group_account_manager">
+-                        <div class="o_setting_left_pane">
+-                            <field name="l10n_do_fiscal_sequence_control"/>
+-                        </div>
+-                        <div class="o_setting_right_pane">
+-                            <label for="l10n_do_fiscal_sequence_control" readonly="0"/>
+-                            <div class="text-muted">
+-                                Habilitar la opcion de control de sequencia de comprobantes.
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="col-12 col-lg-6 o_setting_box">
+-                        <div class="o_setting_left_pane">
+-                            <field name="view_delivered_received" widget="upgrade_boolean"/>
+-                        </div>
+-                        <div class="o_setting_right_pane">
+-                            <label for="view_delivered_received"/>
+-                            <div class="text-muted">
+-                                Ability to add manual signatures to the report
+-                            </div>
+-                        </div>
+-                        <br/>
+-                        <div class="o_setting_right_pane"
+-                             attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
+-                            <span class="o_form_label">Show name in report left</span>
+-                            <div class="text-muted">
+-                                <field name="label_one_report"/>
+-                            </div>
+-                        </div>
+-                        <div class="o_setting_right_pane"
+-                             attrs="{'invisible': [('view_delivered_received', '=', False)], 'required': [('view_delivered_received', '=', True)]}">
+-                            <span class="o_form_label">Show name in report right</span>
+-                            <div class="text-muted">
+-                                <field name="label_one_report_2"/>
+-                            </div>
+-                        </div>
+-                    </div>
+-                </div>
+-            </xpath>
+-<!--            @TODO trabajando en el proceso de valor de moneda en factura y en pagos manual y la moneda financiera.-->
+-            <!--                <xpath expr="//div[@id='main_currency']" position="after">-->
+-            <!--                    <div class="col-12 col-lg-6 o_setting_box">-->
+-            <!--                        <div class="o_setting_left_pane">-->
+-            <!--                            <field name="financial_currency" widget="upgrade_boolean"/>-->
+-            <!--                        </div>-->
+-            <!--                        <div class="o_setting_right_pane">-->
+-            <!--                            <label for="financial_currency"/>-->
+-            <!--                            <div class="text-muted">-->
+-            <!--                                Financial Currency Change-->
+-            <!--                            </div>-->
+-            <!--                        </div>-->
+-            <!--                    </div>-->
+-            <!--                    <div class="col-12 col-lg-6 o_setting_box">-->
+-            <!--                        <div class="o_setting_left_pane">-->
+-            <!--                            <field name="manual_change_currency" widget="upgrade_boolean"/>-->
+-            <!--                        </div>-->
+-            <!--                        <div class="o_setting_right_pane">-->
+-            <!--                            <label for="manual_change_currency"/>-->
+-            <!--                            <div class="text-muted">-->
+-            <!--                                Manual Currency Change for Invoice-->
+-            <!--                             </div>-->
+-            <!--                        </div>-->
+-            <!--                    </div>-->
+-            <!--                </xpath>-->
+-        </field>
+-    </record>
+-</odoo>
+\ No newline at end of file
+Index: l10n_do_accounting_plus/models/__init__.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/__init__.py b/l10n_do_accounting_plus/models/__init__.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/__init__.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,7 +0,0 @@
+-from . import wsmovildgii
+-from . import account_journal
+-from . import res_company
+-from . import res_config_setting
+-from . import account_move
+-from . import account_payment
+-from . import res_partner
+Index: l10n_do_accounting_plus/models/account_journal.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/account_journal.py b/l10n_do_accounting_plus/models/account_journal.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/account_journal.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,61 +0,0 @@
+-from odoo import fields, models, _
+-
+-
+-class AccountJournal(models.Model):
+-    _inherit = "account.journal"
+-
+-    hidden_payment_form = fields.Boolean(
+-        string='Payment Form With Method Lines',
+-        required=False)
+-
+-
+-class AccountPaymentMethod(models.Model):
+-    _inherit = 'account.payment.method.line'
+-
+-    def _get_l10n_do_payment_form(self):
+-        """ Return the list of payment forms allowed by DGII. """
+-        return [
+-            ("cash", _("Cash")),
+-            ("bank", _("Check / Transfer")),
+-            ("card", _("Credit Card")),
+-            ("credit", _("Credit")),
+-            ("swap", _("Swap")),
+-            ("bond", _("Bonds or Gift Certificate")),
+-            ("others", _("Other Sale Type")),
+-        ]
+-
+-    l10n_do_payment_form = fields.Selection(
+-        string='Payment Form',
+-        selection='_get_l10n_do_payment_form',
+-        required=False, )
+-
+-
+-class AccountFiscalSequence(models.Model):
+-    _name = 'account.fiscal.sequence'
+-    _description = "Account Fiscal Sequence"
+-
+-    l10n_do_warning_vouchers = fields.Char(
+-        string='Warning Sequence',
+-        required=False)
+-
+-    l10n_do_limit_vouchers = fields.Char(
+-        string='Limit Sequence',
+-        required=False)
+-
+-    document_type = fields.Many2one(
+-        comodel_name='l10n_latam.document.type',
+-        string='Document Type',
+-        required=False)
+-
+-    code = fields.Char(related='document_type.doc_code_prefix')
+-
+-    company_id = fields.Many2one(
+-        comodel_name='res.company',
+-        string='Company', required=True, readonly=True,
+-        default=lambda self: self.env.company)
+-    # TODO unable to add constraint 'account_fiscal_sequence_document_type' as unique (code, company_id)
+-    #   mensaje a verificar
+-    # _sql_constraints = [
+-    #     ('document_type', 'unique (code, company_id)',
+-    #      'You only can use one document type per company')
+-    # ]
+Index: l10n_do_accounting_plus/models/account_payment.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/account_payment.py b/l10n_do_accounting_plus/models/account_payment.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/account_payment.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,18 +0,0 @@
+-from odoo import fields, models, api
+-
+-
+-class AccountPayment(models.Model):
+-    _inherit = ['account.payment']
+-
+-    manual_currency_rate = fields.Float(string="Currency Rate",)
+-    is_currency_manual = fields.Boolean(string="is_currency_manual", default=False)
+-
+-    # @api.onchange('currency_id')
+-    # def compute_manual_currency_rate(self):
+-    #     currency_company = self.company_id.currency_id
+-    #     currency_id = self.currency_id
+-    #     financial_currency = self.company_id.financial_currency
+-    #     if financial_currency and currency_company != currency_id:
+-    #         self.is_currency_manual = False
+-    #     else:
+-    #         self.is_currency_manual = True
+Index: l10n_do_accounting_plus/security/ir.model.access.csv
+===================================================================
+diff --git a/l10n_do_accounting_plus/security/ir.model.access.csv b/l10n_do_accounting_plus/security/ir.model.access.csv
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/security/ir.model.access.csv	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,2 +0,0 @@
+-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+-l10n_do_accounting_plus.access_account_fiscal_sequence,access_account_fiscal_sequence,l10n_do_accounting_plus.model_account_fiscal_sequence,base.group_user,1,1,1,1
+\ No newline at end of file
+Index: l10n_do_accounting_plus/__manifest__.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/__manifest__.py b/l10n_do_accounting_plus/__manifest__.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/__manifest__.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,27 +0,0 @@
+-{
+-    "name": "Fiscal Accounting (Rep. Dominicana) Plus",
+-    "summary": """
+-        Este módulo implementa una extencion de nuevas opciones para la localizacion dominicana.""",
+-    "author": "CAPW Servicios Tecnicos",
+-    "category": "Localization",
+-    "license": "LGPL-3",
+-    "website": "https://capw.com.do",
+-    "version": "15.0.4",
+-    # any module necessary for this one to work correctly
+-    "depends": ["l10n_do_accounting"],
+-    # always loaded
+-    "data": [
+-        "security/ir.model.access.csv",
+-        "views/account_fiscal_sequence.xml",
+-        "views/account_journal_views.xml",
+-        "views/account_move_views.xml",
+-        "views/account_payment.xml",
+-        "views/report_invoice.xml",
+-        "views/res_config_settings_view.xml",
+-        "views/res_partner.xml",
+-        # "views/res_company_views.xml",
+-    ],
+-    "installable": True,
+-    "auto_install": False,
+-    "application": False,
+-}
+Index: l10n_do_accounting_plus/models/res_company.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/res_company.py b/l10n_do_accounting_plus/models/res_company.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/res_company.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,12 +0,0 @@
+-from odoo import fields, models
+-# from wsmovildgii import get_contribuyentes
+-
+-
+-class ResCompany(models.Model):
+-    _inherit = "res.company"
+-
+-    financial_currency = fields.Boolean(string='Financial Currency')
+-    manual_change_currency = fields.Boolean(string='Manual Change Currency')
+-    date_equal_to_invoice_retention = fields.Boolean(string='Date Retention Equal to Date Invoice')
+-    l10n_do_fiscal_sequence_control = fields.Boolean(string='Activate Fiscal Sequence Control')
+-    fiscal_journal_sale = fields.Many2one('account.journal', string='Fiscal_journal_sale')
+Index: l10n_do_accounting_plus/models/res_partner.py
+===================================================================
+diff --git a/l10n_do_accounting_plus/models/res_partner.py b/l10n_do_accounting_plus/models/res_partner.py
+deleted file mode 100644
+--- a/l10n_do_accounting_plus/models/res_partner.py	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
++++ /dev/null	(revision 270adc57516923ecd04721f5d7bbff310170dc17)
+@@ -1,11 +0,0 @@
+-from odoo import models, fields, api, _
+-from .wsmovildgii import get_contribuyentes
+-
+-
+-class Partner(models.Model):
+-    _inherit = "res.partner"
+-
+-    @api.onchange('vat')
+-    def get_contribuyentes(self):
+-        get_contribuyentes(self)
+-        return get_contribuyentes(self)

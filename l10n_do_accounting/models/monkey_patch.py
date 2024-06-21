@@ -1,14 +1,18 @@
-from collections import defaultdict
 from odoo import models, api
-from odoo.exceptions import ValidationError
 
 
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    @api.depends("posted_before", "state", "journal_id", "date")
+    @api.depends(
+        "posted_before", "state", "journal_id", "date", "move_type", "payment_id"
+    )
     def _compute_name(self):
+<<<<<<< HEAD
         self = self.sorted(lambda m: (m.date, m.ref or "", m.id))
+=======
+        self = self.sorted(lambda m: (m.date, m.ref or "", m._origin.id))
+>>>>>>> 94bec61b7b67a86cb93f2d74afcef9e29110c0ed
 
         for move in self:
             if move.state == "cancel":
@@ -17,7 +21,11 @@ class AccountMove(models.Model):
             move_has_name = move.name and move.name != "/"
             if move_has_name or move.state != "posted":
                 if not move.posted_before and not move._sequence_matches_date():
+<<<<<<< HEAD
                     if move._get_last_sequence(lock=False):
+=======
+                    if move._get_last_sequence():
+>>>>>>> 94bec61b7b67a86cb93f2d74afcef9e29110c0ed
                         move.name = False
                         continue
                 else:
@@ -25,7 +33,11 @@ class AccountMove(models.Model):
                         move_has_name
                         and move.posted_before
                         or not move_has_name
+<<<<<<< HEAD
                         and move._get_last_sequence(lock=False)
+=======
+                        and move._get_last_sequence()
+>>>>>>> 94bec61b7b67a86cb93f2d74afcef9e29110c0ed
                     ):
                         continue
             if move.date and (not move_has_name or not move._sequence_matches_date()):

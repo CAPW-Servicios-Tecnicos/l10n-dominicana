@@ -32,7 +32,8 @@
                 <br/>
                 <span>
                     <strong>Fecha Emisión:</strong>
-                    <span t-field="o.invoice_date"/>
+                    <span t-if="o.invoice_date" t-field="o.invoice_date"/>
+                    <span t-else="">No especificado</span>
                 </span>
                 <br/>
                 <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
@@ -324,10 +325,10 @@
             </attribute>
         </xpath>
 
-        <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']"
-               position="replace">
-            <t t-call="l10n_do_accounting.document_tax_totals"/>
-        </xpath>
+<!--        <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']"-->
+<!--               position="replace">-->
+<!--            <t t-call="l10n_do_accounting.document_tax_totals"/>-->
+<!--        </xpath>-->
 
     </template>
 

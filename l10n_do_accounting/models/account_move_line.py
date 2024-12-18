@@ -136,7 +136,6 @@ class AccountMoveLine(models.Model):
             + result["itbis_18_tax_amount"]
             + result["itbis_16_tax_amount"]
             + result["itbis_0_tax_amount"]
-            - result["isr_withholding_amount"]
         )
 
         if self.currency_id != self.company_id.currency_id:

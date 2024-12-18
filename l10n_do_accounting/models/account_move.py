@@ -124,86 +124,80 @@ class AccountMove(models.Model):
         "manually because a new expiration date was set on journal",
     )
 
-    # _sql_constraints = [
-    #     (
-    #         "unique_l10n_do_fiscal_number_sales",
-    #         "",
-    #         "Another document with the same fiscal number already exists.",
-    #     ),
-    #     (
-    #         "unique_l10n_do_fiscal_number_purchase_manual",
-    #         "",
-    #         "Another document for the same partner with the same fiscal number already exists.",
-    #     ),
-    #     (
-    #         "unique_l10n_do_fiscal_number_purchase_internal",
-    #         "",
-    #         "Another document for the same partner with the same fiscal number already exists.",
-    #     ),
-    # ]
-    #
-    # def _auto_init(self):
-    #     if not index_exists(
-    #         self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
-    #     ):
-    #         drop_index(
-    #             self.env.cr,
-    #             "account_move_unique_l10n_do_fiscal_number_purchase_manual",
-    #             self._table,
-    #         )
-    #         drop_index(
-    #             self.env.cr,
-    #             "account_move_unique_l10n_do_fiscal_number_purchase_internal",
-    #             self._table,
-    #         )
-    #
-    #         if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
-    #             create_column(
-    #                 self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
-    #             )
-    #         if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
-    #             create_column(
-    #                 self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
-    #             )
-    #
-    #         self.env.cr.execute(
-    #             """
-    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
-    #             ON account_move(l10n_do_fiscal_number, company_id)
-    #             WHERE (l10n_latam_document_type_id IS NOT NULL
-    #             AND move_type NOT IN ('in_invoice', 'in_refund'))
-    #             AND l10n_do_fiscal_number <> '';
-    #
-    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
-    #             ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
-    #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
-    #             AND l10n_latam_manual_document_number = 't')
-    #             AND l10n_do_fiscal_number <> '';
-    #
-    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
-    #             ON account_move(l10n_do_fiscal_number, company_id)
-    #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-    #             AND l10n_latam_manual_document_number = 'f')
-    #             AND l10n_do_fiscal_number <> '';
-    #         """
-    #         )
-    #     return super()._auto_init()
+    _sql_constraints = [
+        (
+            "unique_l10n_do_fiscal_number_sales",
+            "",
+            "Another document with the same fiscal number already exists.",
+        ),
+        (
+            "unique_l10n_do_fiscal_number_purchase_manual",
+            "",
+            "Another document for the same partner with the same fiscal number already exists.",
+        ),
+        (
+            "unique_l10n_do_fiscal_number_purchase_internal",
+            "",
+            "Another document for the same partner with the same fiscal number already exists.",
+        ),
+    ]
+
+    def _auto_init(self):
+        if not index_exists(
+            self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
+        ):
+            drop_index(
+                self.env.cr,
+                "account_move_unique_l10n_do_fiscal_number_purchase_manual",
+                self._table,
+            )
+            drop_index(
+                self.env.cr,
+                "account_move_unique_l10n_do_fiscal_number_purchase_internal",
+                self._table,
+            )
+
+            if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
+                create_column(
+                    self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
+                )
+            if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
+                create_column(
+                    self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
+                )
+
+            self.env.cr.execute(
+                """
+                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
+                ON account_move(l10n_do_fiscal_number, company_id)
+                WHERE (l10n_latam_document_type_id IS NOT NULL
+                AND move_type NOT IN ('in_invoice', 'in_refund'))
+                AND l10n_do_fiscal_number <> '';
+                
+                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
+                ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
+                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
+                AND l10n_latam_manual_document_number = 't')
+                AND l10n_do_fiscal_number <> '';
+                
+                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
+                ON account_move(l10n_do_fiscal_number, company_id)
+                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                AND l10n_latam_manual_document_number = 'f')
+                AND l10n_do_fiscal_number <> '';
+            """
+            )
+        return super()._auto_init()
 
     @api.model
-    def _name_search(
-        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
-    ):
-        args = args or []
-        domain = []
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         if name:
-            domain = [
+            domain = expression.AND([[
                 "|",
                 ("name", operator, name),
                 ("l10n_do_fiscal_number", operator, name),
-            ]
-        return self._search(
-            expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid
-        )
+            ], domain])
+        return super()._name_search(name, domain, operator, limit, order)
 
     def _l10n_do_is_new_expiration_date(self):
         self.ensure_one()
@@ -864,7 +858,8 @@ class AccountMove(models.Model):
 
     def unlink(self):
         if self.filtered(
-            lambda inv: inv.country_code == "DO"
+            lambda inv: inv.is_purchase_document()
+            and inv.country_code == "DO"
             and inv.l10n_latam_use_documents
             and inv.posted_before
         ):

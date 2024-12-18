@@ -32,8 +32,7 @@
                 <br/>
                 <span>
                     <strong>Fecha Emisión:</strong>
-                    <span t-if="o.invoice_date" t-field="o.invoice_date"/>
-                    <span t-else="">No especificado</span>
+                    <span t-field="o.invoice_date"/>
                 </span>
                 <br/>
                 <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
@@ -150,7 +149,6 @@
     <template id="document_tax_totals">
 
         <t t-set="l10n_do_amounts" t-value="o._get_l10n_do_amounts()"/>
-        <table style="margin-left: -20px; width: 100%;">
 
         <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
             <tr class="border-black o_subtotal">
@@ -207,7 +205,20 @@
             </td>
         </tr>
 
-         <!-- Desglose de retenciones -->
+        <!-- Total = subtotal + impuestos + retenciones -->
+        <tr class="border-black o_total">
+            <td>
+                <strong>Total</strong>
+            </td>
+
+            <t t-set="l10n_do_amount_total" t-value="l10n_do_amounts['l10n_do_invoice_total']"/>
+            <td class="text-end">
+                <span class="text-nowrap" t-out="l10n_do_amount_total"
+                      t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+            </td>
+        </tr>
+
+        <!-- Desglose de retenciones -->
         <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="tax_aml">
             <t t-set="l10n_do_wh_amount"
                t-value="tax_aml.debit or tax_aml.credit if o.currency_id == o.company_id.currency_id else tax_aml.amount_currency"/>
@@ -225,19 +236,6 @@
             </tr>
         </t>
 
-        <!-- Total = subtotal + impuestos + retenciones -->
-        <tr class="border-black o_total">
-            <td>
-                <strong>Total</strong>
-            </td>
-
-            <t t-set="l10n_do_amount_total" t-value="l10n_do_amounts['l10n_do_invoice_total']"/>
-            <td class="text-end">
-                <span class="text-nowrap" t-out="l10n_do_amount_total"
-                      t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-            </td>
-        </tr>
-        </table>
     </template>
 
     <template id="report_invoice_document_inherited"
@@ -325,10 +323,10 @@
             </attribute>
         </xpath>
 
-<!--        <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']"-->
-<!--               position="replace">-->
-<!--            <t t-call="l10n_do_accounting.document_tax_totals"/>-->
-<!--        </xpath>-->
+        <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']"
+               position="replace">
+            <t t-call="l10n_do_accounting.document_tax_totals"/>
+        </xpath>
 
     </template>
 

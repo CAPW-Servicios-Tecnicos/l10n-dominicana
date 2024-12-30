@@ -142,52 +142,52 @@ class AccountMove(models.Model):
         ),
     ]
 
-    def _auto_init(self):
-        if not index_exists(
-            self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
-        ):
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_manual",
-                self._table,
-            )
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_internal",
-                self._table,
-            )
+    # def _auto_init(self):
+    #     if not index_exists(
+    #         self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
+    #     ):
+    #         drop_index(
+    #             self.env.cr,
+    #             "account_move_unique_l10n_do_fiscal_number_purchase_manual",
+    #             self._table,
+    #         )
+    #         drop_index(
+    #             self.env.cr,
+    #             "account_move_unique_l10n_do_fiscal_number_purchase_internal",
+    #             self._table,
+    #         )
 
-            if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
-                )
-            if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
-                )
+    #         if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
+    #             create_column(
+    #                 self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
+    #             )
+    #         if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
+    #             create_column(
+    #                 self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
+    #             )
 
-            self.env.cr.execute(
-                """
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
-                ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL
-                AND move_type NOT IN ('in_invoice', 'in_refund'))
-                AND l10n_do_fiscal_number <> '';
+    #         self.env.cr.execute(
+    #             """
+    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
+    #             ON account_move(l10n_do_fiscal_number, company_id)
+    #             WHERE (l10n_latam_document_type_id IS NOT NULL
+    #             AND move_type NOT IN ('in_invoice', 'in_refund'))
+    #             AND l10n_do_fiscal_number <> '';
                 
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
-                ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
-                AND l10n_latam_manual_document_number = 't')
-                AND l10n_do_fiscal_number <> '';
+    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
+    #             ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
+    #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
+    #             AND l10n_latam_manual_document_number = 't')
+    #             AND l10n_do_fiscal_number <> '';
                 
-                # CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
-                # ON account_move(l10n_do_fiscal_number, company_id)
-                # WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                # AND l10n_latam_manual_document_number = 'f')
-                # AND l10n_do_fiscal_number <> '';
-            """
-            )
-        return super()._auto_init()
+    #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
+    #             ON account_move(l10n_do_fiscal_number, company_id)
+    #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+    #             AND l10n_latam_manual_document_number = 'f')
+    #             AND l10n_do_fiscal_number <> '';
+    #         """
+    #         )
+    #     return super()._auto_init()
 
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):

@@ -124,23 +124,23 @@ class AccountMove(models.Model):
         "manually because a new expiration date was set on journal",
     )
 
-    _sql_constraints = [
-        (
-            "unique_l10n_do_fiscal_number_sales",
-            "",
-            "Another document with the same fiscal number already exists.",
-        ),
-        (
-            "unique_l10n_do_fiscal_number_purchase_manual",
-            "",
-            "Another document for the same partner with the same fiscal number already exists.",
-        ),
-        (
-            "unique_l10n_do_fiscal_number_purchase_internal",
-            "",
-            "Another document for the same partner with the same fiscal number already exists.",
-        ),
-    ]
+    # _sql_constraints = [
+    #     (
+    #         "unique_l10n_do_fiscal_number_sales",
+    #         "",
+    #         "Another document with the same fiscal number already exists.",
+    #     ),
+    #     (
+    #         "unique_l10n_do_fiscal_number_purchase_manual",
+    #         "",
+    #         "Another document for the same partner with the same fiscal number already exists.",
+    #     ),
+    #     (
+    #         "unique_l10n_do_fiscal_number_purchase_internal",
+    #         "",
+    #         "Another document for the same partner with the same fiscal number already exists.",
+    #     ),
+    # ]
 
     # def _auto_init(self):
     #     if not index_exists(

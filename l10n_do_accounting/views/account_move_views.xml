@@ -11,13 +11,17 @@
                 <field name="l10n_do_enable_first_sequence" invisible="1" force_save="1"/>
                 <field name="l10n_do_show_expiration_date_msg" invisible="1"/>
             </field>
+            <field name="show_update_fpos" position="inside">
+                <field name="l10n_do_enable_first_sequence" invisible="1"/>
+            </field>
             <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
                 <div class="alert alert-warning"
                      role="alert" style="margin-bottom:0px;"
                      invisible="move_type == 'entry' or country_code != 'DO'
                                 or not l10n_do_company_in_contingency
                                 or state != 'draft'">
-                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF issuing has been enabled.
+                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF
+                    issuing has been enabled.
                 </div>
                 <div class="alert alert-warning"
                      role="alert" style="margin-bottom:0px;"
@@ -33,7 +37,9 @@
                         invisible="state in ('draft', 'cancel') or country_code != 'DO'"/>
             </xpath>
             <xpath expr="//button[@name='button_draft']" position="attributes">
-                <attribute name="invisible">restrict_mode_hash_table == True or (state not in ('posted', 'cancel') and country_code != 'DO') or (state != 'cancel' and country_code == 'DO')</attribute>
+                <attribute name="invisible">restrict_mode_hash_table == True or (state not in ('posted', 'cancel') and
+                    country_code != 'DO') or (state != 'cancel' and country_code == 'DO')
+                </attribute>
             </xpath>
             <xpath expr="//h1/span/.." position="after">
                 <h4 invisible="state != 'cancel' or country_code != 'DO'">
@@ -43,9 +49,17 @@
                 </h4>
             </xpath>
             <xpath expr="//field[@name='l10n_latam_document_number']" position="attributes">
-                <attribute name="required">l10n_do_enable_first_sequence or l10n_latam_manual_document_number and (l10n_latam_use_documents and country_code == 'DO')</attribute>
-                <attribute name="invisible">(not l10n_latam_use_documents and country_code == 'DO') or (not l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft') or (not l10n_do_enable_first_sequence and l10n_latam_manual_document_number and state == 'draft') and (move_type in ('out_invoice', 'out_refund', 'in_refund') and country_code == 'DO')</attribute>
-                <attribute name="readonly">(state != 'draft' and country_code == 'DO') or (posted_before and country_code == 'DO')</attribute>
+                <attribute name="required">l10n_do_enable_first_sequence or l10n_latam_manual_document_number and
+                    (l10n_latam_use_documents and country_code == 'DO')
+                </attribute>
+                <attribute name="invisible">(not l10n_latam_use_documents and country_code == 'DO') or (not
+                    l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft') or
+                    (not l10n_do_enable_first_sequence and l10n_latam_manual_document_number and state == 'draft') and
+                    (move_type in ('out_invoice', 'out_refund', 'in_refund') and country_code == 'DO')
+                </attribute>
+                <attribute name="readonly">(state != 'draft' and country_code == 'DO') or (posted_before and
+                    country_code == 'DO')
+                </attribute>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/div" position="after">
                 <xpath expr="//field[@name='l10n_latam_document_type_id']" position="move"/>
@@ -72,17 +86,19 @@
             </xpath>
             <xpath expr="//div[@name='journal_div']" position="after">
                 <field name="l10n_do_ecf_security_code"
-                    invisible="not partner_id
+                       invisible="not partner_id
                                or country_code != 'DO'
                                or not l10n_latam_manual_document_number
                                or not is_ecf_invoice"/>
             </xpath>
 
             <!-- only computed when l10n_do ecf invoice -->
-            <xpath expr="//page[@id='invoice_tab']/field[@name='invoice_line_ids']/tree/field[@name='tax_ids']" position="after">
+            <xpath expr="//page[@id='invoice_tab']/field[@name='invoice_line_ids']/tree/field[@name='tax_ids']"
+                   position="after">
                 <field name="l10n_do_itbis_amount" column_invisible="1" force_save="1"/>
             </xpath>
-            <xpath expr="//page[@id='aml_tab']/field[@name='line_ids']/tree/field[@name='account_type']" position="after">
+            <xpath expr="//page[@id='aml_tab']/field[@name='line_ids']/tree/field[@name='account_type']"
+                   position="after">
                 <field name="l10n_do_itbis_amount" column_invisible="1" force_save="1"/>
             </xpath>
         </field>
@@ -111,7 +127,8 @@
             'move_type': 'out_invoice',
             'journal_type': 'sale',
             'internal_type': 'debit_note',
-            }</field>
+            }
+        </field>
         <field name="search_view_id" ref="account.view_account_invoice_filter"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -142,7 +159,8 @@
             'journal_type': 'purchase',
             'journal_type': 'purchase',
             'internal_type': 'debit_note',
-            }</field>
+            }
+        </field>
         <field name="search_view_id" ref="account.view_account_invoice_filter"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -180,7 +198,8 @@
                     ('ref', 'ilike', self),
                     ('partner_id', 'ilike', self),
                     ('l10n_do_fiscal_number', 'ilike', self)
-                ]</attribute>
+                    ]
+                </attribute>
             </field>
         </field>
     </record>

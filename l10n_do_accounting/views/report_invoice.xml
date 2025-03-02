@@ -158,8 +158,8 @@
 
                 <td class="text-end">
                     <span
-                        t-att-class="oe_subtotal_footer_separator"
-                        t-out="subtotal['formatted_amount']"
+                            t-att-class="oe_subtotal_footer_separator"
+                            t-out="subtotal['formatted_amount']"
                     />
                 </td>
             </tr>
@@ -169,21 +169,21 @@
         <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="tax_aml">
             <t t-set="l10n_do_tax_amount"
                t-value="abs(tax_aml.debit or tax_aml.credit if o.currency_id == o.company_id.currency_id else tax_aml.amount_currency)"/>
-            <tr t-if="tax_aml.tax_line_id.amount > 0" style="">
+            <tr t-if="tax_aml.tax_line_id.amount &gt; 0" style="">
                 <t>
-                    <td>
-                        <span class="text-nowrap"
-                              t-out="tax_aml.tax_line_id.name"/>
+                    <td style="word-break: break-word; white-space: normal;">
+                        <span class="text-nowrap" t-out="tax_aml.tax_line_id.name"/>
                     </td>
                     <td class="text-end o_price_total">
                         <span class="text-nowrap" t-out="l10n_do_tax_amount"
-                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                              t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
                     </td>
                 </t>
             </tr>
         </t>
 
-        <t t-set="total_amount_taxed" t-value="l10n_do_amounts['itbis_18_base_amount'] + l10n_do_amounts['itbis_16_base_amount'] + l10n_do_amounts['itbis_0_base_amount']"/>
+        <t t-set="total_amount_taxed"
+           t-value="l10n_do_amounts['itbis_18_base_amount'] + l10n_do_amounts['itbis_16_base_amount'] + l10n_do_amounts['itbis_0_base_amount']"/>
         <t t-set="total_exempt_amount" t-value="l10n_do_amounts['exempt_amount']"/>
 
         <tr class="border-black o_total" t-if="ecf_representation">
@@ -224,13 +224,12 @@
                t-value="tax_aml.debit or tax_aml.credit if o.currency_id == o.company_id.currency_id else tax_aml.amount_currency"/>
             <tr t-if="tax_aml.tax_line_id.amount &lt; 0" style="">
                 <t>
-                    <td>
-                        <span class="text-nowrap"
-                              t-out="tax_aml.tax_line_id.name"/>
+                    <td style="word-break: break-word; white-space: normal;">
+                        <span t-out="tax_aml.tax_line_id.name"/>
                     </td>
                     <td class="text-end o_price_total">
                         <span class="text-nowrap" t-out="l10n_do_wh_amount"
-                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                              t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
                     </td>
                 </t>
             </tr>
@@ -257,8 +256,8 @@
         </div>
 
         <xpath
-            expr="//table[hasclass('o_main_table')]/tbody//td[hasclass('o_price_total')]"
-            position="inside">
+                expr="//table[hasclass('o_main_table')]/tbody//td[hasclass('o_price_total')]"
+                position="inside">
             <t t-if="is_l10n_do_invoice and line.price_subtotal == line.price_total">
                 <span>
                     <strong>E</strong>
@@ -271,7 +270,8 @@
                 <div>
                     <div t-if="o.l10n_do_electronic_stamp" class="col-6" style="display: inline-block">
                         <div>
-                            <img alt="Barcode" t-att-src="'/report/barcode/?barcode_type=QR&amp;width=100&amp;height=100&amp;value=' + o.l10n_do_electronic_stamp if o.l10n_do_electronic_stamp else ''"/>
+                            <img alt="Barcode"
+                                 t-att-src="'/report/barcode/?barcode_type=QR&amp;width=100&amp;height=100&amp;value=' + o.l10n_do_electronic_stamp if o.l10n_do_electronic_stamp else ''"/>
                         </div>
                         <t t-if="o.l10n_do_ecf_security_code">
                             <strong>Código de Seguridad:</strong>
@@ -319,7 +319,8 @@
         </xpath>
         <xpath expr="//span[@id='line_tax_ids']" position="attributes">
             <attribute name="t-out">
-                ', '.join(map(lambda x: (x.description or x.name), line.tax_ids)) if not ecf_representation else '%s %s' % (o.currency_id.symbol, '{0:,.2f}'.format(line.l10n_do_itbis_amount))
+                ', '.join(map(lambda x: (x.description or x.name), line.tax_ids)) if not ecf_representation else '%s %s'
+                % (o.currency_id.symbol, '{0:,.2f}'.format(line.l10n_do_itbis_amount))
             </attribute>
         </xpath>
 

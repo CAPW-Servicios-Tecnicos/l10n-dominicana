@@ -91,10 +91,10 @@ class AccountMove(models.Model):
         compute="_compute_l10n_do_electronic_stamp",
         store=True,
     )
-    l10n_do_company_in_contingency = fields.Boolean(
-        string="Company in contingency",
-        compute="_compute_company_in_contingency",
-    )
+    # l10n_do_company_in_contingency = fields.Boolean(
+    #     string="Company in contingency",
+    #     compute="_compute_company_in_contingency",
+    # )
     l10n_do_sequence_prefix = fields.Char(compute="_compute_split_sequence", store=True)
     l10n_do_sequence_number = fields.Integer(
         compute="_compute_split_sequence", store=True
@@ -304,23 +304,23 @@ class AccountMove(models.Model):
                 and invoice.l10n_latam_document_type_id.l10n_do_ncf_type[:2] == "e-"
             )
 
-    @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
-    def _compute_company_in_contingency(self):
-        ecf_invoices = self.search(
-            [
-                ("is_ecf_invoice", "=", True),
-            ],
-            limit=1,
-        ).filtered(lambda i: not i.l10n_latam_manual_document_number)
-
-        # first set all invoices l10n_do_company_in_contingency = False
-        self.write({"l10n_do_company_in_contingency": False})
-
-        # then get draft invoices and do the thing
-        for invoice in self.filtered(lambda inv: inv.state == "draft"):
-            invoice.l10n_do_company_in_contingency = bool(
-                ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
-            )
+    # @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
+    # def _compute_company_in_contingency(self):
+    #     ecf_invoices = self.search(
+    #         [
+    #             ("is_ecf_invoice", "=", True),
+    #         ],
+    #         limit=1,
+    #     ).filtered(lambda i: not i.l10n_latam_manual_document_number)
+    #
+    #     # first set all invoices l10n_do_company_in_contingency = False
+    #     self.write({"l10n_do_company_in_contingency": False})
+    #
+    #     # then get draft invoices and do the thing
+    #     for invoice in self.filtered(lambda inv: inv.state == "draft"):
+    #         invoice.l10n_do_company_in_contingency = bool(
+    #             ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
+    #         )
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
     def _compute_l10n_do_electronic_stamp(self):

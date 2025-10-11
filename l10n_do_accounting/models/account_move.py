@@ -306,21 +306,17 @@ class AccountMove(models.Model):
 
     @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
     def _compute_company_in_contingency(self):
-        ecf_invoices = self.search(
-            [
-                ("is_ecf_invoice", "=", True),
-            ],
-            limit=1,
-        ).filtered(lambda i: not i.l10n_latam_manual_document_number)
-
-        # first set all invoices l10n_do_company_in_contingency = False
-        self.write({"l10n_do_company_in_contingency": False})
-
-        # then get draft invoices and do the thing
-        for invoice in self.filtered(lambda inv: inv.state == "draft"):
-            invoice.l10n_do_company_in_contingency = bool(
-                ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
-            )
+        # Busca si existe al menos 1 factura e-CF en la BD (como hacía tu código)
+        ecf_any = self.search([("is_ecf_invoice", "=", True)], limit=1).filtered(
+            lambda i: not i.l10n_latam_manual_document_number
+        )
+        # IMPORTANTe: no uses write() dentro de un compute
+        for inv in self:
+            # Solo se marca en borrador; el resto queda en False
+            if inv.state == "draft":
+                inv.l10n_do_company_in_contingency = bool(ecf_any and not inv.company_id.l10n_do_ecf_issuer)
+            else:
+                inv.l10n_do_company_in_contingency = False
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
     def _compute_l10n_do_electronic_stamp(self):

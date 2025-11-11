@@ -2,6 +2,8 @@ import re
 from werkzeug import urls
 
 from odoo import models, fields, api, _
+import logging
+from urllib.parse import quote
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
@@ -173,13 +175,13 @@ class AccountMove(models.Model):
     #             WHERE (l10n_latam_document_type_id IS NOT NULL
     #             AND move_type NOT IN ('in_invoice', 'in_refund'))
     #             AND l10n_do_fiscal_number <> '';
-                
+
     #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
     #             ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
     #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
     #             AND l10n_latam_manual_document_number = 't')
     #             AND l10n_do_fiscal_number <> '';
-                
+
     #             CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
     #             ON account_move(l10n_do_fiscal_number, company_id)
     #             WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
@@ -318,71 +320,66 @@ class AccountMove(models.Model):
             else:
                 inv.l10n_do_company_in_contingency = False
 
-    @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")
+    @api.depends(
+        'l10n_do_ecf_security_code',
+        'l10n_do_ecf_sign_date',
+        'invoice_date',
+        'is_ecf_invoice',
+        'state',
+        'l10n_latam_document_type_id',
+        'l10n_latam_manual_document_number',
+        'l10n_do_fiscal_number',
+        'company_id.vat',
+        'commercial_partner_id.vat',
+        'currency_id', 'company_id.currency_id', 'amount_total',
+    )
     def _compute_l10n_do_electronic_stamp(self):
-        l10n_do_ecf_invoice = self.filtered(
-            lambda i: i.is_ecf_invoice
-            and not i.l10n_latam_manual_document_number
-            and i.l10n_do_ecf_security_code
-            and i.state == "posted"
-        )
+        for inv in self:
+            try:
+                _logger.info("[ECF STAMP] compute start id=%s state=%s is_ecf=%s manual=%s",
+                             inv.id, inv.state, inv.is_ecf_invoice, bool(inv.l10n_latam_manual_document_number))
+                # gates
+                if not (inv.is_ecf_invoice and inv.state == 'posted'
+                        and not inv.l10n_latam_manual_document_number
+                        and inv.l10n_do_ecf_security_code):
+                    inv.l10n_do_electronic_stamp = False
+                    _logger.info("[ECF STAMP] gated out id=%s", inv.id)
+                    continue
 
-        for invoice in l10n_do_ecf_invoice:
-            if hasattr(invoice.company_id, "l10n_do_ecf_service_env"):
-                ecf_service_env = invoice.company_id.l10n_do_ecf_service_env
-            else:
-                ecf_service_env = "TesteCF"
+                env_code = 'ecf' if inv.company_id.is_production else 'TesteCF'
+                dcp = (inv.l10n_latam_document_type_id.doc_code_prefix or '')
+                is_rfc = (dcp == 'E32' and inv.amount_total_signed < 250000)
+                host = 'fc' if is_rfc else 'ecf'
+                base = f"https://{host}.dgii.gov.do/{env_code}/consultatimbre{'FC' if is_rfc else ''}?"
 
-            doc_code_prefix = invoice.l10n_latam_document_type_id.doc_code_prefix
-            is_rfc = (  # Es un Resumen Factura Consumo
-                doc_code_prefix == "E32" and invoice.amount_total_signed < 250000
-            )
+                rncemisor = inv.company_id.partner_id.vat or ''
+                parts = [f"rncemisor={rncemisor}"]
+                if not is_rfc and dcp[1:] not in ('43', '47'):
+                    parts.append(f"rnccomprador={inv.commercial_partner_id.vat or ''}")
+                parts.append(f"encf={inv.l10n_do_fiscal_number or ''}")
 
-            qr_string = "https://%s.dgii.gov.do/%s/ConsultaTimbre%s?" % (
-                "fc" if is_rfc else "ecf",
-                ecf_service_env,
-                "FC" if is_rfc else "",
-            )
-            qr_string += "RncEmisor=%s&" % invoice.company_id.vat or ""
-            if not is_rfc:
-                qr_string += (
-                    "RncComprador=%s&" % invoice.commercial_partner_id.vat
-                    if invoice.l10n_latam_document_type_id.doc_code_prefix[1:]
-                    not in ("43", "47")
-                    else ""
+                if not is_rfc:
+                    fecha_emision = (inv.invoice_date or fields.Date.context_today(self)).strftime("%d-%m-%Y")
+                    parts.append(f"fechaemision={fecha_emision}")
+
+                total_dop = inv.currency_id._convert(
+                    inv.amount_total, inv.company_id.currency_id, inv.company_id,
+                    inv.invoice_date or fields.Date.context_today(self)
                 )
-            qr_string += "ENCF=%s&" % invoice.l10n_do_fiscal_number or ""
-            if not is_rfc:
-                qr_string += "FechaEmision=%s&" % (
-                    invoice.invoice_date or fields.Date.today()
-                ).strftime("%d-%m-%Y")
+                parts.append("montototal=%s" % (("%f" % total_dop).rstrip("0").rstrip(".")))
 
-            total_field = "l10n_do_invoice_total"
-            if invoice.currency_id != invoice.company_id.currency_id:
-                total_field += "_currency"
-            l10n_do_total = invoice._get_l10n_do_amounts()[total_field]
+                if not is_rfc and inv.l10n_do_ecf_sign_date:
+                    parts.append("fechafirma=%s" % inv.l10n_do_ecf_sign_date.strftime("%d-%m-%Y+%H:%M:%S"))
 
-            qr_string += "MontoTotal=%s&" % ("%f" % l10n_do_total).rstrip("0").rstrip(
-                "."
-            )
-            if not is_rfc:
-                qr_string += "FechaFirma=%s&" % invoice.l10n_do_ecf_sign_date.strftime(
-                    "%d-%m-%Y %H:%M:%S"
-                )
+                sec = quote(inv.l10n_do_ecf_security_code or '', safe='')
+                parts.append(f"codigoseguridad={sec}")
 
-            special_chars = " !#$&'()*+,/:;=?@[]\"-.<>\\^_`"
-            security_code = "".join(
-                c.replace(c, "%" + c.encode("utf-8").hex()).upper()
-                if c in special_chars
-                else c
-                for c in invoice.l10n_do_ecf_security_code or ""
-            )
-            qr_string += "CodigoSeguridad=%s" % security_code
-
-            invoice.l10n_do_electronic_stamp = urls.url_quote_plus(qr_string, safe="%")
-
-        (self - l10n_do_ecf_invoice).l10n_do_electronic_stamp = False
-
+                url = base + "&".join(parts)
+                inv.l10n_do_electronic_stamp = url
+                _logger.info("[ECF STAMP] compute ok id=%s url=%s", inv.id, url)
+            except Exception as e:
+                inv.l10n_do_electronic_stamp = False
+                _logger.exception("[ECF STAMP] compute error id=%s: %s", inv.id, e)
     @api.constrains(
         "l10n_do_fiscal_number", "partner_id", "company_id", "posted_before"
     )
@@ -437,12 +434,12 @@ class AccountMove(models.Model):
         ):
             raise AccessError(_("You are not allowed to cancel Fiscal Invoices"))
 
-        if fiscal_invoice and not fiscal_invoice.posted_before:
-            raise ValidationError(
-                _(
-                    "You cannot cancel a fiscal document that has not been posted before."
-                )
-            )
+        # if fiscal_invoice and not fiscal_invoice.posted_before:
+        #     raise ValidationError(
+        #         _(
+        #             "You cannot cancel a fiscal document that has not been posted before."
+        #         )
+        #     )
 
         if not_ecf_fiscal_invoice and not self.env.context.get(
             "skip_cancel_wizard", False

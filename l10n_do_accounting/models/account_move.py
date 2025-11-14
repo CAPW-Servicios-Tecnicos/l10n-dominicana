@@ -336,14 +336,11 @@ class AccountMove(models.Model):
     def _compute_l10n_do_electronic_stamp(self):
         for inv in self:
             try:
-                _logger.info("[ECF STAMP] compute start id=%s state=%s is_ecf=%s manual=%s",
-                             inv.id, inv.state, inv.is_ecf_invoice, bool(inv.l10n_latam_manual_document_number))
                 # gates
                 if not (inv.is_ecf_invoice and inv.state == 'posted'
                         and not inv.l10n_latam_manual_document_number
                         and inv.l10n_do_ecf_security_code):
                     inv.l10n_do_electronic_stamp = False
-                    _logger.info("[ECF STAMP] gated out id=%s", inv.id)
                     continue
 
                 env_code = 'ecf' if inv.company_id.is_production else 'TesteCF'
@@ -376,10 +373,8 @@ class AccountMove(models.Model):
 
                 url = base + "&".join(parts)
                 inv.l10n_do_electronic_stamp = url
-                _logger.info("[ECF STAMP] compute ok id=%s url=%s", inv.id, url)
             except Exception as e:
                 inv.l10n_do_electronic_stamp = False
-                _logger.exception("[ECF STAMP] compute error id=%s: %s", inv.id, e)
     @api.constrains(
         "l10n_do_fiscal_number", "partner_id", "company_id", "posted_before"
     )

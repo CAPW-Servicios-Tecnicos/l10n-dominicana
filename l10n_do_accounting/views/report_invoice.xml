@@ -271,7 +271,8 @@
                     <div t-if="o.l10n_do_electronic_stamp" class="col-6" style="display: inline-block">
                         <div>
                             <img alt="Barcode"
-                                 t-att-src="'/report/barcode/?barcode_type=QR&amp;width=100&amp;height=100&amp;value=' + o.l10n_do_electronic_stamp if o.l10n_do_electronic_stamp else ''"/>
+                                 t-att-src="image_data_uri(o.qr_code_image)"
+                                 style="width: 100px; height: 100px; object-fit: contain;"/>
                         </div>
                         <t t-if="o.l10n_do_ecf_security_code">
                             <strong>Código de Seguridad:</strong>

@@ -5,4 +5,4 @@ from . import account_journal
 from . import account_move
 from . import monkey_patch
 from . import account_move_line
-from . import res_config
+# from . import res_config

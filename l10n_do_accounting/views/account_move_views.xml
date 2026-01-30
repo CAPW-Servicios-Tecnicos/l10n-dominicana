@@ -74,7 +74,9 @@
                        readonly="state != 'draft'"
                 />
                 <field name="l10n_do_fiscal_number"
-                       required="l10n_do_enable_first_sequence or l10n_latam_manual_document_number and (l10n_latam_use_documents and country_code == 'DO')"/>
+                       required="l10n_do_enable_first_sequence or l10n_latam_manual_document_number and (l10n_latam_use_documents and country_code == 'DO')"
+                       invisible="not l10n_latam_use_documents and not l10n_latam_manual_document_number or (state == 'draft' and move_type in ('out_invoice', 'out_refund')) or l10n_latam_country_code != 'DO'"
+                       readonly="state != 'draft'"/>
             </xpath>
             <xpath expr="//field[@name='l10n_latam_document_number']" position="after">
                 <field name="l10n_do_income_type"

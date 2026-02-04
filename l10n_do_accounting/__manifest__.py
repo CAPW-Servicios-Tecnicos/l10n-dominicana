@@ -8,10 +8,10 @@
     "category": "Localization",
     "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",
-    "version": "17.0.1.6",
+    "version": "18.0.0.0.0",
     "countries": ["do"],
     # any module necessary for this one to work correctly
-    "depends": ["account", "l10n_latam_invoice_document", "l10n_do"],
+    "depends": ["l10n_latam_invoice_document", "l10n_do"],
     # always loaded
     "data": [
         "security/ir.model.access.csv",

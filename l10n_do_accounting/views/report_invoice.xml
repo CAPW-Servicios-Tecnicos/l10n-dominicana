@@ -41,14 +41,14 @@
                         <t t-if="o.partner_id.phone">
                             <strong>Tel.:</strong>
                             <span t-field="o.partner_id.phone"/>
-                            <t t-if="o.partner_id.mobile">
-                                <span>/</span>
-                            </t>
+<!--                            <t t-if="o.partner_id.mobile">-->
+<!--                                <span>/</span>-->
+<!--                            </t>-->
                         </t>
-                        <t t-if="o.partner_id.mobile">
-                            <strong>Cel.:</strong>
-                            <span t-field="o.partner_id.mobile" widget="phone"/>
-                        </t>
+<!--                        <t t-if="o.partner_id.mobile">-->
+<!--                            <strong>Cel.:</strong>-->
+<!--                            <span t-field="o.partner_id.mobile" widget="phone"/>-->
+<!--                        </t>-->
                     </t>
                     <t t-else="">
                         <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>

@@ -166,6 +166,7 @@ class AccountMove(models.Model):
                     self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
                 )
 
+
             self.env.cr.execute("""
                 CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
                 ON account_move(l10n_do_fiscal_number, company_id)

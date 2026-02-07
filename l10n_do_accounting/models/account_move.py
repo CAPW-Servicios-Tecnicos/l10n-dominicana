@@ -166,27 +166,34 @@ class AccountMove(models.Model):
                     self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
                 )
 
-            self.env.cr.execute(
-                """
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
+            self.env.cr.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
                 ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL
-                AND move_type NOT IN ('in_invoice', 'in_refund'))
+                WHERE (
+                    l10n_latam_document_type_id IS NOT NULL
+                    AND move_type NOT IN ('in_invoice', 'in_refund')
+                )
                 AND l10n_do_fiscal_number <> '';
 
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
+                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
                 ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
-                AND l10n_latam_manual_document_number = 't')
+                WHERE (
+                    l10n_latam_document_type_id IS NOT NULL
+                    AND move_type IN ('in_invoice', 'in_refund')
+                    AND l10n_latam_manual_document_number = true
+                )
                 AND l10n_do_fiscal_number <> '';
 
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
+                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
                 ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                AND l10n_latam_manual_document_number = 'f')
+                WHERE (
+                    l10n_latam_document_type_id IS NOT NULL
+                    AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                    AND l10n_latam_manual_document_number = false
+                )
                 AND l10n_do_fiscal_number <> '';
-            """
-            )
+            """)
+
         return super()._auto_init()
 
     @api.model

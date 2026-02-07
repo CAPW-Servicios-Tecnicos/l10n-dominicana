@@ -875,6 +875,7 @@ class AccountMove(models.Model):
             )
         return super(AccountMove, self).unlink()
 
+
     # Extension of the _deduce_sequence_number_reset function to compute the `name` field according to the invoice
     # date and prevent the `l10n_latam_document_number` field from being reset
     @api.model

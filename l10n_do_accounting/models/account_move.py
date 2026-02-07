@@ -7,6 +7,7 @@ from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
 
+
 class AccountMove(models.Model):
     _inherit = "account.move"
     _rec_names_search = ["l10n_do_fiscal_number"]

@@ -65,7 +65,7 @@ class AccountMove(models.Model):
         selection="_get_l10n_do_income_type",
         string="Income Type",
         copy=False,
-        default=lambda self: self._context.get("l10n_do_income_type", "01"),
+        default="01"
     )
 
     l10n_do_origin_ncf = fields.Char(
@@ -123,6 +123,8 @@ class AccountMove(models.Model):
         help="Technical field to hide/show message on invoice header that indicate fiscal number must be input "
              "manually because a new expiration date was set on journal",
     )
+
+    #TODO ya no es soportado este atributo debe de utilizarse el model.Constraint
 
     # _sql_constraints = [
     #     (

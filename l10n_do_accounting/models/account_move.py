@@ -57,6 +57,13 @@ class AccountMove(models.Model):
         string="Cost & Expense Type",
     )
 
+    l10n_latam_country_code = fields.Char(
+        related="company_id.country_id.code",
+        store=True,
+        readonly=True,
+        help="Technical field used to hide/show fields regarding the localization",
+    )
+
     l10n_do_cancellation_type = fields.Selection(
         selection="_get_l10n_do_cancellation_type",
         string="Cancellation Type",

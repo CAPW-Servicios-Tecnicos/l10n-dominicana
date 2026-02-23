@@ -65,7 +65,7 @@ class AccountMove(models.Model):
         selection="_get_l10n_do_income_type",
         string="Income Type",
         copy=False,
-        default="01"
+        default=lambda self: self.env.context.get("l10n_do_income_type", "01"),
     )
 
     l10n_do_origin_ncf = fields.Char(
@@ -124,8 +124,6 @@ class AccountMove(models.Model):
              "manually because a new expiration date was set on journal",
     )
 
-    #TODO ya no es soportado este atributo debe de utilizarse el model.Constraint
-
     # _sql_constraints = [
     #     (
     #         "unique_l10n_do_fiscal_number_sales",
@@ -145,51 +143,52 @@ class AccountMove(models.Model):
     # ]
 
     def _auto_init(self):
-        if not index_exists(
-                self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
-        ):
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_manual",
-                self._table,
-            )
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_internal",
-                self._table,
-            )
+        res = super()._auto_init()
+        cr = self.env.cr
 
-            if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
-                )
-            if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
-                )
+        # If main index exists, assume everything is already installed
+        if index_exists(cr, "account_move_unique_l10n_do_fiscal_number_sales"):
+            return res
 
-            self.env.cr.execute(
-                """
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_sales
-                ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL
-                AND move_type NOT IN ('in_invoice', 'in_refund'))
-                AND l10n_do_fiscal_number <> '';
+        # Clean old indexes (safe on upgrades)
+        drop_index(cr, "account_move_unique_l10n_do_fiscal_number_purchase_manual", self._table)
+        drop_index(cr, "account_move_unique_l10n_do_fiscal_number_purchase_internal", self._table)
 
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_manual
-                ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund')
-                AND l10n_latam_manual_document_number = 't')
-                AND l10n_do_fiscal_number <> '';
+        # Ensure needed columns exist with correct types
+        if not column_exists(cr, "account_move", "l10n_do_fiscal_number"):
+            create_column(cr, "account_move", "l10n_do_fiscal_number", "varchar")
 
-                CREATE UNIQUE INDEX account_move_unique_l10n_do_fiscal_number_purchase_internal
-                ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                AND l10n_latam_manual_document_number = 'f')
-                AND l10n_do_fiscal_number <> '';
-            """
-            )
-        return super()._auto_init()
+        # IMPORTANT: boolean, not varchar
+        if not column_exists(cr, "account_move", "l10n_latam_manual_document_number"):
+            create_column(cr, "account_move", "l10n_latam_manual_document_number", "boolean")
+
+        # Create partial unique indexes (the real "constraints" you need)
+        cr.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
+            ON account_move (l10n_do_fiscal_number, company_id)
+            WHERE (l10n_latam_document_type_id IS NOT NULL
+                   AND move_type NOT IN ('in_invoice', 'in_refund'))
+              AND l10n_do_fiscal_number IS NOT NULL
+              AND l10n_do_fiscal_number <> '';
+
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
+            ON account_move (l10n_do_fiscal_number, commercial_partner_id, company_id)
+            WHERE (l10n_latam_document_type_id IS NOT NULL
+                   AND move_type IN ('in_invoice', 'in_refund')
+                   AND l10n_latam_manual_document_number IS TRUE)
+              AND l10n_do_fiscal_number IS NOT NULL
+              AND l10n_do_fiscal_number <> '';
+
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
+            ON account_move (l10n_do_fiscal_number, company_id)
+            WHERE (l10n_latam_document_type_id IS NOT NULL
+                   AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                   AND l10n_latam_manual_document_number IS FALSE)
+              AND l10n_do_fiscal_number IS NOT NULL
+              AND l10n_do_fiscal_number <> '';
+        """)
+
+        return res
 
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
@@ -683,7 +682,7 @@ class AccountMove(models.Model):
 
     def _l10n_do_get_formatted_sequence(self):
         self.ensure_one()
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             starting_sequence = "%s/%04d/0000" % (
                 self.journal_id.code,
                 self.date.year,
@@ -721,7 +720,7 @@ class AccountMove(models.Model):
             where_string = where_string.replace(
                 "AND sequence_prefix !~ %(anti_regex)s ", ""
             )
-        if self._context.get("is_l10n_do_seq", False):
+        if self.env.context.get("is_l10n_do_seq", False):
             where_string = where_string.replace("journal_id = %(journal_id)s AND", "")
             where_string += (
                 " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s AND"
@@ -758,7 +757,7 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None):
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
                 relaxed=relaxed, with_prefix=with_prefix
             )
@@ -805,7 +804,7 @@ class AccountMove(models.Model):
         return (self.env.cr.fetchone() or [None])[0]
 
     def _get_sequence_format_param(self, previous):
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 
         regex = self._l10n_do_sequence_fixed_regex
@@ -823,7 +822,7 @@ class AccountMove(models.Model):
     def _set_next_sequence(self):
         self.ensure_one()
 
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._set_next_sequence()
 
         last_sequence = self._get_last_sequence()
@@ -878,10 +877,10 @@ class AccountMove(models.Model):
                 self.l10n_latam_use_documents
                 and self.company_id.country_id.code == "DO"
                 and self.posted_before
-                and not self._context.get("is_l10n_do_seq", False)
+                and not self.env.context.get("is_l10n_do_seq", False)
         ):
             return "year"
-        elif self._context.get("is_l10n_do_seq", False):
+        elif self.env.context.get("is_l10n_do_seq", False):
             return "never"
         else:
             "never"

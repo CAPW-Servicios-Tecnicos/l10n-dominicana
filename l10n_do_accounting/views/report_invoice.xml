@@ -41,8 +41,14 @@
                         <t t-if="o.partner_id.phone">
                             <strong>Tel.:</strong>
                             <span t-field="o.partner_id.phone"/>
-<!--                            TODO comentando el campo mobile no existe en la version 19.0-->
+<!--                            <t t-if="o.partner_id.mobile">-->
+<!--                                <span>/</span>-->
+<!--                            </t>-->
                         </t>
+<!--                        <t t-if="o.partner_id.mobile">-->
+<!--                            <strong>Cel.:</strong>-->
+<!--                            <span t-field="o.partner_id.mobile" widget="phone"/>-->
+<!--                        </t>-->
                     </t>
                     <t t-else="">
                         <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>
@@ -54,6 +60,13 @@
                         <t t-if="commercial_partner_id.phone">
                             <strong>Tel.:</strong>
                             <span t-field="commercial_partner_id.phone"/>
+                            <t t-if="commercial_partner_id.mobile">
+                                <span>/</span>
+                            </t>
+                        </t>
+                        <t t-if="commercial_partner_id.mobile">
+                            <strong>Cel.:</strong>
+                            <span t-field="commercial_partner_id.mobile" widget="phone"/>
                         </t>
                     </t>
                     <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
@@ -152,6 +165,13 @@
 <!--                    <t t-if="o.partner_id.phone">-->
 <!--                        <strong>Tel.:</strong>-->
 <!--                        <span t-field="o.partner_id.phone"/>-->
+<!--                        <t t-if="o.partner_id.mobile">-->
+<!--                            <span>/</span>-->
+<!--                        </t>-->
+<!--                    </t>-->
+<!--                    <t t-if="o.partner_id.mobile">-->
+<!--                        <strong>Cel.:</strong>-->
+<!--                        <span t-field="o.partner_id.mobile" widget="phone"/>-->
 <!--                    </t>-->
 <!--                </t>-->
 <!--                <t t-else="">-->
@@ -164,6 +184,13 @@
 <!--                    <t t-if="commercial_partner_id.phone">-->
 <!--                        <strong>Tel.:</strong>-->
 <!--                        <span t-field="commercial_partner_id.phone"/>-->
+<!--                        <t t-if="commercial_partner_id.mobile">-->
+<!--                            <span>/</span>-->
+<!--                        </t>-->
+<!--                    </t>-->
+<!--                    <t t-if="commercial_partner_id.mobile">-->
+<!--                        <strong>Cel.:</strong>-->
+<!--                        <span t-field="commercial_partner_id.mobile" widget="phone"/>-->
 <!--                    </t>-->
 <!--                </t>-->
 <!--                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>-->

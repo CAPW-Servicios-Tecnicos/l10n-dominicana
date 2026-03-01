@@ -5,83 +5,134 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
-            <field name="restrict_mode_hash_table" position="after">
+           <!-- Hidden technical flags: anchor to something stable -->
+            <xpath expr="//field[@name='restrict_mode_hash_table']" position="after">
                 <field name="is_ecf_invoice" invisible="1"/>
                 <field name="l10n_do_company_in_contingency" invisible="1"/>
                 <field name="l10n_do_enable_first_sequence" invisible="1" force_save="1"/>
                 <field name="l10n_do_show_expiration_date_msg" invisible="1"/>
-            </field>
-<!--            <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">-->
-<!--                <div class="alert alert-warning"-->
-<!--                     role="alert" style="margin-bottom:0px;"-->
-<!--                     invisible="move_type == 'entry' or country_code != 'DO'-->
-<!--                                or not l10n_do_company_in_contingency-->
-<!--                                or state != 'draft'">-->
-<!--                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF issuing has been enabled.-->
-<!--                </div>-->
-<!--                <div class="alert alert-warning"-->
-<!--                     role="alert" style="margin-bottom:0px;"-->
-<!--                     invisible="move_type == 'entry'-->
-<!--                                or country_code != 'DO'-->
-<!--                                or not l10n_do_show_expiration_date_msg-->
-<!--                                or state != 'draft'">-->
-<!--                    Notice. Document Number field enabled because a new Fiscal Number Expiration date was set on journal-->
-<!--                </div>-->
-<!--            </xpath>-->
+            </xpath>
+
+            <!-- Alerts: keep them near lock message if exists, else put after sheet -->
+            <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
+                <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
+                     invisible="move_type == 'entry'
+                                or country_code != 'DO'
+                                or not l10n_do_company_in_contingency
+                                or state != 'draft'">
+                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF issuing has been enabled.
+                </div>
+
+                <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
+                     invisible="move_type == 'entry'
+                                or country_code != 'DO'
+                                or not l10n_do_show_expiration_date_msg
+                                or state != 'draft'">
+                    Notice. Document Number field enabled because a new Fiscal Number Expiration date was set on journal
+                </div>
+            </xpath>
+
+            <!-- If tax_lock_date_message block is not present in this build, fall back -->
+            <xpath expr="//sheet" position="inside">
+                <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
+                     invisible="move_type == 'entry'
+                                or country_code != 'DO'
+                                or not l10n_do_company_in_contingency
+                                or state != 'draft'">
+                    Notice. This company is in a transient state of contingency for Electronic Invoice issuing. NCF issuing has been enabled.
+                </div>
+
+                <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
+                     invisible="move_type == 'entry'
+                                or country_code != 'DO'
+                                or not l10n_do_show_expiration_date_msg
+                                or state != 'draft'">
+                    Notice. Document Number field enabled because a new Fiscal Number Expiration date was set on journal
+                </div>
+            </xpath>
+
+            <!-- Cancel button: do NOT duplicate button_cancel name; just add your extra cancel if you need it -->
             <xpath expr="//button[@name='button_cancel']" position="after">
-                <button name="button_cancel" type="object" string="Cancel"
+                <button name="button_cancel" type="object" string="Cancel (DO)"
                         invisible="state in ('draft', 'cancel') or country_code != 'DO'"/>
             </xpath>
+
+            <!-- Draft button visibility (keep your logic) -->
             <xpath expr="//button[@name='button_draft']" position="attributes">
-                <attribute name="invisible">restrict_mode_hash_table == True or (state not in ('posted', 'cancel') and country_code != 'DO') or (state != 'cancel' and country_code == 'DO')</attribute>
+               <attribute name="invisible">restrict_mode_hash_table == True or (state not in ('posted','cancel') and country_code != 'DO') or (state != 'cancel' and country_code == 'DO')</attribute>
+
             </xpath>
-            <xpath expr="//h1/span/.." position="after">
+
+            <!-- Show cancellation reason -->
+            <xpath expr="//h1" position="after">
                 <h4 invisible="state != 'cancel' or country_code != 'DO'">
                     Cancellation Reason:
                     <br/>
                     <field name="l10n_do_cancellation_type" readonly="1"/>
                 </h4>
             </xpath>
-            <xpath expr="//field[@name='l10n_latam_document_number']" position="attributes">
-                <attribute name="required">l10n_do_enable_first_sequence or l10n_latam_manual_document_number and (l10n_latam_use_documents and country_code == 'DO')</attribute>
-                <attribute name="invisible">(not l10n_latam_use_documents and country_code == 'DO') or (not l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft') or (not l10n_do_enable_first_sequence and l10n_latam_manual_document_number and state == 'draft') and (move_type in ('out_invoice', 'out_refund', 'in_refund') and country_code == 'DO')</attribute>
-                <attribute name="readonly">(state != 'draft' and country_code == 'DO') or (posted_before and country_code == 'DO')</attribute>
-            </xpath>
-            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/div" position="after">
-                <xpath expr="//field[@name='l10n_latam_document_type_id']" position="move"/>
-                <xpath expr="//field[@name='l10n_latam_document_number']" position="move"/>
+
+            <!-- Dominican document fields: anchor after journal_div (stable) -->
+            <xpath expr="//div[@name='journal_div']" position="after">
+
+                <!-- Document type (if latam docs enabled) -->
+                <!--<field name="l10n_latam_document_type_id"-->
+                <!--       invisible="country_code != 'DO' or not l10n_latam_use_documents"-->
+                <!--       readonly="state != 'draft'"/>-->
+
+                <!-- Document number: keep your required logic, but don't rely on original field existing in view -->
+                <field name="l10n_latam_document_number"
+                       required="(l10n_do_enable_first_sequence or l10n_latam_manual_document_number)
+                                 and (l10n_latam_use_documents and country_code == 'DO')"
+                       invisible="country_code != 'DO'
+                                  or not l10n_latam_use_documents
+                                  or (not l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft')"
+                       readonly="(state != 'draft' and country_code == 'DO') or (posted_before and country_code == 'DO')"/>
+
+                <!-- Origin NCF for credit notes / debit origin -->
                 <field name="l10n_do_origin_ncf"
-                       invisible="(move_type not in ('in_refund', 'out_refund') and not debit_origin_id) or (move_type not in ('in_refund', 'out_refund') and not l10n_latam_use_documents or country_code != 'DO')"
+                       invisible="country_code != 'DO'
+                                  or not l10n_latam_use_documents
+                                  or ((move_type not in ('in_refund', 'out_refund')) and not debit_origin_id)"
                        required="(move_type in ('in_refund', 'out_refund') and l10n_latam_use_documents) or debit_origin_id"
                        readonly="state != 'draft'"/>
+
+                <!-- ECF modification code -->
                 <field name="l10n_do_ecf_modification_code"
-                       invisible="(move_type not in ('in_refund', 'out_refund') and not debit_origin_id) or (move_type in ('in_refund', 'out_refund') and not is_ecf_invoice) or (debit_origin_id and not is_ecf_invoice) or country_code != 'DO'"
+                       invisible="country_code != 'DO'
+                                  or not l10n_latam_use_documents
+                                  or not is_ecf_invoice
+                                  or ((move_type not in ('in_refund', 'out_refund')) and not debit_origin_id)"
                        required="is_ecf_invoice and (move_type in ('in_refund', 'out_refund') or debit_origin_id)"
-                       readonly="state != 'draft'"
-                />
+                       readonly="state != 'draft'"/>
+
+                <!-- ECF security code (manual numbering + ecf invoice) -->
+                <field name="l10n_do_ecf_security_code"
+                       invisible="country_code != 'DO'
+                                  or not partner_id
+                                  or not l10n_latam_manual_document_number
+                                  or not is_ecf_invoice"/>
+
             </xpath>
+
+            <!-- Income / expense types: anchor after the field we inject (safe) -->
             <xpath expr="//field[@name='l10n_latam_document_number']" position="after">
                 <field name="l10n_do_income_type"
                        invisible="not l10n_latam_use_documents or (move_type != 'out_invoice' or country_code != 'DO')"
                        required="l10n_latam_use_documents and move_type == 'out_invoice'"
                        readonly="state != 'draft'"/>
+
                 <field name="l10n_do_expense_type"
                        invisible="not l10n_latam_use_documents or (move_type != 'in_invoice' or country_code != 'DO')"
                        required="l10n_latam_use_documents and move_type == 'in_invoice'"
                        readonly="state != 'draft'"/>
             </xpath>
-            <xpath expr="//div[@name='journal_div']" position="after">
-                <field name="l10n_do_ecf_security_code"
-                    invisible="not partner_id
-                               or country_code != 'DO'
-                               or not l10n_latam_manual_document_number
-                               or not is_ecf_invoice"/>
-            </xpath>
 
-            <!-- only computed when l10n_do ecf invoice -->
+            <!-- Add ITBIS amount columns -->
             <xpath expr="//page[@id='invoice_tab']/field[@name='invoice_line_ids']/list/field[@name='tax_ids']" position="after">
                 <field name="l10n_do_itbis_amount" column_invisible="1" force_save="1"/>
             </xpath>
+
             <xpath expr="//page[@id='aml_tab']/field[@name='line_ids']/list/field[@name='account_type']" position="after">
                 <field name="l10n_do_itbis_amount" column_invisible="1" force_save="1"/>
             </xpath>

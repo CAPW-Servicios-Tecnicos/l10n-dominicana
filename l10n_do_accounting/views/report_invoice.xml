@@ -61,9 +61,24 @@
                 <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
                     <span class="m-0" t-field="o.partner_id.name"/>
                     <br/>
-                    <t t-if="o.partner_id.phone">
-                        <strong>Tel.:</strong>
-                        <span t-field="o.partner_id.phone"/>
+                    <strong>
+                        <t t-if="vat_len == 9">Razón Social:</t>
+                        <t t-else="">Nombre:</t>
+                    </strong>
+                    <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
+                        <span class="m-0" t-field="o.partner_id.name"/>
+                        <br/>
+                        <t t-if="o.partner_id.phone">
+                            <strong>Tel.:</strong>
+                            <span t-field="o.partner_id.phone"/>
+                            <!--                            <t t-if="o.partner_id.mobile">-->
+                            <!--                                <span>/</span>-->
+                            <!--                            </t>-->
+                        </t>
+                        <!--                        <t t-if="o.partner_id.mobile">-->
+                        <!--                            <strong>Cel.:</strong>-->
+                        <!--                            <span t-field="o.partner_id.mobile" widget="phone"/>-->
+                        <!--                        </t>-->
                     </t>
                 </t>
                 <t t-else="">
@@ -80,25 +95,35 @@
                             <span>/</span>
                         </t>
                     </t>
-                    <t t-if="commercial_partner_id.mobile">
-                        <strong>Cel.:</strong>
-                        <span t-field="commercial_partner_id.mobile" widget="phone"/>
-                    </t>
-                </t>
-
-                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id"
-                      t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
-
-                <div class="row" style="margin-top: 10px;" t-if="o.invoice_origin or o.ref">
-                    <div class="col-6" t-if="o.invoice_origin" name="origin">
-                        <strong>Origen:</strong>
-                        <p class="m-0" t-field="o.invoice_origin"/>
-                    </div>
-                    <div class="col-6" t-if="o.ref" name="reference">
-                        <strong>Referencia:</strong>
-                        <p class="m-0" t-field="o.ref"/>
-                    </div>
+                    <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id"
+                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
                 </div>
+                <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">
+                    <strong>Origen:</strong>
+                    <p class="m-0" t-field="o.invoice_origin"/>
+                </div>
+                <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">
+                    <strong>Referencia:</strong>
+                    <p class="m-0" t-field="o.ref"/>
+                </div>
+                <!--                <div>-->
+                <!--                    <strong t-field="o.company_id.partner_id.name"/>-->
+                <!--                </div>-->
+                <!--                <span t-field="o.company_id.partner_id" class="text-muted" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/>-->
+                <!--                <span>-->
+                <!--                    <strong>RNC:</strong>-->
+                <!--                    <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>-->
+                <!--                </span>-->
+                <!--                <br/>-->
+                <!--                <span>-->
+                <!--                    <strong>Fecha Emisión:</strong>-->
+                <!--                    <span t-field="o.invoice_date"/>-->
+                <!--                </span>-->
+                <!--                <br/>-->
+                <!--                <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">-->
+                <!--                    <strong>Vence:</strong>-->
+                <!--                    <span t-field="o.invoice_date_due"/>-->
+                <!--                </span>-->
             </div>
 
             <div class="col-6 text-end" style="line-height: 1.60; margin-top: -10px;">
@@ -160,6 +185,66 @@
                 </div>
             </div>
         </div>
+        <br/>
+        <!--        <div id="receiver_info" class="row" style="margin-top: 0 !important; margin-bottom: 0 !important;">-->
+        <!--            <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>-->
+        <!--            <div class="col-auto col-7 mw-100 mb-2">-->
+        <!--                <strong>-->
+        <!--                    <t t-if="vat_len == 9">RNC:</t>-->
+        <!--                    <t t-elif="vat_len == 11">Cédula:</t>-->
+        <!--                    <t t-else="">ID Cliente:</t>-->
+        <!--                </strong>-->
+        <!--                <span class="m-0" t-out="o.commercial_partner_id.vat or ''"/>-->
+        <!--                <br/>-->
+        <!--                <strong>-->
+        <!--                    <t t-if="vat_len == 9">Razón Social:</t>-->
+        <!--                    <t t-else="">Nombre:</t>-->
+        <!--                </strong>-->
+        <!--                <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">-->
+        <!--                    <span class="m-0" t-field="o.partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <t t-if="o.partner_id.phone">-->
+        <!--                        <strong>Tel.:</strong>-->
+        <!--                        <span t-field="o.partner_id.phone"/>-->
+        <!--                        <t t-if="o.partner_id.mobile">-->
+        <!--                            <span>/</span>-->
+        <!--                        </t>-->
+        <!--                    </t>-->
+        <!--                    <t t-if="o.partner_id.mobile">-->
+        <!--                        <strong>Cel.:</strong>-->
+        <!--                        <span t-field="o.partner_id.mobile" widget="phone"/>-->
+        <!--                    </t>-->
+        <!--                </t>-->
+        <!--                <t t-else="">-->
+        <!--                    <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>-->
+        <!--                    <span class="m-0" t-field="commercial_partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <strong>Contacto:</strong>-->
+        <!--                    <span t-field="o.partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <t t-if="commercial_partner_id.phone">-->
+        <!--                        <strong>Tel.:</strong>-->
+        <!--                        <span t-field="commercial_partner_id.phone"/>-->
+        <!--                        <t t-if="commercial_partner_id.mobile">-->
+        <!--                            <span>/</span>-->
+        <!--                        </t>-->
+        <!--                    </t>-->
+        <!--                    <t t-if="commercial_partner_id.mobile">-->
+        <!--                        <strong>Cel.:</strong>-->
+        <!--                        <span t-field="commercial_partner_id.mobile" widget="phone"/>-->
+        <!--                    </t>-->
+        <!--                </t>-->
+        <!--                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>-->
+        <!--            </div>-->
+        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">-->
+        <!--                <strong>Origen:</strong>-->
+        <!--                <p class="m-0" t-field="o.invoice_origin"/>-->
+        <!--            </div>-->
+        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">-->
+        <!--                <strong>Referencia:</strong>-->
+        <!--                <p class="m-0" t-field="o.ref"/>-->
+        <!--            </div>-->
+        <!--        </div>-->
         <br/>
     </template>
 
@@ -291,7 +376,7 @@
                         <br/>
                         <t t-if="o.l10n_do_ecf_sign_date">
                             <strong>Fecha Firma Digital:</strong>
-                            <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y')"/>
+                            <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y %H:%M:%S')"/>
                         </t>
                     </div>
                 </div>

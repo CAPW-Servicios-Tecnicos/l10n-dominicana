@@ -558,19 +558,24 @@ class AccountMove(models.Model):
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
-        if (
-                self.company_id.country_id == self.env.ref("base.do")
-                and self.l10n_latam_document_type_id
-                and self.move_type == "in_invoice"
-                and self.partner_id
-        ):
-            self.l10n_do_expense_type = (
-                self.partner_id.l10n_do_expense_type
-                if not self.l10n_do_expense_type
-                else self.l10n_do_expense_type
-            )
+        res = super(AccountMove, self)._onchange_partner_id()
+        do_country = self.env.ref("base.do", raise_if_not_found=False)
 
-        return super(AccountMove, self)._onchange_partner_id()
+        for move in self:
+            if (
+                    do_country
+                    and self.env.company.country_id == do_country
+                    and move.l10n_latam_document_type_id
+                    and move.move_type == "in_invoice"
+                    and move.partner_id
+            ):
+                move.l10n_do_expense_type = (
+                    move.partner_id.l10n_do_expense_type
+                    if not move.l10n_do_expense_type
+                    else move.l10n_do_expense_type
+                )
+
+        return res
 
     def _reverse_move_vals(self, default_values, cancel=True):
         ctx = self.env.context

@@ -37,7 +37,44 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </t>
+        <t t-else="">
+            <div>
+                <div class="row" style="margin-bottom: 28px;">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-3" style="padding-top: 6px;">
+                                <img t-if="o.company_id.logo"
+                                     t-att-src="image_data_uri(o.company_id.logo)"
+                                     style="max-height: 135px; width: auto; display: block;"
+                                     alt="Logo"/>
+                            </div>
+                            <div class="col-9" style="padding-top: 18px; line-height: 1.45;">
+                                <div t-if="o.company_id.partner_id.name">
+                                    <strong t-field="o.company_id.partner_id.name"/>
+                                </div>
+                                <div t-if="o.company_id.vat">
+                                    <strong>RNC:</strong>
+                                    <span t-field="o.company_id.vat"/>
+                                </div>
+                                <div t-if="o.company_id.partner_id.street">
+                                    <span t-field="o.company_id.partner_id"
+                                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                                </div>
+                                <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
+                                    <strong>Tel.:</strong>
+                                    <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
+                                </div>
+                                <div t-if="o.company_id.email or o.company_id.partner_id.email">
+                                    <strong>Email:</strong>
+                                    <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
     </template>
 
     <template id="informations">

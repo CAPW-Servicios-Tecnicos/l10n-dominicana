@@ -3,21 +3,37 @@
 
 
     <template id="custom_header">
-        <t t-if="o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed'">
-            <div class="row" style="margin-bottom: 0; min-height: 165px;">
-                <div class="col-4" style="padding-top: 0;">
-                    <img t-if="o.company_id.logo"
-                         t-att-src="image_data_uri(o.company_id.logo)"
-                         style="max-height: 165px; width: auto; display: block;"
-                         alt="Logo"/>
-                </div>
-                <div class="col-8 text-end" style="line-height: 1.50; font-size: 16px; padding-top: 12px;">
-                    <div t-if="o.company_id.partner_id.name" style="font-size: 18px;">
-                        <strong t-field="o.company_id.partner_id.name"/>
-                    </div>
-                    <div t-if="o.company_id.partner_id.street">
-                        <span t-field="o.company_id.partner_id"
-                              t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+        <div>
+            <div class="row" style="margin-bottom: 28px;">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-3" style="padding-top: 6px;">
+                            <img t-if="o.company_id.logo"
+                                 t-att-src="image_data_uri(o.company_id.logo)"
+                                 style="max-height: 135px; width: auto; display: block;"
+                                 alt="Logo"/>
+                        </div>
+                        <div class="col-9" style="padding-top: 18px; line-height: 1.45;">
+                            <div t-if="o.company_id.partner_id.name">
+                                <strong t-field="o.company_id.partner_id.name"/>
+                            </div>
+                            <div t-if="o.company_id.vat">
+                                <strong>RNC:</strong>
+                                <span t-field="o.company_id.vat"/>
+                            </div>
+                            <div t-if="o.company_id.partner_id.street">
+                                <span t-field="o.company_id.partner_id"
+                                      t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                            </div>
+                            <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
+                                <strong>Tel.:</strong>
+                                <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
+                            </div>
+                            <div t-if="o.company_id.email or o.company_id.partner_id.email">
+                                <strong>Email:</strong>
+                                <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,8 +78,7 @@
     </template>
 
     <template id="informations">
-        <div id="informations" class="row"
-             t-attf-style="clear: both; margin-top: #{'-60px' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else '8px'};">
+        <div id="informations" class="row" style="clear: both; margin-top: 8px;">
             <div class="col-6" style="line-height: 1.45;">
                 <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>
 
@@ -83,9 +98,24 @@
                 <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
                     <span class="m-0" t-field="o.partner_id.name"/>
                     <br/>
-                    <t t-if="o.partner_id.phone">
-                        <strong>Tel.:</strong>
-                        <span t-field="o.partner_id.phone"/>
+                    <strong>
+                        <t t-if="vat_len == 9">Razón Social:</t>
+                        <t t-else="">Nombre:</t>
+                    </strong>
+                    <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
+                        <span class="m-0" t-field="o.partner_id.name"/>
+                        <br/>
+                        <t t-if="o.partner_id.phone">
+                            <strong>Tel.:</strong>
+                            <span t-field="o.partner_id.phone"/>
+                            <!--                            <t t-if="o.partner_id.mobile">-->
+                            <!--                                <span>/</span>-->
+                            <!--                            </t>-->
+                        </t>
+                        <!--                        <t t-if="o.partner_id.mobile">-->
+                        <!--                            <strong>Cel.:</strong>-->
+                        <!--                            <span t-field="o.partner_id.mobile" widget="phone"/>-->
+                        <!--                        </t>-->
                     </t>
                 </t>
                 <t t-else="">
@@ -102,25 +132,35 @@
                             <span>/</span>
                         </t>
                     </t>
-                    <t t-if="commercial_partner_id.mobile">
-                        <strong>Cel.:</strong>
-                        <span t-field="commercial_partner_id.mobile" widget="phone"/>
-                    </t>
+                    <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id"
+                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
                 </t>
-
-                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id"
-                      t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
-
-                <div class="row" style="margin-top: 10px;" t-if="o.invoice_origin or o.ref">
-                    <div class="col-6" t-if="o.invoice_origin" name="origin">
-                        <strong>Origen:</strong>
-                        <p class="m-0" t-field="o.invoice_origin"/>
-                    </div>
-                    <div class="col-6" t-if="o.ref" name="reference">
-                        <strong>Referencia:</strong>
-                        <p class="m-0" t-field="o.ref"/>
-                    </div>
+                <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">
+                    <strong>Origen:</strong>
+                    <p class="m-0" t-field="o.invoice_origin"/>
                 </div>
+                <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">
+                    <strong>Referencia:</strong>
+                    <p class="m-0" t-field="o.ref"/>
+                </div>
+                <!--                <div>-->
+                <!--                    <strong t-field="o.company_id.partner_id.name"/>-->
+                <!--                </div>-->
+                <!--                <span t-field="o.company_id.partner_id" class="text-muted" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/>-->
+                <!--                <span>-->
+                <!--                    <strong>RNC:</strong>-->
+                <!--                    <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>-->
+                <!--                </span>-->
+                <!--                <br/>-->
+                <!--                <span>-->
+                <!--                    <strong>Fecha Emisión:</strong>-->
+                <!--                    <span t-field="o.invoice_date"/>-->
+                <!--                </span>-->
+                <!--                <br/>-->
+                <!--                <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">-->
+                <!--                    <strong>Vence:</strong>-->
+                <!--                    <span t-field="o.invoice_date_due"/>-->
+                <!--                </span>-->
             </div>
 
             <div class="col-6 text-end" style="line-height: 1.60; margin-top: -10px;">
@@ -182,6 +222,66 @@
                 </div>
             </div>
         </div>
+        <br/>
+        <!--        <div id="receiver_info" class="row" style="margin-top: 0 !important; margin-bottom: 0 !important;">-->
+        <!--            <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>-->
+        <!--            <div class="col-auto col-7 mw-100 mb-2">-->
+        <!--                <strong>-->
+        <!--                    <t t-if="vat_len == 9">RNC:</t>-->
+        <!--                    <t t-elif="vat_len == 11">Cédula:</t>-->
+        <!--                    <t t-else="">ID Cliente:</t>-->
+        <!--                </strong>-->
+        <!--                <span class="m-0" t-out="o.commercial_partner_id.vat or ''"/>-->
+        <!--                <br/>-->
+        <!--                <strong>-->
+        <!--                    <t t-if="vat_len == 9">Razón Social:</t>-->
+        <!--                    <t t-else="">Nombre:</t>-->
+        <!--                </strong>-->
+        <!--                <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">-->
+        <!--                    <span class="m-0" t-field="o.partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <t t-if="o.partner_id.phone">-->
+        <!--                        <strong>Tel.:</strong>-->
+        <!--                        <span t-field="o.partner_id.phone"/>-->
+        <!--                        <t t-if="o.partner_id.mobile">-->
+        <!--                            <span>/</span>-->
+        <!--                        </t>-->
+        <!--                    </t>-->
+        <!--                    <t t-if="o.partner_id.mobile">-->
+        <!--                        <strong>Cel.:</strong>-->
+        <!--                        <span t-field="o.partner_id.mobile" widget="phone"/>-->
+        <!--                    </t>-->
+        <!--                </t>-->
+        <!--                <t t-else="">-->
+        <!--                    <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>-->
+        <!--                    <span class="m-0" t-field="commercial_partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <strong>Contacto:</strong>-->
+        <!--                    <span t-field="o.partner_id.name"/>-->
+        <!--                    <br/>-->
+        <!--                    <t t-if="commercial_partner_id.phone">-->
+        <!--                        <strong>Tel.:</strong>-->
+        <!--                        <span t-field="commercial_partner_id.phone"/>-->
+        <!--                        <t t-if="commercial_partner_id.mobile">-->
+        <!--                            <span>/</span>-->
+        <!--                        </t>-->
+        <!--                    </t>-->
+        <!--                    <t t-if="commercial_partner_id.mobile">-->
+        <!--                        <strong>Cel.:</strong>-->
+        <!--                        <span t-field="commercial_partner_id.mobile" widget="phone"/>-->
+        <!--                    </t>-->
+        <!--                </t>-->
+        <!--                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>-->
+        <!--            </div>-->
+        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">-->
+        <!--                <strong>Origen:</strong>-->
+        <!--                <p class="m-0" t-field="o.invoice_origin"/>-->
+        <!--            </div>-->
+        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">-->
+        <!--                <strong>Referencia:</strong>-->
+        <!--                <p class="m-0" t-field="o.ref"/>-->
+        <!--            </div>-->
+        <!--        </div>-->
         <br/>
     </template>
 
@@ -313,7 +413,7 @@
                         <br/>
                         <t t-if="o.l10n_do_ecf_sign_date">
                             <strong>Fecha Firma Digital:</strong>
-                            <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y')"/>
+                            <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y %H:%M:%S')"/>
                         </t>
                     </div>
                 </div>
@@ -336,60 +436,9 @@
                       t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
             </td>
         </xpath>
-        <xpath expr="//table[hasclass('o_main_table')]" position="attributes">
-            <attribute name="t-attf-style">
-                #{'border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 8px; margin-bottom: 0; border-top: 1px solid #6f7882; border-bottom: 0;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
-
-        <xpath expr="//table[hasclass('o_main_table')]/thead/tr/th" position="attributes">
-            <attribute name="t-attf-style">
-                #{'border: 1px solid #9aa3ad; padding: 5px 6px; font-size: 11px; font-weight: 600; text-transform: uppercase;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
-
-        <xpath expr="//table[hasclass('o_main_table')]/tbody/tr/td" position="attributes">
-            <attribute name="t-attf-style">
-                #{'border-left: 1px solid #c4cad0; border-right: 1px solid #c4cad0; border-bottom: 1px solid #c4cad0; padding: 6px 6px; vertical-align: top;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
-
-        <xpath expr="//p[@name='payment_communication']" position="attributes">
-            <attribute name="t-if">
-                not (
-                o.company_id.external_report_layout_id
-                and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed'
-                )
-            </attribute>
-        </xpath>
-
-        <xpath expr="//div[@id='total']" position="before">
-            <div t-if="o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed'"
-                 style="width: 56%; float: left; margin-top: 0; padding-top: 8px; font-size: 12px;">
-                <div t-if="o.payment_reference">
-                    <strong>Comunicación del pago:</strong>
-                    <span t-field="o.payment_reference"/>
-                </div>
-            </div>
-        </xpath>
-
-        <xpath expr="//div[@id='total']" position="attributes">
-            <attribute name="t-attf-style">
-                #{'width: 44%; float: right; margin-top: 0; padding-top: 0;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
-
-        <xpath expr="//div[@id='total']/div" position="attributes">
-            <attribute name="t-attf-style">
-                #{'width: 100%; margin-top: 0; padding-top: 0;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
-
-        <xpath expr="//div[@id='total']/div/table" position="attributes">
-            <attribute name="t-attf-style">
-                #{'width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 0; font-size: 12px;' if o.company_id.external_report_layout_id and o.company_id.external_report_layout_id.key == 'web.external_layout_boxed' else ''}
-            </attribute>
-        </xpath>
+<xpath expr="//span[@id='line_tax_ids']" position="attributes">
+    <attribute name="t-out">', '.join(map(lambda x: (x.invoice_label or x.name).replace('Sales', '').strip(), line.tax_ids)) if not ecf_representation else '%s %s' % (o.currency_id.symbol, '{0:,.2f}'.format(line.l10n_do_itbis_amount))</attribute>
+</xpath>
 
         <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']" position="replace">
             <t t-call="l10n_do_accounting.document_tax_totals"/>

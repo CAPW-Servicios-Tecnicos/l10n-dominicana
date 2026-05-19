@@ -558,7 +558,13 @@ class AccountMove(models.Model):
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
-        res = super(AccountMove, self)._onchange_partner_id()
+        try:
+            res = super(AccountMove, self)._onchange_partner_id()
+        except TypeError as e:
+            if "unhashable type: 'dict'" not in str(e):
+                raise
+            res = {}
+
         do_country = self.env.ref("base.do", raise_if_not_found=False)
 
         for move in self:
@@ -890,3 +896,5 @@ class AccountMove(models.Model):
         else:
             "never"
         return super(AccountMove, self)._deduce_sequence_number_reset(name)
+
+

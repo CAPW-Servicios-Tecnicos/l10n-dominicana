@@ -164,29 +164,29 @@ class AccountMove(models.Model):
 
         # Create partial unique indexes (the real "constraints" you need)
         cr.execute("""
-            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
-            ON account_move (l10n_do_fiscal_number, company_id)
-            WHERE (l10n_latam_document_type_id IS NOT NULL
-                   AND move_type NOT IN ('in_invoice', 'in_refund'))
-              AND l10n_do_fiscal_number IS NOT NULL
-              AND l10n_do_fiscal_number <> '';
+                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
+                       ON account_move (l10n_do_fiscal_number, company_id)
+                       WHERE (l10n_latam_document_type_id IS NOT NULL
+                       AND move_type NOT IN ('in_invoice', 'in_refund'))
+                       AND l10n_do_fiscal_number IS NOT NULL
+                       AND l10n_do_fiscal_number <> '';
 
-            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
-            ON account_move (l10n_do_fiscal_number, commercial_partner_id, company_id)
-            WHERE (l10n_latam_document_type_id IS NOT NULL
-                   AND move_type IN ('in_invoice', 'in_refund')
-                   AND l10n_latam_manual_document_number IS TRUE)
-              AND l10n_do_fiscal_number IS NOT NULL
-              AND l10n_do_fiscal_number <> '';
+                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
+                       ON account_move (l10n_do_fiscal_number, commercial_partner_id, company_id)
+                       WHERE (l10n_latam_document_type_id IS NOT NULL
+                       AND move_type IN ('in_invoice', 'in_refund')
+                       AND l10n_latam_manual_document_number IS TRUE)
+                       AND l10n_do_fiscal_number IS NOT NULL
+                       AND l10n_do_fiscal_number <> '';
 
-            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
-            ON account_move (l10n_do_fiscal_number, company_id)
-            WHERE (l10n_latam_document_type_id IS NOT NULL
-                   AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                   AND l10n_latam_manual_document_number IS FALSE)
-              AND l10n_do_fiscal_number IS NOT NULL
-              AND l10n_do_fiscal_number <> '';
-        """)
+                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
+                       ON account_move (l10n_do_fiscal_number, company_id)
+                       WHERE (l10n_latam_document_type_id IS NOT NULL
+                       AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                       AND l10n_latam_manual_document_number IS FALSE)
+                       AND l10n_do_fiscal_number IS NOT NULL
+                       AND l10n_do_fiscal_number <> '';
+                   """)
 
         return res
 
@@ -896,5 +896,3 @@ class AccountMove(models.Model):
         else:
             "never"
         return super(AccountMove, self)._deduce_sequence_number_reset(name)
-
-

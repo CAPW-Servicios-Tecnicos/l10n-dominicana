@@ -556,7 +556,7 @@ class AccountMove(models.Model):
     #             )
     #     super(AccountMove, self - l10n_do_invoices)._check_invoice_type_document_type()
 
-    @api.onchange("partner_id")
+ @api.onchange("partner_id")
     def _onchange_partner_id(self):
         try:
             res = super(AccountMove, self)._onchange_partner_id()

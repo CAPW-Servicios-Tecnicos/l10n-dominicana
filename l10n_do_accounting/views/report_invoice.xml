@@ -2,251 +2,139 @@
 <odoo>
 
 
-  <template id="custom_header">
-    <div>
-        <div class="row" style="margin-bottom: 28px;">
-            <div class="col-12">
-                <div class="row">
-                    <div class="col-3" style="padding-top: 6px;">
-                        <img t-if="o.company_id.logo"
-                             t-att-src="image_data_uri(o.company_id.logo)"
-                             style="max-height: 135px; width: auto; display: block;"
-                             alt="Logo"/>
-                    </div>
-                    <div class="col-9" style="padding-top: 18px; line-height: 1.45;">
-                        <div t-if="o.company_id.partner_id.name">
-                            <strong t-field="o.company_id.partner_id.name"/>
-                        </div>
-                        <div t-if="o.company_id.vat">
-                            <strong>RNC:</strong>
-                            <span t-field="o.company_id.vat"/>
-                        </div>
-                        <div t-if="o.company_id.partner_id.street">
-                            <span t-field="o.company_id.partner_id"
-                                  t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
-                        </div>
-                        <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
-                            <strong>Tel.:</strong>
-                            <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
-                        </div>
-                        <div t-if="o.company_id.email or o.company_id.partner_id.email">
-                            <strong>Email:</strong>
-                            <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
-                        </div>
-                    </div>
+<template id="custom_header">
+    <div style="margin-bottom: 0;">
+        <div class="row">
+            <div class="col-5" style="padding-top: 0;">
+                <img t-if="o.company_id.logo"
+                     t-att-src="image_data_uri(o.company_id.logo)"
+                     style="max-height: 70px; max-width: 220px; width: auto; display: block;"
+                     alt="Logo"/>
+            </div>
+
+            <div class="col-7 text-end" style="padding-top: 0; line-height: 1.15; font-size: 11.5px;">
+                <div t-if="o.company_id.partner_id.name">
+                    <strong t-field="o.company_id.partner_id.name"/>
+                </div>
+                <div t-if="o.company_id.vat">
+                    <strong>RNC:</strong>
+                    <span t-field="o.company_id.vat"/>
+                </div>
+                <div t-if="o.company_id.partner_id.street">
+                    <span t-field="o.company_id.partner_id"
+                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                </div>
+                <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
+                    <strong>Tel.:</strong>
+                    <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
+                </div>
+                <div t-if="o.company_id.email or o.company_id.partner_id.email">
+                    <strong>Email:</strong>
+                    <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
-    <template id="informations">
-        <div id="informations" class="row" style="clear: both; margin-top: 8px;">
-            <div class="col-6" style="line-height: 1.45;">
-                <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>
+<template id="informations">
+    <div id="informations" class="row" style="clear: both; margin-top: -45px; margin-bottom: 12px;">
+        <div class="col-6" style="line-height: 1.45; font-size: 13px;">
+            <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>
 
+            <div>
                 <strong>
                     <t t-if="vat_len == 9">RNC:</t>
                     <t t-elif="vat_len == 11">Cédula:</t>
                     <t t-else="">ID Cliente:</t>
                 </strong>
-                <span class="m-0" t-out="o.commercial_partner_id.vat or ''"/>
-                <br/>
+                <span t-out="o.commercial_partner_id.vat or ''"/>
+            </div>
 
+            <div>
                 <strong>
                     <t t-if="vat_len == 9">Razón Social:</t>
                     <t t-else="">Nombre:</t>
                 </strong>
-
-                <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
-                    <span class="m-0" t-field="o.partner_id.name"/>
-                    <br/>
-                    <strong>
-                        <t t-if="vat_len == 9">Razón Social:</t>
-                        <t t-else="">Nombre:</t>
-                    </strong>
-                    <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">
-                        <span class="m-0" t-field="o.partner_id.name"/>
-                        <br/>
-                        <t t-if="o.partner_id.phone">
-                            <strong>Tel.:</strong>
-                            <span t-field="o.partner_id.phone"/>
-                            <!--                            <t t-if="o.partner_id.mobile">-->
-                            <!--                                <span>/</span>-->
-                            <!--                            </t>-->
-                        </t>
-                        <!--                        <t t-if="o.partner_id.mobile">-->
-                        <!--                            <strong>Cel.:</strong>-->
-                        <!--                            <span t-field="o.partner_id.mobile" widget="phone"/>-->
-                        <!--                        </t>-->
-                    </t>
-                </t>
-                <t t-else="">
-                    <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>
-                    <span class="m-0" t-field="commercial_partner_id.name"/>
-                    <br/>
-                    <strong>Contacto:</strong>
-                    <span t-field="o.partner_id.name"/>
-                    <br/>
-                    <t t-if="commercial_partner_id.phone">
-                        <strong>Tel.:</strong>
-                        <span t-field="commercial_partner_id.phone"/>
-                        <t t-if="commercial_partner_id.mobile">
-                            <span>/</span>
-                        </t>
-                    </t>
-                    <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id"
-                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
-                </t>
-                <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">
-                    <strong>Origen:</strong>
-                    <p class="m-0" t-field="o.invoice_origin"/>
-                </div>
-                <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">
-                    <strong>Referencia:</strong>
-                    <p class="m-0" t-field="o.ref"/>
-                </div>
-                <!--                <div>-->
-                <!--                    <strong t-field="o.company_id.partner_id.name"/>-->
-                <!--                </div>-->
-                <!--                <span t-field="o.company_id.partner_id" class="text-muted" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/>-->
-                <!--                <span>-->
-                <!--                    <strong>RNC:</strong>-->
-                <!--                    <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>-->
-                <!--                </span>-->
-                <!--                <br/>-->
-                <!--                <span>-->
-                <!--                    <strong>Fecha Emisión:</strong>-->
-                <!--                    <span t-field="o.invoice_date"/>-->
-                <!--                </span>-->
-                <!--                <br/>-->
-                <!--                <span t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">-->
-                <!--                    <strong>Vence:</strong>-->
-                <!--                    <span t-field="o.invoice_date_due"/>-->
-                <!--                </span>-->
+                <span t-field="o.partner_id.name"/>
             </div>
 
-            <div class="col-6 text-end" style="line-height: 1.60; margin-top: -10px;">
-                <h2 style="margin-top: 0; margin-bottom: 14px;">
-                    <span t-field="o.l10n_latam_document_type_id.report_name"/>
-                </h2>
+            <div t-if="o.partner_id.phone">
+                <strong>Tel.:</strong>
+                <span t-field="o.partner_id.phone"/>
+            </div>
 
-                <div t-if="o.l10n_do_fiscal_number" style="margin-bottom: 15px;">
-                    <strong>
-                        <t t-if="ecf_representation">e-NCF:</t>
-                        <t t-else="">NCF:</t>
-                    </strong>
-                    <span t-field="o.l10n_do_fiscal_number"/>
-                </div>
+            <div t-if="o.invoice_origin">
+                <strong>Origen:</strong>
+                <span t-field="o.invoice_origin"/>
+            </div>
 
-                <div t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
-                    <strong>NCF modificado:</strong>
-                    <span t-field="o.l10n_do_origin_ncf"/>
-                    <t t-if="ecf_representation">
-                        <br/>
-                        <strong>Código Modificación:</strong>
-                        <span t-field="o.l10n_do_ecf_modification_code"/>
-                    </t>
-                </div>
+            <div t-if="o.ref">
+                <strong>Referencia:</strong>
+                <span t-field="o.ref"/>
+            </div>
+        </div>
 
-                <div t-if="o.l10n_latam_use_documents
+        <div class="col-6 text-end" style="line-height: 1.55; font-size: 13px;">
+            <h2 style="margin: 0 0 12px 0; font-size: 26px; line-height: 1.15;">
+                <span t-field="o.l10n_latam_document_type_id.report_name"/>
+            </h2>
+
+            <div t-if="o.l10n_do_fiscal_number" style="margin-bottom: 10px;">
+                <strong>
+                    <t t-if="ecf_representation">e-NCF:</t>
+                    <t t-else="">NCF:</t>
+                </strong>
+                <span t-field="o.l10n_do_fiscal_number"/>
+            </div>
+
+            <div t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
+                <strong>NCF modificado:</strong>
+                <span t-field="o.l10n_do_origin_ncf"/>
+                <t t-if="ecf_representation">
+                    <br/>
+                    <strong>Código Modificación:</strong>
+                    <span t-field="o.l10n_do_ecf_modification_code"/>
+                </t>
+            </div>
+
+            <div t-if="o.l10n_latam_use_documents
                and o.move_type in ['out_invoice', 'out_refund']
                and o.state == 'posted'
                and o.l10n_do_fiscal_number
                and o.l10n_latam_document_type_id
                and o.l10n_latam_document_type_id.doc_code_prefix[1:] not in ('32', '34', '02')">
-                    <strong>
-                        <t t-if="ecf_representation">Vencimiento e-NCF:</t>
-                        <t t-else="">Válida hasta:</t>
-                    </strong>
-                    <span t-field="o.l10n_do_ncf_expiration_date"/>
-                </div>
+                <strong>
+                    <t t-if="ecf_representation">Vencimiento e-NCF:</t>
+                    <t t-else="">Válida hasta:</t>
+                </strong>
+                <span t-field="o.l10n_do_ncf_expiration_date"/>
+            </div>
 
-                <div>
-                    <strong>Fecha Emisión:</strong>
-                    <span t-field="o.invoice_date"/>
-                </div>
+            <div>
+                <strong>Fecha Emisión:</strong>
+                <span t-field="o.invoice_date"/>
+            </div>
 
-                <div t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
-                    <strong>Vence:</strong>
-                    <span t-field="o.invoice_date_due"/>
-                </div>
+            <div t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
+                <strong>Vence:</strong>
+                <span t-field="o.invoice_date_due"/>
+            </div>
 
-                <div t-if="is_l10n_do_invoice" class="text-muted" style="margin-top: 12px;">
-                    <span>
-                        <strong>Original:</strong>
-                        Cliente
-                    </span>
-                    <br/>
-                    <span>
-                        <strong>Copia:</strong>
-                        Vendedor
-                    </span>
-                </div>
+            <div t-if="is_l10n_do_invoice" class="text-muted" style="margin-top: 10px;">
+                <span>
+                    <strong>Original:</strong>
+                    Cliente
+                </span>
+                <br/>
+                <span>
+                    <strong>Copia:</strong>
+                    Vendedor
+                </span>
             </div>
         </div>
-        <br/>
-        <!--        <div id="receiver_info" class="row" style="margin-top: 0 !important; margin-bottom: 0 !important;">-->
-        <!--            <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>-->
-        <!--            <div class="col-auto col-7 mw-100 mb-2">-->
-        <!--                <strong>-->
-        <!--                    <t t-if="vat_len == 9">RNC:</t>-->
-        <!--                    <t t-elif="vat_len == 11">Cédula:</t>-->
-        <!--                    <t t-else="">ID Cliente:</t>-->
-        <!--                </strong>-->
-        <!--                <span class="m-0" t-out="o.commercial_partner_id.vat or ''"/>-->
-        <!--                <br/>-->
-        <!--                <strong>-->
-        <!--                    <t t-if="vat_len == 9">Razón Social:</t>-->
-        <!--                    <t t-else="">Nombre:</t>-->
-        <!--                </strong>-->
-        <!--                <t t-if="o.partner_id.is_company or not o.partner_id.parent_id">-->
-        <!--                    <span class="m-0" t-field="o.partner_id.name"/>-->
-        <!--                    <br/>-->
-        <!--                    <t t-if="o.partner_id.phone">-->
-        <!--                        <strong>Tel.:</strong>-->
-        <!--                        <span t-field="o.partner_id.phone"/>-->
-        <!--                        <t t-if="o.partner_id.mobile">-->
-        <!--                            <span>/</span>-->
-        <!--                        </t>-->
-        <!--                    </t>-->
-        <!--                    <t t-if="o.partner_id.mobile">-->
-        <!--                        <strong>Cel.:</strong>-->
-        <!--                        <span t-field="o.partner_id.mobile" widget="phone"/>-->
-        <!--                    </t>-->
-        <!--                </t>-->
-        <!--                <t t-else="">-->
-        <!--                    <t t-set="commercial_partner_id" t-value="o.partner_id.commercial_partner_id"/>-->
-        <!--                    <span class="m-0" t-field="commercial_partner_id.name"/>-->
-        <!--                    <br/>-->
-        <!--                    <strong>Contacto:</strong>-->
-        <!--                    <span t-field="o.partner_id.name"/>-->
-        <!--                    <br/>-->
-        <!--                    <t t-if="commercial_partner_id.phone">-->
-        <!--                        <strong>Tel.:</strong>-->
-        <!--                        <span t-field="commercial_partner_id.phone"/>-->
-        <!--                        <t t-if="commercial_partner_id.mobile">-->
-        <!--                            <span>/</span>-->
-        <!--                        </t>-->
-        <!--                    </t>-->
-        <!--                    <t t-if="commercial_partner_id.mobile">-->
-        <!--                        <strong>Cel.:</strong>-->
-        <!--                        <span t-field="commercial_partner_id.mobile" widget="phone"/>-->
-        <!--                    </t>-->
-        <!--                </t>-->
-        <!--                <span t-if="o.partner_id.street" class="m-0" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>-->
-        <!--            </div>-->
-        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.invoice_origin" name="origin">-->
-        <!--                <strong>Origen:</strong>-->
-        <!--                <p class="m-0" t-field="o.invoice_origin"/>-->
-        <!--            </div>-->
-        <!--            <div class="col-auto col-2 mw-100 mb-2" t-if="o.ref" name="reference">-->
-        <!--                <strong>Referencia:</strong>-->
-        <!--                <p class="m-0" t-field="o.ref"/>-->
-        <!--            </div>-->
-        <!--        </div>-->
-        <br/>
-    </template>
+    </div>
+</template>
 
     <template id="document_tax_totals">
 
@@ -361,28 +249,35 @@
             </t>
         </xpath>
 
-        <xpath expr="//div[@id='right-elements']/.." position="after">
-            <div class="row">
-                <div>
-                    <div t-if="o.l10n_do_electronic_stamp" class="col-6" style="display: inline-block">
-                        <div>
-                            <img alt="Barcode"
-                                 t-att-src="'/report/barcode/?barcode_type=QR&amp;width=100&amp;height=100&amp;value=' + o.l10n_do_electronic_stamp if o.l10n_do_electronic_stamp else ''"/>
-                        </div>
-                        <t t-if="o.l10n_do_ecf_security_code">
-                            <strong>Código de Seguridad:</strong>
-                            <span t-out="o.l10n_do_ecf_security_code"/>
-                        </t>
-                        <br/>
-                        <t t-if="o.l10n_do_ecf_sign_date">
-                            <strong>Fecha Firma Digital:</strong>
-                            <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y %H:%M:%S')"/>
-                        </t>
-                    </div>
-                </div>
-            </div>
+<xpath expr="//div[@id='payment_term']" position="after">
+    <div t-if="o.qr_code_image or o.l10n_do_electronic_stamp"
+         style="width:150px; max-width:150px; margin-top:10px; margin-bottom:8px; text-align:left; page-break-inside:avoid !important; break-inside:avoid !important; overflow:visible !important;">
+
+        <t t-if="o.qr_code_image">
+            <img alt="QR e-CF"
+                 t-att-src="image_data_uri(o.qr_code_image)"
+                 style="width:115px; height:115px; max-width:115px; max-height:115px; display:block; object-fit:contain; margin:0 0 3px 0; padding:0; border:0;"/>
+        </t>
+
+        <t t-elif="o.l10n_do_electronic_stamp">
+            <img alt="QR e-CF"
+                 t-att-src="'/report/barcode/?barcode_type=QR&amp;width=115&amp;height=115&amp;value=' + o.l10n_do_electronic_stamp"
+                 style="width:115px; height:115px; max-width:115px; max-height:115px; display:block; object-fit:contain; margin:0 0 3px 0; padding:0; border:0;"/>
+        </t>
+
+        <div style="font-size:7.5px; line-height:1.05; white-space:normal;">
+            <t t-if="o.l10n_do_ecf_security_code">
+                <strong>Código de Seguridad:</strong>
+                <span t-out="o.l10n_do_ecf_security_code"/>
+            </t>
             <br/>
-        </xpath>
+            <t t-if="o.l10n_do_ecf_sign_date">
+                <strong>Fecha Firma Digital:</strong>
+                <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y')"/>
+            </t>
+        </div>
+    </div>
+</xpath>
 
         <!-- Total monto descuento en líneas -->
         <xpath expr="//th[@name='th_discount']" position="after">
@@ -409,11 +304,13 @@
 
     </template>
 
-    <template id="report_invoice" inherit_id="account.report_invoice">
-        <xpath expr='//t[@t-call="account.report_invoice_document"]' position="after">
-            <t t-if="o._get_name_invoice_report() == 'l10n_do_accounting.report_invoice_document_inherited'"
-               t-call="l10n_do_accounting.report_invoice_document_inherited" t-lang="lang"/>
-        </xpath>
-    </template>
+<template id="report_invoice" inherit_id="account.report_invoice">
+    <xpath expr='//t[@t-call="account.report_invoice_document"]' position="replace">
+        <t t-if="o._get_name_invoice_report() == 'l10n_do_accounting.report_invoice_document_inherited'"
+           t-call="l10n_do_accounting.report_invoice_document_inherited" t-lang="lang"/>
+        <t t-else=""
+           t-call="account.report_invoice_document" t-lang="lang"/>
+    </xpath>
+</template>
 
 </odoo>

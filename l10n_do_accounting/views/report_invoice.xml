@@ -250,33 +250,7 @@
         </xpath>
 
 <xpath expr="//div[@id='payment_term']" position="after">
-    <div t-if="o.qr_code_image or o.l10n_do_electronic_stamp"
-         style="width:150px; max-width:150px; margin-top:10px; margin-bottom:8px; text-align:left; page-break-inside:avoid !important; break-inside:avoid !important; overflow:visible !important;">
-
-        <t t-if="o.qr_code_image">
-            <img alt="QR e-CF"
-                 t-att-src="image_data_uri(o.qr_code_image)"
-                 style="width:115px; height:115px; max-width:115px; max-height:115px; display:block; object-fit:contain; margin:0 0 3px 0; padding:0; border:0;"/>
-        </t>
-
-        <t t-elif="o.l10n_do_electronic_stamp">
-            <img alt="QR e-CF"
-                 t-att-src="'/report/barcode/?barcode_type=QR&amp;width=115&amp;height=115&amp;value=' + o.l10n_do_electronic_stamp"
-                 style="width:115px; height:115px; max-width:115px; max-height:115px; display:block; object-fit:contain; margin:0 0 3px 0; padding:0; border:0;"/>
-        </t>
-
-        <div style="font-size:7.5px; line-height:1.05; white-space:normal;">
-            <t t-if="o.l10n_do_ecf_security_code">
-                <strong>Código de Seguridad:</strong>
-                <span t-out="o.l10n_do_ecf_security_code"/>
-            </t>
-            <br/>
-            <t t-if="o.l10n_do_ecf_sign_date">
-                <strong>Fecha Firma Digital:</strong>
-                <span t-out="context_timestamp(o.l10n_do_ecf_sign_date).strftime('%d-%m-%Y')"/>
-            </t>
-        </div>
-    </div>
+    <div id="l10n_do_ecf_qr_placeholder"/>
 </xpath>
 
         <!-- Total monto descuento en líneas -->

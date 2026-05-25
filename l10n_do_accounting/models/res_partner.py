@@ -6,20 +6,22 @@ class Partner(models.Model):
     _inherit = "res.partner"
 
     def _get_l10n_do_dgii_payer_types_selection(self):
-        """Return the list of payer types needed in invoices to clasify accordingly to
-        DGII requirements."""
+        """Return the list of payer types needed in invoices to classify accordingly to
+        DGII requirements.
+        """
         return [
             ("taxpayer", _("Fiscal Tax Payer")),
             ("non_payer", _("Non Tax Payer")),
             ("nonprofit", _("Nonprofit Organization")),
-            ("special", _("special from Tax Paying")),
+            ("special", _("Special from Tax Paying")),
             ("governmental", _("Governmental")),
             ("foreigner", _("Foreigner")),
         ]
 
     def _get_l10n_do_expense_type(self):
-        """Return the list of expenses needed in invoices to clasify accordingly to
-        DGII requirements."""
+        """Return the list of expenses needed in invoices to classify accordingly to
+        DGII requirements.
+        """
         return [
             ("01", _("01 - Personal")),
             ("02", _("02 - Work, Supplies and Services")),
@@ -42,67 +44,84 @@ class Partner(models.Model):
         index=True,
         store=True,
     )
+
     l10n_do_expense_type = fields.Selection(
         selection="_get_l10n_do_expense_type",
         string="Cost & Expense Type",
         store=True,
     )
+
     country_id = fields.Many2one(
-        default=lambda self: self.env.ref("base.do")
-        if self.env.user.company_id.country_id == self.env.ref("base.do")
-        else False
+        default=lambda self: self._default_l10n_do_country_id()
     )
 
+    @api.model
+    def _default_l10n_do_country_id(self):
+        """Set Dominican Republic as default country only when the company is Dominican.
+
+        Important:
+        A Many2one default must return an ID or False, not a recordset.
+        Returning a recordset may break web_read/onchange in newer Odoo versions.
+        """
+        dominican_republic = self.env.ref("base.do", raise_if_not_found=False)
+
+        if not dominican_republic:
+            return False
+
+        if self.env.company.country_id == dominican_republic:
+            return dominican_republic.id
+
+        return False
+
     def _check_l10n_do_fiscal_fields(self, vals):
-        if not self or self.parent_id:
-            # Do not perform any check because child contacts
-            # have readonly fiscal field. This also allows set
-            # contacts parent, even if this changes any of its
-            # fiscal fields.
+        """Prevent changes to fiscal partner fields after fiscal documents are posted."""
+        if not self:
             return
 
         fiscal_fields = [
             field
-            for field in ["name", "vat", "country_id"]  # l10n_do_dgii_tax_payer_type ?
+            for field in ["name", "vat", "country_id"]
             if field in vals
         ]
-        if (
-            fiscal_fields
-            and not self.env.user.has_group(
-                "l10n_do_accounting.group_l10n_do_edit_fiscal_partner"
-            )
-            and self.env["account.move"]
-            .sudo()
-            .search(
-                [
-                    ("l10n_latam_use_documents", "=", True),
-                    ("country_code", "=", "DO"),
-                    ("commercial_partner_id", "=", self.id),
-                    ("state", "=", "posted"),
-                ],
-                limit=1,
-            )
-        ):
-            raise AccessError(
-                _(
-                    "You are not allowed to modify %s after partner "
-                    "fiscal document issuing"
+
+        if not fiscal_fields:
+            return
+
+        if self.env.user.has_group("l10n_do_accounting.group_l10n_do_edit_fiscal_partner"):
+            return
+
+        for partner in self:
+            # Do not validate child contacts because their fiscal fields are readonly
+            # and they depend on the commercial partner.
+            if partner.parent_id:
+                continue
+
+            has_posted_fiscal_document = self.env["account.move"].sudo().search([
+                ("l10n_latam_use_documents", "=", True),
+                ("country_code", "=", "DO"),
+                ("commercial_partner_id", "=", partner.id),
+                ("state", "=", "posted"),
+            ], limit=1)
+
+            if has_posted_fiscal_document:
+                raise AccessError(
+                    _(
+                        "You are not allowed to modify %s after partner "
+                        "fiscal document issuing"
+                    )
+                    % (", ".join(self._fields[f].string for f in fiscal_fields))
                 )
-                % (", ".join(self._fields[f].string for f in fiscal_fields))
-            )
 
     def write(self, vals):
-        res = super(Partner, self).write(vals)
         self._check_l10n_do_fiscal_fields(vals)
-
-        return res
+        return super().write(vals)
 
     @api.depends("vat", "country_id", "name")
     def _compute_l10n_do_dgii_payer_type(self):
-        """Compute the type of partner depending on soft decisions"""
+        """Compute the type of partner depending on soft decisions."""
         for partner in self:
             vat = partner.vat or partner.name or ""
-            vat_len = len(vat) if vat else 0
+            vat_len = len(vat)
             upper_name = partner.name.upper() if partner.name else ""
             is_dominican_partner = partner.country_code == "DO"
 
@@ -122,7 +141,7 @@ class Partner(models.Model):
                 elif "ZONA FRANCA" in upper_name:
                     partner.l10n_do_dgii_tax_payer_type = "special"
                 elif "IGLESIA" in upper_name or (
-                    "MINISTERIO" in upper_name and vat.startswith("4")
+                        "MINISTERIO" in upper_name and vat.startswith("4")
                 ):
                     partner.l10n_do_dgii_tax_payer_type = "special"
                 elif not vat.startswith("4"):
@@ -133,6 +152,7 @@ class Partner(models.Model):
                 partner.l10n_do_dgii_tax_payer_type = "non_payer"
 
     def _inverse_l10n_do_dgii_tax_payer_type(self):
+        """Allow manual edition of the computed taxpayer type."""
         for partner in self:
             partner.l10n_do_dgii_tax_payer_type = partner.l10n_do_dgii_tax_payer_type
 

@@ -135,3 +135,32 @@ class Partner(models.Model):
     def _inverse_l10n_do_dgii_tax_payer_type(self):
         for partner in self:
             partner.l10n_do_dgii_tax_payer_type = partner.l10n_do_dgii_tax_payer_type
+
+    def _l10n_do_normalize_web_read_id(self, record_id):
+        if isinstance(record_id, dict):
+            record_id = record_id.get("id") or record_id.get("res_id") or record_id.get("origin")
+            if isinstance(record_id, dict):
+                record_id = record_id.get("id") or record_id.get("res_id")
+
+        if hasattr(record_id, "origin"):
+            origin = record_id.origin
+            record_id = origin.id if hasattr(origin, "id") else origin
+
+        return record_id
+
+    def web_read(self, specification):
+        raw_ids = list(getattr(self, "_ids", []))
+        normalized_ids = []
+        has_dirty_id = False
+
+        for record_id in raw_ids:
+            normalized_id = self._l10n_do_normalize_web_read_id(record_id)
+            if normalized_id != record_id:
+                has_dirty_id = True
+            normalized_ids.append(normalized_id)
+
+        if has_dirty_id:
+            normalized_ids = [record_id for record_id in normalized_ids if record_id]
+            return super(Partner, self.browse(normalized_ids)).web_read(specification)
+
+        return super().web_read(specification)

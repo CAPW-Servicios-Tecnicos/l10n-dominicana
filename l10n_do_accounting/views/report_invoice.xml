@@ -2,139 +2,139 @@
 <odoo>
 
 
-<template id="custom_header">
-    <div style="margin-bottom: 0;">
-        <div class="row">
-            <div class="col-5" style="padding-top: 0;">
-                <img t-if="o.company_id.logo"
-                     t-att-src="image_data_uri(o.company_id.logo)"
-                     style="max-height: 70px; max-width: 220px; width: auto; display: block;"
-                     alt="Logo"/>
-            </div>
+    <template id="custom_header">
+        <div style="margin-bottom: 0;">
+            <div class="row">
+                <div class="col-5" style="padding-top: 0;">
+                    <img t-if="o.company_id.logo"
+                         t-att-src="image_data_uri(o.company_id.logo)"
+                         style="max-height: 70px; max-width: 220px; width: auto; display: block;"
+                         alt="Logo"/>
+                </div>
 
-            <div class="col-7 text-end" style="padding-top: 0; line-height: 1.15; font-size: 11.5px;">
-                <div t-if="o.company_id.partner_id.name">
-                    <strong t-field="o.company_id.partner_id.name"/>
+                <div class="col-7 text-end" style="padding-top: 0; line-height: 1.15; font-size: 11.5px;">
+                    <div t-if="o.company_id.partner_id.name">
+                        <strong t-field="o.company_id.partner_id.name"/>
+                    </div>
+                    <div t-if="o.company_id.vat">
+                        <strong>RNC:</strong>
+                        <span t-field="o.company_id.vat"/>
+                    </div>
+                    <div t-if="o.company_id.partner_id.street">
+                        <span t-field="o.company_id.partner_id"
+                              t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                    </div>
+                    <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
+                        <strong>Tel.:</strong>
+                        <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
+                    </div>
+                    <div t-if="o.company_id.email or o.company_id.partner_id.email">
+                        <strong>Email:</strong>
+                        <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
+                    </div>
                 </div>
-                <div t-if="o.company_id.vat">
-                    <strong>RNC:</strong>
-                    <span t-field="o.company_id.vat"/>
+            </div>
+        </div>
+    </template>
+
+    <template id="informations">
+        <div id="informations" class="row" style="clear: both; margin-top: 10px; margin-bottom: 12px;">
+            <div class="col-6" style="line-height: 1.45; font-size: 13px;">
+                <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>
+
+                <div>
+                    <strong>
+                        <t t-if="vat_len == 9">RNC:</t>
+                        <t t-elif="vat_len == 11">Cédula:</t>
+                        <t t-else="">ID Cliente:</t>
+                    </strong>
+                    <span t-out="o.commercial_partner_id.vat or ''"/>
                 </div>
-                <div t-if="o.company_id.partner_id.street">
-                    <span t-field="o.company_id.partner_id"
-                          t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+
+                <div>
+                    <strong>
+                        <t t-if="vat_len == 9">Razón Social:</t>
+                        <t t-else="">Nombre:</t>
+                    </strong>
+                    <span t-field="o.partner_id.name"/>
                 </div>
-                <div t-if="o.company_id.phone or o.company_id.partner_id.phone">
+
+                <div t-if="o.partner_id.phone">
                     <strong>Tel.:</strong>
-                    <span t-out="o.company_id.phone or o.company_id.partner_id.phone"/>
+                    <span t-field="o.partner_id.phone"/>
                 </div>
-                <div t-if="o.company_id.email or o.company_id.partner_id.email">
-                    <strong>Email:</strong>
-                    <span t-out="o.company_id.email or o.company_id.partner_id.email"/>
+
+                <div t-if="o.invoice_origin">
+                    <strong>Origen:</strong>
+                    <span t-field="o.invoice_origin"/>
+                </div>
+
+                <div t-if="o.ref">
+                    <strong>Referencia:</strong>
+                    <span t-field="o.ref"/>
                 </div>
             </div>
-        </div>
-    </div>
-</template>
 
-<template id="informations">
-    <div id="informations" class="row" style="clear: both; margin-top: -45px; margin-bottom: 12px;">
-        <div class="col-6" style="line-height: 1.45; font-size: 13px;">
-            <t t-set="vat_len" t-value="len(o.commercial_partner_id.vat) if o.commercial_partner_id.vat else 0"/>
+            <div class="col-6 text-end" style="line-height: 1.55; font-size: 13px;">
+                <h2 style="margin: 0 0 12px 0; font-size: 26px; line-height: 1.15;">
+                    <span t-field="o.l10n_latam_document_type_id.report_name"/>
+                </h2>
 
-            <div>
-                <strong>
-                    <t t-if="vat_len == 9">RNC:</t>
-                    <t t-elif="vat_len == 11">Cédula:</t>
-                    <t t-else="">ID Cliente:</t>
-                </strong>
-                <span t-out="o.commercial_partner_id.vat or ''"/>
-            </div>
+                <div t-if="o.l10n_do_fiscal_number" style="margin-bottom: 10px;">
+                    <strong>
+                        <t t-if="ecf_representation">e-NCF:</t>
+                        <t t-else="">NCF:</t>
+                    </strong>
+                    <span t-field="o.l10n_do_fiscal_number"/>
+                </div>
 
-            <div>
-                <strong>
-                    <t t-if="vat_len == 9">Razón Social:</t>
-                    <t t-else="">Nombre:</t>
-                </strong>
-                <span t-field="o.partner_id.name"/>
-            </div>
+                <div t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
+                    <strong>NCF modificado:</strong>
+                    <span t-field="o.l10n_do_origin_ncf"/>
+                    <t t-if="ecf_representation">
+                        <br/>
+                        <strong>Código Modificación:</strong>
+                        <span t-field="o.l10n_do_ecf_modification_code"/>
+                    </t>
+                </div>
 
-            <div t-if="o.partner_id.phone">
-                <strong>Tel.:</strong>
-                <span t-field="o.partner_id.phone"/>
-            </div>
-
-            <div t-if="o.invoice_origin">
-                <strong>Origen:</strong>
-                <span t-field="o.invoice_origin"/>
-            </div>
-
-            <div t-if="o.ref">
-                <strong>Referencia:</strong>
-                <span t-field="o.ref"/>
-            </div>
-        </div>
-
-        <div class="col-6 text-end" style="line-height: 1.55; font-size: 13px;">
-            <h2 style="margin: 0 0 12px 0; font-size: 26px; line-height: 1.15;">
-                <span t-field="o.l10n_latam_document_type_id.report_name"/>
-            </h2>
-
-            <div t-if="o.l10n_do_fiscal_number" style="margin-bottom: 10px;">
-                <strong>
-                    <t t-if="ecf_representation">e-NCF:</t>
-                    <t t-else="">NCF:</t>
-                </strong>
-                <span t-field="o.l10n_do_fiscal_number"/>
-            </div>
-
-            <div t-if="(o.move_type == 'out_refund' or o.move_type == 'in_refund' or o.debit_origin_id) and (o.l10n_do_origin_ncf != False)">
-                <strong>NCF modificado:</strong>
-                <span t-field="o.l10n_do_origin_ncf"/>
-                <t t-if="ecf_representation">
-                    <br/>
-                    <strong>Código Modificación:</strong>
-                    <span t-field="o.l10n_do_ecf_modification_code"/>
-                </t>
-            </div>
-
-            <div t-if="o.l10n_latam_use_documents
+                <div t-if="o.l10n_latam_use_documents
                and o.move_type in ['out_invoice', 'out_refund']
                and o.state == 'posted'
                and o.l10n_do_fiscal_number
                and o.l10n_latam_document_type_id
                and o.l10n_latam_document_type_id.doc_code_prefix[1:] not in ('32', '34', '02')">
-                <strong>
-                    <t t-if="ecf_representation">Vencimiento e-NCF:</t>
-                    <t t-else="">Válida hasta:</t>
-                </strong>
-                <span t-field="o.l10n_do_ncf_expiration_date"/>
-            </div>
+                    <strong>
+                        <t t-if="ecf_representation">Vencimiento e-NCF:</t>
+                        <t t-else="">Válida hasta:</t>
+                    </strong>
+                    <span t-field="o.l10n_do_ncf_expiration_date"/>
+                </div>
 
-            <div>
-                <strong>Fecha Emisión:</strong>
-                <span t-field="o.invoice_date"/>
-            </div>
+                <div>
+                    <strong>Fecha Emisión:</strong>
+                    <span t-field="o.invoice_date"/>
+                </div>
 
-            <div t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
-                <strong>Vence:</strong>
-                <span t-field="o.invoice_date_due"/>
-            </div>
+                <div t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted' and not ecf_representation">
+                    <strong>Vence:</strong>
+                    <span t-field="o.invoice_date_due"/>
+                </div>
 
-            <div t-if="is_l10n_do_invoice" class="text-muted" style="margin-top: 10px;">
-                <span>
-                    <strong>Original:</strong>
-                    Cliente
-                </span>
-                <br/>
-                <span>
-                    <strong>Copia:</strong>
-                    Vendedor
-                </span>
+                <div t-if="is_l10n_do_invoice" class="text-muted" style="margin-top: 10px;">
+                    <span>
+                        <strong>Original:</strong>
+                        Cliente
+                    </span>
+                    <br/>
+                    <span>
+                        <strong>Copia:</strong>
+                        Vendedor
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
-</template>
+    </template>
 
     <template id="document_tax_totals">
 
@@ -249,9 +249,9 @@
             </t>
         </xpath>
 
-<xpath expr="//div[@id='payment_term']" position="after">
-    <div id="l10n_do_ecf_qr_placeholder"/>
-</xpath>
+        <xpath expr="//div[@id='payment_term']" position="after">
+            <div id="l10n_do_ecf_qr_placeholder"/>
+        </xpath>
 
         <!-- Total monto descuento en líneas -->
         <xpath expr="//th[@name='th_discount']" position="after">
@@ -268,9 +268,12 @@
                       t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
             </td>
         </xpath>
-<xpath expr="//span[@id='line_tax_ids']" position="attributes">
-    <attribute name="t-out">', '.join(map(lambda x: (x.invoice_label or x.name).replace('Sales', '').strip(), line.tax_ids)) if not ecf_representation else '%s %s' % (o.currency_id.symbol, '{0:,.2f}'.format(line.l10n_do_itbis_amount))</attribute>
-</xpath>
+        <xpath expr="//span[@id='line_tax_ids']" position="attributes">
+            <attribute name="t-out">', '.join(map(lambda x: (x.invoice_label or x.name).replace('Sales', '').strip(),
+                line.tax_ids)) if not ecf_representation else '%s %s' % (o.currency_id.symbol,
+                '{0:,.2f}'.format(line.l10n_do_itbis_amount))
+            </attribute>
+        </xpath>
 
         <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']" position="replace">
             <t t-call="l10n_do_accounting.document_tax_totals"/>
@@ -278,13 +281,89 @@
 
     </template>
 
-<template id="report_invoice" inherit_id="account.report_invoice">
-    <xpath expr='//t[@t-call="account.report_invoice_document"]' position="replace">
-        <t t-if="o._get_name_invoice_report() == 'l10n_do_accounting.report_invoice_document_inherited'"
-           t-call="l10n_do_accounting.report_invoice_document_inherited" t-lang="lang"/>
-        <t t-else=""
-           t-call="account.report_invoice_document" t-lang="lang"/>
-    </xpath>
-</template>
+    <template id="report_invoice_document_customer_info_without_ncf"
+              inherit_id="account.report_invoice_document">
+
+        <xpath expr="//div[@id='informations']" position="replace">
+            <div
+                    id="informations" class="row mb-4"
+                    t-if="o.invoice_date or (o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted') or o.delivery_date or o.invoice_origin or o.partner_id.ref or o.ref or o.invoice_incoterm_id or (o.company_id.country_id.code == 'DO' and not o.l10n_do_fiscal_number)">
+                <!-- Cliente solo para facturas dominicanas sin comprobante -->
+                <div class="col"
+                     t-if="o.company_id.country_id.code == 'DO' and not o.l10n_do_fiscal_number"
+                     name="customer_without_ncf">
+                    <strong>Cliente</strong>
+                    <div t-field="o.partner_id.name"/>
+                </div>
+                <div class="col" t-if="o.invoice_date" name="invoice_date">
+                    <t t-if="o.move_type == 'out_invoice'">
+                        <strong>Invoice Date</strong>
+                    </t>
+                    <t t-elif="o.move_type == 'out_refund'">
+                        <strong>Credit Note Date</strong>
+                    </t>
+                    <t t-elif="o.move_type == 'out_receipt'">
+                        <strong>Receipt Date</strong>
+                    </t>
+                    <t t-else="">
+                        <strong>Date</strong>
+                    </t>
+                    <div t-field="o.invoice_date">2023-09-12</div>
+                </div>
+
+                <div class="col" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'"
+                     name="due_date">
+                    <strong>Due Date</strong>
+                    <div t-field="o.invoice_date_due">2023-10-31</div>
+                </div>
+
+                <div class="col" t-if="o.taxable_supply_date and o.show_taxable_supply_date" name="taxable_supply_date">
+                    <strong>Taxable Supply</strong>
+                    <div t-field="o.taxable_supply_date">2023-10-31</div>
+                </div>
+
+                <div class="col" t-if="o.delivery_date" name="delivery_date">
+                    <strong>Delivery Date</strong>
+                    <div t-field="o.delivery_date">2023-09-25</div>
+                </div>
+
+                <div class="col" t-if="o.invoice_origin" name="origin">
+                    <strong>Source</strong>
+                    <div t-field="o.invoice_origin">SO123</div>
+                </div>
+
+                <div class="col" t-if="o.partner_id.ref" name="customer_code">
+                    <strong>Customer Code</strong>
+                    <div t-field="o.partner_id.ref"/>
+                </div>
+
+                <div class="col" t-if="o.ref" name="reference">
+                    <strong>Reference</strong>
+                    <div t-field="o.ref">INV/2023/00001</div>
+                </div>
+
+                <div class="col" t-if="o.invoice_incoterm_id" name="incoterm_id">
+                    <strong>Incoterm</strong>
+                    <div t-if="o.incoterm_location">
+                        <span t-field="o.invoice_incoterm_id.code"/>
+                        <br/>
+                        <span t-field="o.incoterm_location"/>
+                    </div>
+                    <div t-else="" t-field="o.invoice_incoterm_id.code" class="m-0"/>
+                </div>
+
+            </div>
+        </xpath>
+
+    </template>
+
+    <template id="report_invoice" inherit_id="account.report_invoice">
+        <xpath expr='//t[@t-call="account.report_invoice_document"]' position="replace">
+            <t t-if="o._get_name_invoice_report() == 'l10n_do_accounting.report_invoice_document_inherited'"
+               t-call="l10n_do_accounting.report_invoice_document_inherited" t-lang="lang"/>
+            <t t-else=""
+               t-call="account.report_invoice_document" t-lang="lang"/>
+        </xpath>
+    </template>
 
 </odoo>

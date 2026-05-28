@@ -271,16 +271,10 @@
         <xpath expr="//span[@id='line_tax_ids']" position="attributes">
             <attribute name="t-out">', '.join(map(lambda x: (x.invoice_label or x.name).replace('Sales', '').strip(),
                 line.tax_ids)) if not ecf_representation else '%s %s' % (o.currency_id.symbol,
-                '{0:,.2f}'.format(sum(t['amount'] for t in line.tax_ids.filtered(lambda tax: tax.amount &gt;
-                0).compute_all(
-                price_unit=line.price_unit * (1 - ((line.discount or 0.0) / 100.0)),
-                currency=o.currency_id,
-                quantity=line.quantity,
-                product=line.product_id,
-                partner=o.partner_id
-                )['taxes'])))
+                '{0:,.2f}'.format(line.l10n_do_itbis_amount))
             </attribute>
         </xpath>
+
         <xpath expr="//div[@id='total']/div/table/t[@t-call='account.document_tax_totals']" position="replace">
             <t t-call="l10n_do_accounting.document_tax_totals"/>
         </xpath>

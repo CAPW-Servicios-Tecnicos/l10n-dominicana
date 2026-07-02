@@ -747,8 +747,9 @@ class AccountMove(models.Model):
                 record._l10n_do_sequence_fixed_regex.replace(r"?P<seq>", ""),
             )
             matching = re.match(regex, sequence)
-            record.l10n_do_sequence_prefix = sequence[:3]
-            record.l10n_do_sequence_number = int(matching.group(1) or 0)
+
+            record.l10n_do_sequence_prefix = sequence[:3] if sequence else ""
+            record.l10n_do_sequence_number = int(matching.group(1) or 0) if matching else 0
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None):
         if not self._context.get("is_l10n_do_seq", False):
@@ -799,19 +800,44 @@ class AccountMove(models.Model):
 
     def _get_sequence_format_param(self, previous):
         if not self._context.get("is_l10n_do_seq", False):
-            return super(AccountMove, self)._get_sequence_format_param(previous)
+            previous = previous or self._get_last_sequence(relaxed=True) or self._get_starting_sequence()
+            starting_sequence = self._get_starting_sequence()
+
+            try:
+                return super(AccountMove, self)._get_sequence_format_param(previous)
+            except AttributeError:
+                try:
+                    return super(AccountMove, self)._get_sequence_format_param(starting_sequence)
+                except AttributeError:
+                    raise UserError(_(
+                        "La secuencia del diario tiene un formato inválido.\n\n"
+                        "Secuencia encontrada: %s\n"
+                        "Secuencia inicial esperada: %s\n\n"
+                        "Solución: revise la última factura/asiento publicado de este diario "
+                        "o limpie la expresión regular personalizada del diario."
+                    ) % (previous, starting_sequence))
 
         regex = self._l10n_do_sequence_fixed_regex
+        previous = previous or self._get_starting_sequence()
 
-        format_values = re.match(regex, previous).groupdict()
+        match = re.match(regex, previous)
+        if not match:
+            previous = self._get_starting_sequence()
+            match = re.match(regex, previous)
+
+        if not match:
+            raise UserError(_("Invalid Dominican fiscal sequence format: %s") % previous)
+
+        format_values = match.groupdict()
         format_values["seq_length"] = len(format_values["seq"])
         format_values["seq"] = int(format_values.get("seq") or 0)
 
         placeholders = re.findall(r"(prefix\d|seq\d?)", regex)
-        format = "".join(
-            "{seq:0{seq_length}d}" if s == "seq" else "{%s}" % s for s in placeholders
+        format_string = "".join(
+            "{seq:0{seq_length}d}" if s == "seq" else "{%s}" % s
+            for s in placeholders
         )
-        return format, format_values
+        return format_string, format_values
 
     def _set_next_sequence(self):
         self.ensure_one()

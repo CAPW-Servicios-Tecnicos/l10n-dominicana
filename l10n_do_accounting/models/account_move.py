@@ -747,8 +747,9 @@ class AccountMove(models.Model):
                 record._l10n_do_sequence_fixed_regex.replace(r"?P<seq>", ""),
             )
             matching = re.match(regex, sequence)
-            record.l10n_do_sequence_prefix = sequence[:3]
-            record.l10n_do_sequence_number = int(matching.group(1) or 0)
+
+            record.l10n_do_sequence_prefix = sequence[:3] if sequence else ""
+            record.l10n_do_sequence_number = int(matching.group(1) or 0) if matching else 0
 
     def _get_last_sequence(self, relaxed=False, with_prefix=None):
         if not self._context.get("is_l10n_do_seq", False):
@@ -800,14 +801,21 @@ class AccountMove(models.Model):
     def _get_sequence_format_param(self, previous):
         if not self._context.get("is_l10n_do_seq", False):
             previous = previous or self._get_last_sequence(relaxed=True) or self._get_starting_sequence()
+            starting_sequence = self._get_starting_sequence()
+
             try:
                 return super(AccountMove, self)._get_sequence_format_param(previous)
             except AttributeError:
-                previous = self._get_starting_sequence()
                 try:
-                    return super(AccountMove, self)._get_sequence_format_param(previous)
+                    return super(AccountMove, self)._get_sequence_format_param(starting_sequence)
                 except AttributeError:
-                    raise UserError(_("Invalid journal sequence format for accounting entry: %s") % previous)
+                    raise UserError(_(
+                        "La secuencia del diario tiene un formato inválido.\n\n"
+                        "Secuencia encontrada: %s\n"
+                        "Secuencia inicial esperada: %s\n\n"
+                        "Solución: revise la última factura/asiento publicado de este diario "
+                        "o limpie la expresión regular personalizada del diario."
+                    ) % (previous, starting_sequence))
 
         regex = self._l10n_do_sequence_fixed_regex
         previous = previous or self._get_starting_sequence()

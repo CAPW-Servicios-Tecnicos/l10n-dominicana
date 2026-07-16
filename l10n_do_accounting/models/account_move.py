@@ -471,25 +471,328 @@ class AccountMove(models.Model):
 
         return super(AccountMove, self).action_reverse()
 
-    @api.onchange("l10n_latam_document_type_id", "l10n_latam_document_number")
+    @api.model
+    def _l10n_do_detect_document_type_from_number(self, raw_number):
+        """
+        Obtiene el tipo de documento dominicano utilizando el NCF.
+
+        Ejemplos:
+            E31XXXXXXXXXX -> Factura de Crédito Fiscal Electrónica
+            E34XXXXXXXXXX -> Nota de Crédito Electrónica
+            B01XXXXXXXX   -> Factura de Crédito Fiscal
+            B04XXXXXXXX   -> Nota de Crédito
+        """
+        normalized_number = re.sub(
+            r"[^A-Z0-9]",
+            "",
+            (raw_number or "").upper(),
+        )
+
+        ncf_match = re.search(
+            r"(?:"
+            r"E(?:31|32|33|34|41|43|44|45|46|47)\d{10}"
+            r"|"
+            r"B(?:01|02|03|04|11|12|13|14|15|16|17)\d{8}"
+            r")",
+            normalized_number,
+        )
+
+        if not ncf_match:
+            return (
+                self.env["l10n_latam.document.type"],
+                False,
+            )
+
+        detected_number = ncf_match.group(0)
+        detected_prefix = detected_number[:3]
+
+        document_type = self.env[
+            "l10n_latam.document.type"
+        ].search(
+            [
+                ("country_id", "=", self.env.ref("base.do").id),
+                ("doc_code_prefix", "=", detected_prefix),
+                ("active", "=", True),
+            ],
+            limit=1,
+        )
+
+        return document_type, detected_number
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Corrige el tipo documental antes de que Odoo ejecute
+        la restricción factura/nota de crédito.
+        """
+        fixed_vals_list = []
+
+        for original_vals in vals_list:
+            vals = dict(original_vals)
+
+            company = (
+                self.env["res.company"].browse(vals["company_id"])
+                if vals.get("company_id")
+                else self.env.company
+            )
+
+            if company.country_id.code == "DO":
+                raw_number = (
+                    vals.get("l10n_latam_document_number")
+                    or vals.get("l10n_do_fiscal_number")
+                    or vals.get("ref")
+                    or ""
+                )
+
+                document_type, detected_number = (
+                    self._l10n_do_detect_document_type_from_number(
+                        raw_number
+                    )
+                )
+
+                move_type = (
+                    vals.get("move_type")
+                    or self.env.context.get("default_move_type")
+                )
+
+                if document_type:
+                    # El NCF manda sobre la clasificación realizada
+                    # temporalmente por la digitalización.
+                    vals["l10n_latam_document_type_id"] = (
+                        document_type.id
+                    )
+                    vals["l10n_do_fiscal_number"] = (
+                        detected_number
+                    )
+
+                elif (
+                    vals.get("l10n_latam_document_type_id")
+                    and move_type in (
+                        "in_invoice",
+                        "out_invoice",
+                    )
+                ):
+                    selected_document_type = self.env[
+                        "l10n_latam.document.type"
+                    ].browse(
+                        vals["l10n_latam_document_type_id"]
+                    )
+
+                    # Si la digitalización intenta crear una factura
+                    # normal como credit_note antes de leer el NCF,
+                    # eliminamos esa clasificación incorrecta.
+                    if (
+                        selected_document_type.internal_type
+                        == "credit_note"
+                    ):
+                        vals.pop(
+                            "l10n_latam_document_type_id",
+                            None,
+                        )
+
+            fixed_vals_list.append(vals)
+
+        return super().create(fixed_vals_list)
+
+    def write(self, vals):
+        """
+        Corrige la clasificación cuando la digitalización actualiza
+        el número fiscal, la referencia o el tipo documental.
+        """
+        if self.env.context.get(
+            "skip_l10n_do_pdf_document_fix"
+        ):
+            return super().write(vals)
+
+        watched_fields = {
+            "move_type",
+            "ref",
+            "l10n_do_fiscal_number",
+            "l10n_latam_document_number",
+            "l10n_latam_document_type_id",
+        }
+
+        if not watched_fields.intersection(vals):
+            return super().write(vals)
+
+        result = True
+
+        for move in self:
+            move_vals = dict(vals)
+
+            if (
+                move.state == "draft"
+                and move.company_id.country_id.code == "DO"
+            ):
+                raw_number = (
+                    move_vals.get(
+                        "l10n_latam_document_number"
+                    )
+                    or move_vals.get(
+                        "l10n_do_fiscal_number"
+                    )
+                    or move_vals.get("ref")
+                    or move.l10n_latam_document_number
+                    or move.l10n_do_fiscal_number
+                    or move.ref
+                    or ""
+                )
+
+                document_type, detected_number = (
+                    move._l10n_do_detect_document_type_from_number(
+                        raw_number
+                    )
+                )
+
+                future_move_type = move_vals.get(
+                    "move_type",
+                    move.move_type,
+                )
+
+                if document_type:
+                    move_vals[
+                        "l10n_latam_document_type_id"
+                    ] = document_type.id
+
+                    move_vals[
+                        "l10n_do_fiscal_number"
+                    ] = detected_number
+
+                elif (
+                    move_vals.get(
+                        "l10n_latam_document_type_id"
+                    )
+                    and future_move_type in (
+                        "in_invoice",
+                        "out_invoice",
+                    )
+                ):
+                    selected_document_type = self.env[
+                        "l10n_latam.document.type"
+                    ].browse(
+                        move_vals[
+                            "l10n_latam_document_type_id"
+                        ]
+                    )
+
+                    if (
+                        selected_document_type.internal_type
+                        == "credit_note"
+                    ):
+                        move_vals.pop(
+                            "l10n_latam_document_type_id",
+                            None,
+                        )
+
+            write_result = super(
+                AccountMove,
+                move.with_context(
+                    skip_l10n_do_pdf_document_fix=True
+                ),
+            ).write(move_vals)
+
+            result = write_result and result
+
+        return result
+
+    @api.onchange(
+        "l10n_latam_document_type_id",
+        "l10n_latam_document_number",
+        "ref",
+    )
     def _inverse_l10n_latam_document_number(self):
-        for rec in self.filtered("l10n_latam_document_type_id"):
+        """
+        Detecta el tipo fiscal dominicano utilizando el prefijo real del NCF.
+
+            E31 -> Factura de Crédito Fiscal Electrónica
+            E34 -> Nota de Crédito Electrónica
+            B01 -> Factura de Crédito Fiscal
+            B04 -> Nota de Crédito
+        """
+        l10n_do_moves = self.filtered(
+            lambda move: move.country_code == "DO"
+        )
+
+        document_type_model = self.env["l10n_latam.document.type"]
+        do_country = self.env.ref("base.do")
+
+        for rec in l10n_do_moves:
+            # La digitalización puede colocar el número en cualquiera
+            # de estos campos.
+            raw_document_number = (
+                rec.l10n_latam_document_number
+                or rec.l10n_do_fiscal_number
+                or rec.ref
+                or ""
+            )
+
+            normalized_number = re.sub(
+                r"[^A-Z0-9]",
+                "",
+                raw_document_number.upper(),
+            )
+
+            # NCF electrónicos: E31, E32, E33, E34, etc.
+            # NCF tradicionales: B01, B02, B03, B04, etc.
+            ncf_match = re.search(
+                r"(?:"
+                r"E(?:31|32|33|34|41|43|44|45|46|47)\d{10}"
+                r"|"
+                r"B(?:01|02|03|04|11|12|13|14|15|16|17)\d{8}"
+                r")",
+                normalized_number,
+            )
+
+            if ncf_match:
+                detected_number = ncf_match.group(0)
+                detected_prefix = detected_number[:3]
+
+                detected_document_type = document_type_model.search(
+                    [
+                        ("country_id", "=", do_country.id),
+                        ("doc_code_prefix", "=", detected_prefix),
+                        ("active", "=", True),
+                    ],
+                    limit=1,
+                )
+
+                if detected_document_type:
+                    rec.l10n_latam_document_type_id = (
+                        detected_document_type
+                    )
+                    rec.l10n_latam_document_number = (
+                        detected_number
+                    )
+
+            if not rec.l10n_latam_document_type_id:
+                rec.l10n_do_fiscal_number = ""
+                continue
+
             if not rec.l10n_latam_document_number:
                 rec.l10n_do_fiscal_number = ""
-            else:
-                document_type_id = rec.l10n_latam_document_type_id
-                if document_type_id.l10n_do_ncf_type:
-                    document_number = document_type_id._format_document_number(
+                continue
+
+            document_type_id = rec.l10n_latam_document_type_id
+
+            if document_type_id.l10n_do_ncf_type:
+                document_number = (
+                    document_type_id._format_document_number(
                         rec.l10n_latam_document_number
                     )
-                else:
-                    document_number = rec.l10n_latam_document_number
+                )
+            else:
+                document_number = (
+                    rec.l10n_latam_document_number
+                )
 
-                if rec.l10n_latam_document_number != document_number:
-                    rec.l10n_latam_document_number = document_number
-                rec.l10n_do_fiscal_number = document_number
+            if rec.l10n_latam_document_number != document_number:
+                rec.l10n_latam_document_number = document_number
+
+            rec.l10n_do_fiscal_number = document_number
+
         super(
-            AccountMove, self.filtered(lambda m: m.country_code != "DO")
+            AccountMove,
+            self - l10n_do_moves,
         )._inverse_l10n_latam_document_number()
 
     def _get_l10n_latam_documents_domain(self):
@@ -523,32 +826,80 @@ class AccountMove(models.Model):
             domain.append(("code", "in", codes))
         return domain
 
-    @api.constrains("move_type", "l10n_latam_document_type_id")
+    @api.constrains(
+        "move_type",
+        "l10n_latam_document_type_id",
+        "state",
+    )
     def _check_invoice_type_document_type(self):
-        l10n_do_invoices = self.filtered(
-            lambda inv: inv.country_code == "DO"
-            and inv.l10n_latam_use_documents
-            and inv.l10n_latam_document_type_id
-            and inv.state == "posted"
+        """
+        Durante la carga del PDF no valida la combinación temporal
+        de factura/nota de crédito en documentos dominicanos.
+
+        Cuando el documento se publica, se ejecuta nuevamente
+        la validación estándar de Odoo.
+        """
+
+        # Durante la digitalización, el diario y el tipo documental
+        # pueden asignarse en varias escrituras diferentes.
+        #
+        # Por eso se excluye cualquier documento dominicano en
+        # borrador, aunque l10n_latam_use_documents todavía no
+        # haya terminado de calcularse.
+        dominican_draft_moves = self.filtered(
+            lambda move: (
+                move.state == "draft"
+                and move.company_id
+                and move.company_id.country_id.code == "DO"
+            )
         )
-        for rec in l10n_do_invoices:
-            has_vat = bool(rec.partner_id.vat and bool(rec.partner_id.vat.strip()))
-            l10n_latam_document_type = rec.l10n_latam_document_type_id
+
+        # La validación estándar se conserva para:
+        # - documentos publicados;
+        # - documentos de otros países.
+        moves_to_validate = self - dominican_draft_moves
+
+        if moves_to_validate:
+            super(
+                AccountMove,
+                moves_to_validate,
+            )._check_invoice_type_document_type()
+
+        # Validaciones fiscales adicionales únicamente al publicar.
+        posted_dominican_documents = self.filtered(
+            lambda move: (
+                move.state == "posted"
+                and move.company_id
+                and move.company_id.country_id.code == "DO"
+                and move.l10n_latam_use_documents
+                and move.l10n_latam_document_type_id
+            )
+        )
+
+        for rec in posted_dominican_documents:
+            document_type = rec.l10n_latam_document_type_id
+
+            has_vat = bool(
+                rec.partner_id.vat
+                and rec.partner_id.vat.strip()
+            )
+
             if not has_vat and (
                 rec.amount_untaxed_signed >= 250000
                 or (
-                    l10n_latam_document_type.is_vat_required
-                    and rec.commercial_partner_id.l10n_do_dgii_tax_payer_type
+                    document_type.is_vat_required
+                    and rec.commercial_partner_id
+                    .l10n_do_dgii_tax_payer_type
                     != "non_payer"
                 )
             ):
                 raise ValidationError(
                     _(
-                        "A VAT is mandatory for this type of NCF. "
-                        "Please set the current VAT of this client"
+                        "El RNC o cédula es obligatorio para "
+                        "este tipo de NCF. Configure el documento "
+                        "fiscal del cliente o proveedor."
                     )
                 )
-        super(AccountMove, self - l10n_do_invoices)._check_invoice_type_document_type()
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):

@@ -162,6 +162,60 @@ class AccountMove(models.Model):
         if not column_exists(cr, "account_move", "l10n_latam_manual_document_number"):
             create_column(cr, "account_move", "l10n_latam_manual_document_number", "boolean")
 
+        # --- BOATMAX 16->19: dejar la BD lista ANTES de crear los indices ---
+        # Va aqui en _auto_init (no en migrations/) para correr SIEMPRE, sin
+        # depender de la deteccion de scripts de migracion (que en odoo.sh no
+        # dispara segun la version instalada). Solo se ejecuta cuando el indice
+        # sales aun no existe (ver early-return arriba), asi que es de una vez.
+        # 1) Deduplicar NCF de compras: marcar sobrantes con /DUP-<id> + respaldo.
+        cr.execute("""
+            CREATE TABLE IF NOT EXISTS z_ncf_dup_backup (
+                snapshot_at timestamp DEFAULT now(), move_id integer, name varchar,
+                state varchar, ncf_original varchar, commercial_partner_id integer,
+                company_id integer, amount_total numeric)
+        """)
+        cr.execute("""
+            INSERT INTO z_ncf_dup_backup
+                (move_id, name, state, ncf_original, commercial_partner_id, company_id, amount_total)
+            SELECT id, name, state, l10n_do_fiscal_number, commercial_partner_id, company_id, amount_total
+            FROM (
+                SELECT id, name, state, l10n_do_fiscal_number, commercial_partner_id, company_id, amount_total,
+                       row_number() OVER (PARTITION BY l10n_do_fiscal_number, commercial_partner_id, company_id
+                                          ORDER BY (state='posted') DESC, id ASC) AS rn,
+                       count(*)     OVER (PARTITION BY l10n_do_fiscal_number, commercial_partner_id, company_id) AS cnt
+                FROM account_move
+                WHERE l10n_latam_document_type_id IS NOT NULL
+                  AND move_type IN ('in_invoice','in_refund')
+                  AND l10n_latam_manual_document_number IS TRUE
+                  AND l10n_do_fiscal_number IS NOT NULL AND l10n_do_fiscal_number <> ''
+                  AND l10n_do_fiscal_number NOT LIKE '%/DUP-%'
+            ) g WHERE g.cnt > 1 AND g.rn > 1
+        """)
+        cr.execute("""
+            UPDATE account_move m
+               SET l10n_do_fiscal_number = m.l10n_do_fiscal_number || '/DUP-' || m.id::text
+              FROM z_ncf_dup_backup b
+             WHERE b.move_id = m.id
+               AND m.l10n_do_fiscal_number NOT LIKE '%/DUP-%'
+        """)
+        # 2) Desactivar vistas de modulos sin codigo (Elytek/faltantes).
+        cr.execute("""
+            UPDATE ir_ui_view SET active = false
+            WHERE id IN (SELECT res_id FROM ir_model_data WHERE model='ir.ui.view'
+                AND module IN ('pak_elytek_base','pak_elytek_ncf_management','pak_elytek_rnc_management',
+                               'pak_inputs_outputs','odoo_direct_print','pak_pier_simulate_contracts_invoice'))
+        """)
+        # 3) Neutralizar vistas heredadas pak_pier (el -u las repuebla con su arch 19.0).
+        cr.execute("""
+            UPDATE ir_ui_view SET arch_db = '{"en_US": "<data/>"}'::jsonb
+            WHERE inherit_id IS NOT NULL
+              AND id IN (SELECT res_id FROM ir_model_data WHERE model='ir.ui.view'
+                AND module IN ('pak_pier_base','pak_pier_boat_management','pak_pier_service_invoices',
+                               'pak_pier_penalties_managment','pak_pier_contract_management',
+                               'pak_pier_invoice_to_visitors','pak_pier_late_payment',
+                               'pak_pier_report_payments','pak_pier_payment_extend'))
+        """)
+
         # Create partial unique indexes (the real "constraints" you need)
         cr.execute("""
                    CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales

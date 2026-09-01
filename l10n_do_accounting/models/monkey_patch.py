@@ -35,11 +35,19 @@ class AccountMove(models.Model):
         self._inverse_name()
 
         for move in self.filtered(
-            lambda x: x.country_code == "DO"
-            and x.l10n_latam_document_type_id
-            and not x.l10n_latam_manual_document_number
-            and not x.l10n_do_enable_first_sequence
-            and x.state == "posted"
-            and not x.l10n_do_fiscal_number
+                lambda x:
+                x.country_code == "DO"
+                and x.move_type in (
+                        "out_invoice",
+                        "out_refund",
+                        "in_invoice",
+                        "in_refund",
+                )
+                and x.l10n_latam_use_documents
+                and x.l10n_latam_document_type_id
+                and not x.l10n_latam_manual_document_number
+                and not x.l10n_do_enable_first_sequence
+                and x.state == "posted"
+                and not x.l10n_do_fiscal_number
         ):
             move.with_context(is_l10n_do_seq=True)._set_next_sequence()

@@ -628,6 +628,10 @@ class AccountMoveTest(common.L10nDOTestsCommon):
         Check unique sequence number constraint works properly.
         It is also James Bond favorite test.
         """
+        # [rama_boatmax] Índice único de NCF desactivado temporalmente en _auto_init
+        # (producción tiene NCF duplicados que impedían crear el índice y bloqueaban
+        # el deploy). Este test valida ese índice, así que se salta hasta reactivarlo.
+        self.skipTest("rama_boatmax: índice único de NCF desactivado temporalmente")
 
         invoice_id = self._create_l10n_do_invoice(
             data={

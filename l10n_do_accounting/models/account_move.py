@@ -162,31 +162,38 @@ class AccountMove(models.Model):
         if not column_exists(cr, "account_move", "l10n_latam_manual_document_number"):
             create_column(cr, "account_move", "l10n_latam_manual_document_number", "boolean")
 
-        # Create partial unique indexes (the real "constraints" you need)
-        cr.execute("""
-                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
-                       ON account_move (l10n_do_fiscal_number, company_id)
-                       WHERE (l10n_latam_document_type_id IS NOT NULL
-                       AND move_type NOT IN ('in_invoice', 'in_refund'))
-                       AND l10n_do_fiscal_number IS NOT NULL
-                       AND l10n_do_fiscal_number <> '';
-
-                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
-                       ON account_move (l10n_do_fiscal_number, commercial_partner_id, company_id)
-                       WHERE (l10n_latam_document_type_id IS NOT NULL
-                       AND move_type IN ('in_invoice', 'in_refund')
-                       AND l10n_latam_manual_document_number IS TRUE)
-                       AND l10n_do_fiscal_number IS NOT NULL
-                       AND l10n_do_fiscal_number <> '';
-
-                   CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
-                       ON account_move (l10n_do_fiscal_number, company_id)
-                       WHERE (l10n_latam_document_type_id IS NOT NULL
-                       AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                       AND l10n_latam_manual_document_number IS FALSE)
-                       AND l10n_do_fiscal_number IS NOT NULL
-                       AND l10n_do_fiscal_number <> '';
-                   """)
+        # ------------------------------------------------------------------
+        # [rama_boatmax] Índices únicos de NCF DESACTIVADOS temporalmente.
+        # Producción (boatmax-capw) tiene NCF duplicados en facturas de compra
+        # que impiden crear "account_move_unique_l10n_do_fiscal_number_purchase_manual"
+        # y bloqueaban TODO deploy en Odoo.sh (psycopg2 UniqueViolation en _auto_init).
+        # Se comenta para desbloquear el despliegue. RE-ACTIVAR este bloque una vez el
+        # contador limpie los 9 NCF duplicados (ver reporte NCF_duplicados_produccion).
+        # ------------------------------------------------------------------
+        # cr.execute("""
+        #            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
+        #                ON account_move (l10n_do_fiscal_number, company_id)
+        #                WHERE (l10n_latam_document_type_id IS NOT NULL
+        #                AND move_type NOT IN ('in_invoice', 'in_refund'))
+        #                AND l10n_do_fiscal_number IS NOT NULL
+        #                AND l10n_do_fiscal_number <> '';
+        #
+        #            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
+        #                ON account_move (l10n_do_fiscal_number, commercial_partner_id, company_id)
+        #                WHERE (l10n_latam_document_type_id IS NOT NULL
+        #                AND move_type IN ('in_invoice', 'in_refund')
+        #                AND l10n_latam_manual_document_number IS TRUE)
+        #                AND l10n_do_fiscal_number IS NOT NULL
+        #                AND l10n_do_fiscal_number <> '';
+        #
+        #            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
+        #                ON account_move (l10n_do_fiscal_number, company_id)
+        #                WHERE (l10n_latam_document_type_id IS NOT NULL
+        #                AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+        #                AND l10n_latam_manual_document_number IS FALSE)
+        #                AND l10n_do_fiscal_number IS NOT NULL
+        #                AND l10n_do_fiscal_number <> '';
+        #            """)
 
         return res
 

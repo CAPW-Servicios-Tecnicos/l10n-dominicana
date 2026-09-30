@@ -146,6 +146,23 @@ class AccountMove(models.Model):
         res = super()._auto_init()
         cr = self.env.cr
 
+        # [rama_boatmax] Desactivar vistas heredadas huérfanas de los módulos elytek
+        # (stubs abandonados). Inyectan campos inexistentes (p. ej. account.move.pricelist)
+        # y rompen la validación de account.move.form al cargar las vistas de este módulo.
+        # Corre ANTES de cargar los XML de vistas. No destructivo e idempotente.
+        cr.execute("""
+            UPDATE ir_ui_view v
+               SET active = false
+              FROM ir_model_data d
+             WHERE d.model = 'ir.ui.view'
+               AND d.res_id = v.id
+               AND d.module IN ('pak_elytek_ncf_management', 'pak_elytek_rnc_management',
+                                'pak_elytek_base', 'pak_elytek_report_606',
+                                'pak_elytek_report_607')
+               AND v.inherit_id IS NOT NULL
+               AND v.active
+        """)
+
         # If main index exists, assume everything is already installed
         if index_exists(cr, "account_move_unique_l10n_do_fiscal_number_sales"):
             return res

@@ -421,7 +421,7 @@ class AccountMove(models.Model):
     def button_cancel(self):
         fiscal_invoice = self.filtered(
             lambda inv: inv.country_code == "DO"
-            and self.move_type[-6:] in ("nvoice", "refund")
+            and inv.move_type[-6:] in ("nvoice", "refund")
             and inv.l10n_latam_use_documents
         )
         not_ecf_fiscal_invoice = fiscal_invoice.filtered(lambda i: not i.is_ecf_invoice)

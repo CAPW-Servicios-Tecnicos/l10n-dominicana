@@ -313,19 +313,71 @@ class AccountMove(models.Model):
                 and invoice.l10n_latam_document_type_id.l10n_do_ncf_type[:2] == "e-"
             )
 
-    @api.depends("company_id", "company_id.l10n_do_ecf_issuer")
+    @api.depends("company_id", "company_id.l10n_do_ecf_issuer", "state")
     def _compute_company_in_contingency(self):
-        # Busca si existe al menos 1 factura e-CF en la BD (como hacía tu código)
-        ecf_any = self.search([("is_ecf_invoice", "=", True)], limit=1).filtered(
-            lambda i: not i.l10n_latam_manual_document_number
-        )
-        # IMPORTANTe: no uses write() dentro de un compute
-        for inv in self:
-            # Solo se marca en borrador; el resto queda en False
-            if inv.state == "draft":
-                inv.l10n_do_company_in_contingency = bool(ecf_any and not inv.company_id.l10n_do_ecf_issuer)
-            else:
-                inv.l10n_do_company_in_contingency = False
+        """Un borrador está en contingencia si su compañía YA emitió e-CF pero hoy no está
+        marcada como emisora electrónica.
+
+        Antes buscaba un e-CF en TODA la base (sin filtrar compañía), así que en multi-compañía
+        una compañía heredaba el estado de otra, y escribía dentro del compute.
+        """
+        companies = self.company_id
+        with_ecf = set()
+        if companies:
+            groups = self.env["account.move"]._read_group(
+                [
+                    ("company_id", "in", companies.ids),
+                    ("is_ecf_invoice", "=", True),
+                    ("l10n_latam_manual_document_number", "=", False),
+                ],
+                groupby=["company_id"],
+                aggregates=["__count"],
+            )
+            with_ecf = {company.id for company, _count in groups}
+        for invoice in self:
+            invoice.l10n_do_company_in_contingency = bool(
+                invoice.state == "draft"
+                and invoice.company_id.id in with_ecf
+                and not invoice.company_id.l10n_do_ecf_issuer
+            )
+
+    def _l10n_do_build_stamp_url(self, service_env, total):
+        """URL del timbre electrónico (QR) del e-CF.
+
+        Reproduce EXACTAMENTE el formato que ya usan los e-CF emitidos en producción
+        (parámetros en minúscula, fecha de firma con `+`, monto sin ceros finales, código de
+        seguridad con los caracteres especiales en %XX), para no cambiar los QR. Orden: rncemisor,
+        rnccomprador, encf, fechaemision, montototal, fechafirma, codigoseguridad. La factura de
+        consumo electrónica menor al umbral usa el dominio `fc` con solo rncemisor, encf, montototal
+        y codigoseguridad.
+
+        Corrige los fallos de la versión anterior: un valor vacío salía como "False" y el RNC
+        del emisor vacío rompía la URL por la precedencia de `% ... or ""`.
+        """
+        self.ensure_one()
+        digits = lambda value: re.sub(r"\D", "", value or "")
+        prefix = self.l10n_latam_document_type_id.doc_code_prefix or ""
+        threshold = self.company_id.l10n_do_consumer_vat_threshold or 250000.0
+        is_rfc = prefix == "E32" and abs(self.amount_total_signed) < threshold
+
+        params = [("rncemisor", digits(self.company_id.vat))]
+        if not is_rfc and prefix[1:] not in ("43", "47"):
+            params.append(("rnccomprador", digits(self.commercial_partner_id.vat)))
+        params.append(("encf", self.l10n_do_fiscal_number or ""))
+        if not is_rfc:
+            params.append(("fechaemision", (self.invoice_date or fields.Date.today()).strftime("%d-%m-%Y")))
+        params.append(("montototal", ("%f" % (total or 0.0)).rstrip("0").rstrip(".")))
+        if not is_rfc and self.l10n_do_ecf_sign_date:
+            params.append(("fechafirma", self.l10n_do_ecf_sign_date.strftime("%d-%m-%Y+%H:%M:%S")))
+        special_chars = " !#$&'()*+,/:;=?@[]\"-.<>\\^_`"
+        security_code = "".join(
+            "%" + c.encode("utf-8").hex().upper() if c in special_chars else c
+            for c in (self.l10n_do_ecf_security_code or ""))
+        params.append(("codigoseguridad", security_code))
+
+        return "https://%s.dgii.gov.do/%s/consultatimbre%s?%s" % (
+            "fc" if is_rfc else "ecf", service_env, "FC" if is_rfc else "",
+            "&".join("%s=%s" % (key, value) for key, value in params))
 
     @api.depends(
         'l10n_do_ecf_security_code',
@@ -351,35 +403,11 @@ class AccountMove(models.Model):
                     continue
 
                 env_code = 'ecf' if inv.company_id.is_production else 'TesteCF'
-                dcp = (inv.l10n_latam_document_type_id.doc_code_prefix or '')
-                is_rfc = (dcp == 'E32' and inv.amount_total_signed < 250000)
-                host = 'fc' if is_rfc else 'ecf'
-                base = f"https://{host}.dgii.gov.do/{env_code}/consultatimbre{'FC' if is_rfc else ''}?"
-
-                rncemisor = inv.company_id.partner_id.vat or ''
-                parts = [f"rncemisor={rncemisor}"]
-                if not is_rfc and dcp[1:] not in ('43', '47'):
-                    parts.append(f"rnccomprador={inv.commercial_partner_id.vat or ''}")
-                parts.append(f"encf={inv.l10n_do_fiscal_number or ''}")
-
-                if not is_rfc:
-                    fecha_emision = (inv.invoice_date or fields.Date.context_today(self)).strftime("%d-%m-%Y")
-                    parts.append(f"fechaemision={fecha_emision}")
-
                 total_dop = inv.currency_id._convert(
                     inv.amount_total, inv.company_id.currency_id, inv.company_id,
                     inv.invoice_date or fields.Date.context_today(self)
                 )
-                parts.append("montototal=%s" % (("%f" % total_dop).rstrip("0").rstrip(".")))
-
-                if not is_rfc and inv.l10n_do_ecf_sign_date:
-                    parts.append("fechafirma=%s" % inv.l10n_do_ecf_sign_date.strftime("%d-%m-%Y+%H:%M:%S"))
-
-                sec = quote(inv.l10n_do_ecf_security_code or '', safe='')
-                parts.append(f"codigoseguridad={sec}")
-
-                url = base + "&".join(parts)
-                inv.l10n_do_electronic_stamp = url
+                inv.l10n_do_electronic_stamp = inv._l10n_do_build_stamp_url(env_code, total_dop)
             except Exception as e:
                 inv.l10n_do_electronic_stamp = False
     @api.constrains(
@@ -1003,7 +1031,52 @@ class AccountMove(models.Model):
                 "account.%s_tax_0_purch" % self.company_id.id
             )
 
+    def _l10n_do_buyer_vat_required(self):
+        """True si la DGII exige el RNC/Cédula del comprador en esta factura de venta.
+
+        - Comprobantes con 'RNC requerido' (crédito fiscal, gubernamental, regímenes especiales,
+          exportación, notas) salvo que el cliente sea contribuyente tipo 'non_payer'.
+        - Consumo: B02 desde el umbral sobre el monto SIN ITBIS (pre-validador del 607);
+          e-CF 32 (y las notas que lo afectan) desde el umbral sobre el monto TOTAL (Formato e-CF).
+        """
+        self.ensure_one()
+        doc_type = self.l10n_latam_document_type_id
+        company = self.company_id
+        if (
+            not company.l10n_do_require_buyer_vat
+            or self.country_code != "DO"
+            or not self.l10n_latam_use_documents
+            or self.move_type not in ("out_invoice", "out_refund")
+            or not doc_type
+        ):
+            return False
+        partner = self.commercial_partner_id
+        if (partner.vat or "").strip():
+            return False
+        if doc_type.is_vat_required and partner.l10n_do_dgii_tax_payer_type != "non_payer":
+            return True
+        prefix = doc_type.doc_code_prefix or ""
+        threshold = company.l10n_do_consumer_vat_threshold
+        if threshold and prefix == "B02":
+            return abs(self.amount_untaxed_signed) >= threshold
+        if threshold and prefix == "E32":
+            return abs(self.amount_total_signed) >= threshold
+        return False
+
+    def _l10n_do_check_buyer_vat(self):
+        for move in self:
+            if move._l10n_do_buyer_vat_required():
+                raise ValidationError(_(
+                    "El comprobante %(doc)s requiere el RNC/Cédula del cliente (%(partner)s). "
+                    "Complételo en el cliente antes de confirmar la factura; la DGII rechazaría "
+                    "este comprobante.",
+                    doc=move.l10n_latam_document_type_id.display_name,
+                    partner=move.commercial_partner_id.display_name,
+                ))
+
     def _post(self, soft=True):
+        # Validar ANTES de confirmar: así no se consume secuencia fiscal ni se genera el e-CF.
+        self._l10n_do_check_buyer_vat()
         res = super()._post(soft)
 
         l10n_do_invoices = self.filtered(

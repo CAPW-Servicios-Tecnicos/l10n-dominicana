@@ -11,6 +11,19 @@
                     <setting id="l10n_do_section" class="row mt16 block" groups="account.group_account_manager"/>
                 </block>
             </xpath>
+            <xpath expr="//block[@id='l10n_do_title']" position="after">
+                <block id="l10n_do_fiscal_checks" title="Dominican fiscal checks"
+                       groups="account.group_account_manager">
+                    <setting id="l10n_do_require_buyer_vat" string="Require buyer RNC/Cédula"
+                             help="Al confirmar una factura de venta fiscal, exige el RNC/Cédula del cliente cuando la DGII lo requiere (crédito fiscal, gubernamental, regímenes especiales, exportación, notas y consumo desde el umbral). Solo afecta facturas que se confirman de ahora en adelante.">
+                        <field name="l10n_do_require_buyer_vat"/>
+                    </setting>
+                    <setting id="l10n_do_consumer_vat_threshold" string="Consumer invoice threshold (RD$)"
+                             help="Monto desde el cual una factura de consumo (B02 / e-CF 32) debe identificar al comprador. En la B02 se compara el monto sin ITBIS; en el e-CF 32, el monto total. Hoy es RD$250,000.">
+                        <field name="l10n_do_consumer_vat_threshold" class="oe_inline"/>
+                    </setting>
+                </block>
+            </xpath>
         </field>
     </record>
 

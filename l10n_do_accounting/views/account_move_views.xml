@@ -72,12 +72,6 @@
                 <!--       invisible="country_code != 'DO' or not l10n_latam_use_documents"-->
                 <!--       readonly="state != 'draft'"/>-->
 
-                <!-- Document number: keep your required logic, but don't rely on original field existing in view -->
-                <field name="l10n_latam_document_number"
-                       required="(l10n_do_enable_first_sequence or l10n_latam_manual_document_number)                                  and (l10n_latam_use_documents and country_code == 'DO')"
-                       invisible="country_code != 'DO'                                   or not l10n_latam_use_documents                                   or (not l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft')"
-                       readonly="(state != 'draft' and country_code == 'DO') or (posted_before and country_code == 'DO')"/>
-
                 <!-- Origin NCF for credit notes / debit origin -->
                 <field name="l10n_do_origin_ncf"
                        invisible="country_code != 'DO'                                   or not l10n_latam_use_documents                                   or ((move_type not in ('in_refund', 'out_refund')) and not debit_origin_id)"
@@ -96,7 +90,17 @@
 
             </xpath>
 
-            <!-- Income / expense types: anchor after the field we inject (safe) -->
+            <!-- Document number: reuse the field added by l10n_latam_invoice_document
+                 (adding a new one duplicates it on the form); DO logic only applies to DO -->
+            <xpath expr="//field[@name='l10n_latam_document_number']" position="attributes">
+                <attribute name="required">(country_code == 'DO' and l10n_latam_use_documents and (l10n_do_enable_first_sequence or l10n_latam_manual_document_number)) or (country_code != 'DO' and partner_id and l10n_latam_use_documents and l10n_latam_manual_document_number)</attribute>
+                <attribute name="invisible">(country_code == 'DO' and (not l10n_latam_use_documents or (not l10n_do_enable_first_sequence and not l10n_latam_manual_document_number and state == 'draft'))) or (country_code != 'DO' and (not l10n_latam_use_documents or not l10n_latam_manual_document_number) and (not l10n_latam_use_documents or highest_name or state != 'draft'))</attribute>
+                <attribute name="readonly">(country_code == 'DO' and (state != 'draft' or posted_before)) or (country_code != 'DO' and posted_before and state != 'draft')</attribute>
+            </xpath>
+
+            <!-- Income / expense types: anchor after the document number field -->
+
+
             <xpath expr="//field[@name='l10n_latam_document_number']" position="after">
                 <field name="l10n_do_income_type"
                        invisible="not l10n_latam_use_documents or (move_type != 'out_invoice' or country_code != 'DO')"

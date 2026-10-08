@@ -2,7 +2,7 @@ import re
 from werkzeug import urls
 
 from odoo import models, fields, api, _
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
@@ -193,11 +193,11 @@ class AccountMove(models.Model):
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         if name:
-            domain = expression.AND([[
+            domain = Domain.AND([[
                 "|",
                 ("name", operator, name),
                 ("l10n_do_fiscal_number", operator, name),
-            ], domain])
+            ], domain or []])
         return super()._name_search(name, domain, operator, limit, order)
 
     def _l10n_do_is_new_expiration_date(self):

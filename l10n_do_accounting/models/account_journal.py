@@ -5,6 +5,8 @@ from odoo.exceptions import RedirectWarning, ValidationError
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
+    hidden_payment_form = fields.Boolean(default=False)
+
     def _get_l10n_do_payment_form(self):
         """Return the list of payment forms allowed by DGII."""
         return [
@@ -227,3 +229,4 @@ class AccountJournalDocumentType(models.Model):
     company_id = fields.Many2one(
         string="Company", related="journal_id.company_id", readonly=True
     )
+

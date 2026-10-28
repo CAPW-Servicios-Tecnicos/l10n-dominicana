@@ -315,13 +315,13 @@ class AccountMove(models.Model):
             limit=1,
         ).filtered(lambda i: not i.l10n_latam_manual_document_number)
 
-        # first set all invoices l10n_do_company_in_contingency = False
-        self.write({"l10n_do_company_in_contingency": False})
-
-        # then get draft invoices and do the thing
-        for invoice in self.filtered(lambda inv: inv.state == "draft"):
+        # Campo no almacenado: se asigna directo (sin write) para no exigir
+        # permiso de escritura en account.move al abrir la factura.
+        for invoice in self:
             invoice.l10n_do_company_in_contingency = bool(
-                ecf_invoices and not invoice.company_id.l10n_do_ecf_issuer
+                invoice.state == "draft"
+                and ecf_invoices
+                and not invoice.company_id.l10n_do_ecf_issuer
             )
 
     @api.depends("l10n_do_ecf_security_code", "l10n_do_ecf_sign_date", "invoice_date")

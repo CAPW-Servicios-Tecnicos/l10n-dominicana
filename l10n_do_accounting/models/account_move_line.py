@@ -18,22 +18,26 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.display_type != "product":
                 line.l10n_do_itbis_amount = False
+                continue
 
             if line.move_id.is_ecf_invoice:
+                # Filtrar cualquier impuesto que sea ITBIS, sin depender de company_id
                 line_itbis_taxes = line.tax_ids.filtered(
-                    lambda t: t.tax_group_id
-                    == self.env.ref("account.%s_tax_group_itbis" % line.company_id.id)
+                    lambda t: 'itbis' in (t.name or '').lower()
                 )
+
                 price_unit = line.price_unit
                 if line.discount:
-                    price_unit = price_unit - (price_unit * (line.discount / 100))
+                    price_unit = price_unit * (1 - (line.discount / 100))
+
                 itbis_taxes_data = line_itbis_taxes.compute_all(
                     price_unit=price_unit,
                     quantity=line.quantity,
+                    currency=line.currency_id,
+                    product=line.product_id,
+                    partner=line.move_id.partner_id,
                 )
-                line.l10n_do_itbis_amount = sum(
-                    [t["amount"] for t in itbis_taxes_data["taxes"]]
-                )
+                line.l10n_do_itbis_amount = sum(t["amount"] for t in itbis_taxes_data["taxes"])
 
     def _get_l10n_do_line_amounts(self):
         group_itbis = self.env.ref("account.%s_tax_group_itbis" % self.company_id.id)

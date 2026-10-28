@@ -2,7 +2,7 @@ import re
 from werkzeug import urls
 
 from odoo import models, fields, api, _
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
@@ -66,7 +66,7 @@ class AccountMove(models.Model):
         selection="_get_l10n_do_income_type",
         string="Income Type",
         copy=False,
-        default=lambda self: self._context.get("l10n_do_income_type", "01"),
+        default=lambda self: self.env.context.get("l10n_do_income_type", "01"),
     )
 
     l10n_do_origin_ncf = fields.Char(
@@ -144,28 +144,12 @@ class AccountMove(models.Model):
     # ]
 
     def _auto_init(self):
-        if not index_exists(
-                self.env.cr, "account_move_unique_l10n_do_fiscal_number_sales"
-        ):
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_manual",
-                self._table,
-            )
-            drop_index(
-                self.env.cr,
-                "account_move_unique_l10n_do_fiscal_number_purchase_internal",
-                self._table,
-            )
+        res = super()._auto_init()
+        cr = self.env.cr
 
-            if not column_exists(self.env.cr, "account_move", "l10n_do_fiscal_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_do_fiscal_number", "varchar"
-                )
-            if not column_exists(self.env.cr, "account_move", "l10n_latam_manual_document_number"):
-                create_column(
-                    self.env.cr, "account_move", "l10n_latam_manual_document_number", "varchar"
-                )
+        # If main index exists, assume everything is already installed
+        if index_exists(cr, "account_move_unique_l10n_do_fiscal_number_sales"):
+            return res
 
 
             self.env.cr.execute("""
@@ -201,11 +185,11 @@ class AccountMove(models.Model):
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         if name:
-            domain = expression.AND([[
+            domain = Domain.AND([[
                 "|",
                 ("name", operator, name),
                 ("l10n_do_fiscal_number", operator, name),
-            ], domain])
+            ], domain or []])
         return super()._name_search(name, domain, operator, limit, order)
 
     def _l10n_do_is_new_expiration_date(self):
@@ -564,21 +548,36 @@ class AccountMove(models.Model):
     #             )
     #     super(AccountMove, self - l10n_do_invoices)._check_invoice_type_document_type()
 
-    @api.onchange("partner_id")
-    def _onchange_partner_id(self):
-        if (
-                self.company_id.country_id == self.env.ref("base.do")
-                and self.l10n_latam_document_type_id
-                and self.move_type == "in_invoice"
-                and self.partner_id
-        ):
-            self.l10n_do_expense_type = (
-                self.partner_id.l10n_do_expense_type
-                if not self.l10n_do_expense_type
-                else self.l10n_do_expense_type
-            )
 
-        return super(AccountMove, self)._onchange_partner_id()
+    @api.onchange("partner_id")
+
+
+    def _onchange_partner_id(self):
+        try:
+            res = super(AccountMove, self)._onchange_partner_id()
+        except TypeError as e:
+            if "unhashable type: 'dict'" not in str(e):
+                raise
+            res = {}
+
+        do_country = self.env.ref("base.do", raise_if_not_found=False)
+
+        for move in self:
+            if (
+                    do_country
+                    and self.env.company.country_id == do_country
+                    and move.l10n_latam_document_type_id
+                    and move.move_type == "in_invoice"
+                    and move.partner_id
+            ):
+                move.l10n_do_expense_type = (
+                    move.partner_id.l10n_do_expense_type
+                    if not move.l10n_do_expense_type
+                    else move.l10n_do_expense_type
+                )
+
+        return res
+
 
     def _reverse_move_vals(self, default_values, cancel=True):
         ctx = self.env.context
@@ -610,6 +609,7 @@ class AccountMove(models.Model):
             ]
         return res
 
+
     @api.depends("l10n_latam_document_type_id", "journal_id")
     def _compute_l10n_latam_manual_document_number(self):
         l10n_do_recs_with_journal_id = self.filtered(
@@ -634,6 +634,7 @@ class AccountMove(models.Model):
             AccountMove, self - l10n_do_recs_with_journal_id
         )._compute_l10n_latam_manual_document_number()
 
+
     def _is_l10n_do_manual_document_number(self):
         self.ensure_one()
 
@@ -652,6 +653,7 @@ class AccountMove(models.Model):
             "e-exterior",
         )
 
+
     def _get_debit_line_tax(self, debit_date):
         if self.move_type == "out_invoice":
             return (
@@ -665,6 +667,7 @@ class AccountMove(models.Model):
             return self.company_id.account_purchase_tax_id or self.env.ref(
                 "account.%s_tax_0_purch" % self.company_id.id
             )
+
 
     def _post(self, soft=True):
         res = super()._post(soft)
@@ -688,9 +691,10 @@ class AccountMove(models.Model):
 
         return res
 
+
     def _l10n_do_get_formatted_sequence(self):
         self.ensure_one()
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             starting_sequence = "%s/%04d/0000" % (
                 self.journal_id.code,
                 self.date.year,
@@ -710,6 +714,7 @@ class AccountMove(models.Model):
             ),
         )
 
+
     def _get_starting_sequence(self):
         if (
                 self.journal_id.l10n_latam_use_documents
@@ -718,6 +723,7 @@ class AccountMove(models.Model):
             return self._l10n_do_get_formatted_sequence()
 
         return super()._get_starting_sequence()
+
 
     def _get_last_sequence_domain(self, relaxed=False):
         where_string, param = super(AccountMove, self)._get_last_sequence_domain(
@@ -728,7 +734,7 @@ class AccountMove(models.Model):
             where_string = where_string.replace(
                 "AND sequence_prefix !~ %(anti_regex)s ", ""
             )
-        if self._context.get("is_l10n_do_seq", False):
+        if self.env.context.get("is_l10n_do_seq", False):
             where_string = where_string.replace("journal_id = %(journal_id)s AND", "")
             where_string += (
                 " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s AND"
@@ -750,6 +756,7 @@ class AccountMove(models.Model):
             )
         return where_string, param
 
+
     @api.depends(lambda self: [self._l10n_do_sequence_field])
     def _compute_split_sequence(self):
         super(AccountMove, self)._compute_split_sequence()
@@ -764,8 +771,9 @@ class AccountMove(models.Model):
             record.l10n_do_sequence_prefix = sequence[:3]
             record.l10n_do_sequence_number = int(matching.group(1) or 0)
 
+
     def _get_last_sequence(self, relaxed=False, with_prefix=None):
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_last_sequence(
                 relaxed=relaxed, with_prefix=with_prefix
             )
@@ -784,18 +792,18 @@ class AccountMove(models.Model):
             param["id"] = self.id or self.id.origin
 
         query = """
-            UPDATE {table} SET write_date = write_date WHERE id = (
-                SELECT id FROM {table}
-                {where_string}
-                AND l10n_do_sequence_prefix = (
-                SELECT l10n_do_sequence_prefix
-                FROM {table} {where_string}
-                ORDER BY id DESC LIMIT 1)
-                ORDER BY l10n_do_sequence_number DESC
-                LIMIT 1
-            )
-            RETURNING {field};
-        """.format(
+                UPDATE {table} SET write_date = write_date WHERE id = (
+                    SELECT id FROM {table}
+                    {where_string}
+                    AND l10n_do_sequence_prefix = (
+                    SELECT l10n_do_sequence_prefix
+                    FROM {table} {where_string}
+                    ORDER BY id DESC LIMIT 1)
+                    ORDER BY l10n_do_sequence_number DESC
+                    LIMIT 1
+                )
+                RETURNING {field};
+            """.format(
             table=self._table,
             where_string=where_string,
             field=self._l10n_do_sequence_field,
@@ -811,8 +819,9 @@ class AccountMove(models.Model):
         self.env.cr.execute(query, param)
         return (self.env.cr.fetchone() or [None])[0]
 
+
     def _get_sequence_format_param(self, previous):
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._get_sequence_format_param(previous)
 
         regex = self._l10n_do_sequence_fixed_regex
@@ -827,10 +836,11 @@ class AccountMove(models.Model):
         )
         return format, format_values
 
+
     def _set_next_sequence(self):
         self.ensure_one()
 
-        if not self._context.get("is_l10n_do_seq", False):
+        if not self.env.context.get("is_l10n_do_seq", False):
             return super(AccountMove, self)._set_next_sequence()
 
         last_sequence = self._get_last_sequence()
@@ -859,9 +869,13 @@ class AccountMove(models.Model):
 
     def _get_name_invoice_report(self):
         self.ensure_one()
-        if self.l10n_latam_use_documents and self.country_code == "DO":
+
+
+        if self.country_code == "DO" and self.move_type in ("out_invoice", "out_refund"):
             return "l10n_do_accounting.report_invoice_document_inherited"
+
         return super()._get_name_invoice_report()
+
 
     # TODO: handle l10n_latam_invoice_document _compute_name() inheritance shit
 
@@ -886,10 +900,10 @@ class AccountMove(models.Model):
                 self.l10n_latam_use_documents
                 and self.company_id.country_id.code == "DO"
                 and self.posted_before
-                and not self._context.get("is_l10n_do_seq", False)
+                and not self.env.context.get("is_l10n_do_seq", False)
         ):
             return "year"
-        elif self._context.get("is_l10n_do_seq", False):
+        elif self.env.context.get("is_l10n_do_seq", False):
             return "never"
         else:
             "never"

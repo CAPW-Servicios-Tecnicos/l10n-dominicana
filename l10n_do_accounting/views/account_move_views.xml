@@ -14,7 +14,7 @@
             </xpath>
 
             <!-- Alerts: keep them near lock message if exists, else put after sheet -->
-            <xpath expr="//field[@name='tax_lock_date_message']/.." position="after">
+            <xpath expr="//div[@id='alerts']" position="after">
                 <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
                      invisible="move_type == 'entry'
                                 or country_code != 'DO'

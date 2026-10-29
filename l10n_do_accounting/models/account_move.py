@@ -2,7 +2,7 @@ import re
 from werkzeug import urls
 
 from odoo import models, fields, api, _
-from odoo.fields import Domain
+from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
@@ -151,41 +151,40 @@ class AccountMove(models.Model):
         if index_exists(cr, "account_move_unique_l10n_do_fiscal_number_sales"):
             return res
 
+        self.env.cr.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
+            ON account_move(l10n_do_fiscal_number, company_id)
+            WHERE (
+                l10n_latam_document_type_id IS NOT NULL
+                AND move_type NOT IN ('in_invoice', 'in_refund')
+            )
+            AND l10n_do_fiscal_number <> '';
 
-            self.env.cr.execute("""
-                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_sales
-                ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (
-                    l10n_latam_document_type_id IS NOT NULL
-                    AND move_type NOT IN ('in_invoice', 'in_refund')
-                )
-                AND l10n_do_fiscal_number <> '';
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
+            ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
+            WHERE (
+                l10n_latam_document_type_id IS NOT NULL
+                AND move_type IN ('in_invoice', 'in_refund')
+                AND l10n_latam_manual_document_number = true
+            )
+            AND l10n_do_fiscal_number <> '';
 
-                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_manual
-                ON account_move(l10n_do_fiscal_number, commercial_partner_id, company_id)
-                WHERE (
-                    l10n_latam_document_type_id IS NOT NULL
-                    AND move_type IN ('in_invoice', 'in_refund')
-                    AND l10n_latam_manual_document_number = true
-                )
-                AND l10n_do_fiscal_number <> '';
+            CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
+            ON account_move(l10n_do_fiscal_number, company_id)
+            WHERE (
+                l10n_latam_document_type_id IS NOT NULL
+                AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                AND l10n_latam_manual_document_number = false
+            )
+            AND l10n_do_fiscal_number <> '';
+        """)
 
-                CREATE UNIQUE INDEX IF NOT EXISTS account_move_unique_l10n_do_fiscal_number_purchase_internal
-                ON account_move(l10n_do_fiscal_number, company_id)
-                WHERE (
-                    l10n_latam_document_type_id IS NOT NULL
-                    AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
-                    AND l10n_latam_manual_document_number = false
-                )
-                AND l10n_do_fiscal_number <> '';
-            """)
-
-        return super()._auto_init()
+        return res
 
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         if name:
-            domain = Domain.AND([[
+            domain = expression.AND([[
                 "|",
                 ("name", operator, name),
                 ("l10n_do_fiscal_number", operator, name),

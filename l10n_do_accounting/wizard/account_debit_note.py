@@ -172,7 +172,9 @@ class AccountDebitNote(models.TransientModel):
                     l10n_do_income_type=move.l10n_do_income_type,
                     invoice_origin=move.name,
                     line_ids=[(5, 0, 0)],
-                    l10n_do_fiscal_number=move.name,
+                    # Manual number (vendor debit notes) or empty, so the
+                    # B03/E33 is taken from the sequence on post
+                    l10n_do_fiscal_number=self.l10n_latam_document_number or False,
                 )
             )
 

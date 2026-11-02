@@ -819,3 +819,42 @@ class AccountMoveTest(common.L10nDOTestsCommon):
                 "l10n_do_invoice_total_currency": 6962.000000974679,
             },
         )
+
+    def test_012_debit_note_fiscal_sequence(self):
+        invoice = self._create_l10n_do_invoice(
+            data={
+                "document_number": "B0100000001",
+            }
+        )
+        invoice._post()
+
+        debit_notes = self.env["account.move"]
+        for i in range(3):
+            wizard = (
+                self.env["account.debit.note"]
+                .with_context(active_ids=invoice.ids, active_model="account.move")
+                .create(
+                    {
+                        "l10n_do_debit_type": "percentage",
+                        "l10n_do_percentage": "10",
+                    }
+                )
+            )
+            debit_note = self.env["account.move"].browse(
+                wizard.create_debit()["res_id"]
+            )
+            # Must not inherit the origin invoice internal name as NCF
+            self.assertFalse(debit_note.l10n_do_fiscal_number)
+            if not i:
+                # First fiscal sequence of the document type is set manually
+                debit_note.l10n_latam_document_number = "B0300000001"
+            debit_note._post()
+            debit_notes |= debit_note
+
+        self.assertEqual(
+            debit_notes.mapped("l10n_do_fiscal_number"),
+            ["B0300000001", "B0300000002", "B0300000003"],
+        )
+        self.assertEqual(
+            debit_notes.mapped("l10n_do_origin_ncf"), ["B0100000001"] * 3
+        )

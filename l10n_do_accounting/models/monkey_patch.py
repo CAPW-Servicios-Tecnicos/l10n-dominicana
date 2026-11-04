@@ -8,9 +8,17 @@ class AccountMove(models.Model):
         "posted_before", "state", "journal_id", "date", "move_type", "origin_payment_id"
     )
     def _compute_name(self):
+        # Solo las compañías con numeración fiscal dominicana usan este cálculo;
+        # el resto (España, México, ...) conserva el comportamiento estándar de
+        # Odoo, que no asigna número a los borradores.
+        do_moves = self.filtered(lambda m: m.company_id.l10n_do_fiscal_numbering)
+        other_moves = self - do_moves
+        if other_moves:
+            super(AccountMove, other_moves)._compute_name()
+
         # Bypass para IDs temporales (NewId) - No pueden generar secuencias fiscales
         # ya que los métodos SQL posteriores requieren IDs enteros reales
-        self = self.filtered(
+        self = do_moves.filtered(
             lambda m: isinstance(m.id, int)
         ).sorted(
             lambda m: (m.date, m.ref or "", m._origin.id))

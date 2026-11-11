@@ -8,7 +8,7 @@
     "category": "Localization",
     "license": "LGPL-3",
     "website": "https://github.com/odoo-dominicana",
-    "version": "18.0.0.7",
+    "version": "18.0.0.8",
     "countries": ["do"],
     "depends": ["l10n_latam_invoice_document", "l10n_do"],
     "data": [

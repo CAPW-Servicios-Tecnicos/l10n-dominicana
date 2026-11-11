@@ -49,7 +49,7 @@ class Partner(models.Model):
     )
     country_id = fields.Many2one(
         default=lambda self: self.env.ref("base.do")
-        if self.env.user.company_id.country_id == self.env.ref("base.do")
+        if self.env.company.country_id == self.env.ref("base.do")
         else False
     )
 
